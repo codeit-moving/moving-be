@@ -1,0 +1,184 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator markdown {
+  provider = "prisma-markdown"
+  output   = "./ERD.md"
+  title    = "Sinchon ICPC Camp ERD"
+}
+
+// 사용자 -> 일반고객과 기사
+model User {
+  id           Int            @id @unique @default(autoincrement()) // 자동 증가
+  email        String         @unique // 이메일 유효성 이메일 형식
+  name         String //이름 1~5 한글만
+  password     String // 비밀번호 (해싱) 특수 + 숫자 + 문자
+  phoneNumber  String         @unique // 전화번호
+  createAt     DateTime       @default(now())
+  updateAt     DateTime       @updatedAt
+  notification notification[]
+  Mover        Mover?         @relation
+  customer     Customer?      @relation
+}
+
+// 일반 고객 프로필
+model Customer {
+  id             Int              @id @unique @default(autoincrement()) // 자동 증가
+  imageUrl       String
+  services       Int[] // [1, 2]
+  areas          Int[] // 리전으로 변경
+  createAt       DateTime         @default(now())
+  updateAt       DateTime         @updatedAt
+  user           User             @relation(fields: [userId], references: [id])
+  userId         Int              @unique
+  MovingInfo     MovingInfo[]
+  ConfirmedQuote ConfirmedQuote[]
+  review         Review[]
+  mover          Mover[] // 사용자가 기사를 찜하면 관계 형성
+}
+
+// 기사
+model Mover {
+  id             Int              @id @unique @default(autoincrement()) //자동증가
+  nickname       String // 별명
+  imageUrl       String // 프로필 이미지
+  services       Int[] // [1, 2] 
+  areas          Int[] // 지역코드 배열 -> 리전으로 변경 예 ) 경기 82031, 8202
+  career         Int // 경력
+  description    String // 상세 설명
+  introduction   String // 한 줄 소개
+  user           User             @relation(fields: [userId], references: [id]) // User와 1:1 관계
+  userId         Int              @unique
+  createAt       DateTime         @default(now())
+  updateAt       DateTime         @updatedAt
+  Quote          Quote[] // 견적서 
+  MovingInfo     MovingInfo?      @relation(fields: [movingInfoId], references: [id]) // 견적서 보낸 기사들
+  movingInfoId   Int?
+  companion      MovingInfo[]     @relation("companion") //반려를 하면 관계 형성
+  ConfirmedQuote ConfirmedQuote[]
+  Review         Review[]
+  ReviewComment  ReviewComment[] // 비 확정 기능 -> 추후 리뷰에 기사가 댓글은 단다 감사합니다 !! 등
+  customer       Customer[] // 사용자가 기사를 찜하면 관계 형성
+}
+
+// 서비스
+model Service {
+  id       Int      @id @unique @default(autoincrement()) //자동증가
+  value    String //값 예 ) 소형, 중형, 대형
+  code     Int //로직에서 사용할 값 예 ) 1, 2, 3
+  status   Boolean //사용여부 예 ) false면 노출을 안 함
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+}
+
+// 지역 -> 리전
+model Area {
+  id       Int      @id @unique @default(autoincrement()) //자동증가
+  value    String //값 예 ) 서울, 경기, 전국
+  code     Int // 8202 -> 대한 82 + 지역번호 02
+  status   Boolean //사용여부 예 ) false면 노출을 안 함
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+}
+
+// 이사정보 -> 고객이 등록
+model MovingInfo {
+  id             Int             @id @unique @default(autoincrement()) //자동증가
+  serviceType    Int //서비스 테이블의 코드값 예 ) 1
+  movingDate     DateTime //이사하는 날
+  startAddress   String //출발지
+  endAddress     String //도착지
+  requestCount   Int             @default(0) //견적서 받은 수 예 0~5
+  designateCount Int             @default(0) //지정 견적 보낸 수 예 0~3
+  isDesignated   Boolean         @default(false) //지정유무 
+  createAt       DateTime        @default(now())
+  updateAt       DateTime        @updatedAt
+  customer       Customer        @relation(fields: [customerId], references: [id])
+  customerId     Int
+  Quote          Quote[] //견적서
+  mover          Mover[] //[], [moverId_1, moverId_2, moverId_3] //견적을 보낸 기사 ID
+  ConfirmedQuote ConfirmedQuote?
+  isCompanion    Mover[]         @relation("companion") //반려 하면 관계를 형성
+}
+
+// 견적서 -> 기사가 등록
+model Quote {
+  id             Int             @id @unique @default(autoincrement()) //자동증가
+  price          Int             @default(0) //견적가
+  comment        String //코멘트
+  createAt       DateTime        @default(now())
+  updateAt       DateTime        @updatedAt
+  movingInfo     MovingInfo      @relation(fields: [movingInfoId], references: [id])
+  movingInfoId   Int
+  mover          Mover           @relation(fields: [moverId], references: [id])
+  moverId        Int
+  ConfirmedQuote ConfirmedQuote? @relation()
+}
+
+// 확정 견적서 -> 고객이 확정을 하면 생성
+model ConfirmedQuote {
+  id           Int        @id @unique @default(autoincrement()) //자동증가
+  createAt     DateTime   @default(now())
+  updateAt     DateTime   @updatedAt
+  movingInfo   MovingInfo @relation(fields: [movingInfoId], references: [id])
+  movingInfoId Int        @unique //이사정보
+  quote        Quote      @relation(fields: [quoteId], references: [id])
+  quoteId      Int        @unique //견적서 정보
+  customer     Customer   @relation(fields: [customerId], references: [id])
+  customerId   Int //소비자
+  mover        Mover      @relation(fields: [moverId], references: [id])
+  moverId      Int //기사
+  review       Review[] //리뷰
+}
+
+// 리뷰 
+model Review {
+  id               Int             @id @unique @default(autoincrement()) //자동증가
+  content          String //리뷰 내용
+  rating           Int //별점
+  imageUrl         String[] //이미지
+  createAt         DateTime        @default(now())
+  updateAt         DateTime        @updatedAt
+  confirmedQuote   ConfirmedQuote  @relation(fields: [confirmedQuoteId], references: [id])
+  confirmedQuoteId Int //완료된 확정견적
+  customer         Customer        @relation(fields: [customerId], references: [id])
+  customerId       Int //리뷰 작성자
+  mover            Mover           @relation(fields: [moverId], references: [id])
+  moverId          Int //리뷰 대상자
+  ReviewComment    ReviewComment[] // 미 확정 기능 -> 리뷰의 기사가 댓글은 단다
+}
+
+// 알림
+model notification {
+  id       Int      @id @unique @default(autoincrement()) //자동증가
+  content  String //예 ) 김코드 기사님의 소형이사 견적이 도착했습니다.
+  isRead   Boolean  @default(false) //읽음 여부
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  user     User     @relation(fields: [userId], references: [id])
+  userId   Int //알림을 받는 사용자 (고객/기사)
+}
+
+// 리뷰 댓글 ( 미확정 기능 )
+model ReviewComment {
+  id       Int      @id @unique @default(autoincrement()) //자동증가
+  content  String //기사님의 리뷰 댓글
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  review   Review   @relation(fields: [reviewId], references: [id])
+  reviewId Int //해당 리뷰
+  mover    Mover    @relation(fields: [moverId], references: [id])
+  moverId  Int //댓글 작성자
+}
