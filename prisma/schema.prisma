@@ -52,18 +52,18 @@ model Customer {
 // 기사
 model Mover {
   id             Int              @id @unique @default(autoincrement()) //자동증가
-  nickname       String // 별명
+  nickname       String // 별명 //이름 1~12 한글만
   imageUrl       String // 프로필 이미지
   services       Int[] // [1, 2] 
   areas          Int[] // 지역코드 배열 -> 리전으로 변경 예 ) 경기 82031, 8202
   career         Int // 경력
-  description    String // 상세 설명
-  introduction   String // 한 줄 소개
+  description    String // 상세 설명 15~200
+  introduction   String // 한 줄 소개 1~50
   user           User             @relation(fields: [userId], references: [id]) // User와 1:1 관계
   userId         Int              @unique
   createAt       DateTime         @default(now())
   updateAt       DateTime         @updatedAt
-  Quote          Quote[] // 견적서 
+  quote          Quote[] // 견적서 
   MovingInfo     MovingInfo?      @relation(fields: [movingInfoId], references: [id]) // 견적서 보낸 기사들
   movingInfoId   Int?
   companion      MovingInfo[]     @relation("companion") //반려를 하면 관계 형성
@@ -107,7 +107,7 @@ model MovingInfo {
   updateAt       DateTime        @updatedAt
   customer       Customer        @relation(fields: [customerId], references: [id])
   customerId     Int
-  Quote          Quote[] //견적서
+  quote          Quote[] //견적서
   mover          Mover[] //[], [moverId_1, moverId_2, moverId_3] //견적을 보낸 기사 ID
   ConfirmedQuote ConfirmedQuote?
   isCompanion    Mover[]         @relation("companion") //반려 하면 관계를 형성
@@ -116,8 +116,8 @@ model MovingInfo {
 // 견적서 -> 기사가 등록
 model Quote {
   id             Int             @id @unique @default(autoincrement()) //자동증가
-  price          Int             @default(0) //견적가
-  comment        String //코멘트
+  price          Int             @default(0) //견적가 0~**
+  comment        String //코멘트 10~50
   createAt       DateTime        @default(now())
   updateAt       DateTime        @updatedAt
   movingInfo     MovingInfo      @relation(fields: [movingInfoId], references: [id])
@@ -146,8 +146,8 @@ model ConfirmedQuote {
 // 리뷰 
 model Review {
   id               Int             @id @unique @default(autoincrement()) //자동증가
-  content          String //리뷰 내용
-  rating           Int //별점
+  content          String //리뷰 내용 0~150
+  rating           Int //별점 1~5
   imageUrl         String[] //이미지
   createAt         DateTime        @default(now())
   updateAt         DateTime        @updatedAt
