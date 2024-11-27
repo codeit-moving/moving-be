@@ -29,7 +29,7 @@ model User {
   createAt     DateTime       @default(now())
   updateAt     DateTime       @updatedAt
   notification notification[]
-  Mover        Mover?         @relation
+  mover        Mover?         @relation
   customer     Customer?      @relation
 }
 
@@ -38,13 +38,13 @@ model Customer {
   id             Int              @id @unique @default(autoincrement()) // 자동 증가
   imageUrl       String
   services       Int[] // [1, 2]
-  regions        Int[] // 리전으로 변경
+  regions        Int[] // 리전으로 변경 // 지역
   createAt       DateTime         @default(now())
   updateAt       DateTime         @updatedAt
   user           User             @relation(fields: [userId], references: [id])
   userId         Int              @unique
-  MovingInfo     MovingInfo[]
-  ConfirmedQuote ConfirmedQuote[]
+  movingInfo     MovingInfo[]
+  confirmedQuote ConfirmedQuote[]
   review         Review[]
   mover          Mover[] // 사용자가 기사를 찜하면 관계 형성
 }
@@ -64,11 +64,11 @@ model Mover {
   createAt       DateTime         @default(now())
   updateAt       DateTime         @updatedAt
   quote          Quote[] // 견적서 
-  MovingInfo     MovingInfo[]     @relation // 지정 견적 관련
+  movingInfo     MovingInfo[]     @relation // 지정 견적 관련
   companion      MovingInfo[]     @relation("companion") //반려를 하면 관계 형성
-  ConfirmedQuote ConfirmedQuote[]
-  Review         Review[]
-  ReviewComment  ReviewComment[] // 비 확정 기능 -> 추후 리뷰에 기사가 댓글은 단다 감사합니다 !! 등
+  confirmedQuote ConfirmedQuote[]
+  review         Review[]
+  reviewComment  ReviewComment[] // 비 확정 기능 -> 추후 리뷰에 기사가 댓글은 단다 감사합니다 !! 등
   customer       Customer[] // 사용자가 기사를 찜하면 관계 형성
 }
 
@@ -92,13 +92,13 @@ model Region {
   updateAt DateTime @updatedAt
 }
 
-// 이사정보 -> 고객이 등록
+// 이사정보 -> 고객이 등록 Requset
 model MovingInfo {
   id             Int             @id @unique @default(autoincrement()) //자동증가
   serviceType    Int //서비스 테이블의 코드값 예 ) 1
   movingDate     DateTime //이사하는 날
-  startAddress   String //출발지
-  endAddress     String //도착지
+  pickupAddress  String //출발지 pickupAddress
+  dropOffAddress String //도착지 dropoffAddress
   requestCount   Int             @default(0) //견적서 받은 수 예 0~5
   designateCount Int             @default(0) //지정 견적 보낸 수 예 0~3
   isDesignated   Boolean         @default(false) //지정유무 
@@ -108,7 +108,7 @@ model MovingInfo {
   customerId     Int
   quote          Quote[] //견적서
   mover          Mover[] //[], [moverId_1, moverId_2, moverId_3] //견적을 보낸 기사 ID
-  ConfirmedQuote ConfirmedQuote?
+  confirmedQuote ConfirmedQuote?
   isCompanion    Mover[]         @relation("companion") //반려 하면 관계를 형성
 }
 
@@ -123,7 +123,7 @@ model Quote {
   movingInfoId   Int
   mover          Mover           @relation(fields: [moverId], references: [id])
   moverId        Int
-  ConfirmedQuote ConfirmedQuote? @relation()
+  confirmedQuote ConfirmedQuote? @relation()
 }
 
 // 확정 견적서 -> 고객이 확정을 하면 생성
@@ -156,7 +156,7 @@ model Review {
   customerId       Int //리뷰 작성자
   mover            Mover           @relation(fields: [moverId], references: [id])
   moverId          Int //리뷰 대상자
-  ReviewComment    ReviewComment[] // 미 확정 기능 -> 리뷰의 기사가 댓글은 단다
+  reviewComment    ReviewComment[] // 미 확정 기능 -> 리뷰의 기사가 댓글은 단다
 }
 
 // 알림
