@@ -64,8 +64,7 @@ model Mover {
   createAt       DateTime         @default(now())
   updateAt       DateTime         @updatedAt
   quote          Quote[] // 견적서 
-  MovingInfo     MovingInfo?      @relation(fields: [movingInfoId], references: [id]) // 견적서 보낸 기사들
-  movingInfoId   Int?
+  MovingInfo     MovingInfo[]     @relation // 지정 견적 관련
   companion      MovingInfo[]     @relation("companion") //반려를 하면 관계 형성
   ConfirmedQuote ConfirmedQuote[]
   Review         Review[]
