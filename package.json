@@ -56,6 +56,6 @@
     "test": "jest"
   },
   "prisma": {
-    "seed": "node prisma/seed.js"
+    "seed": "ts-node --transpileOnly ./data/seed.ts"
   }
 }
