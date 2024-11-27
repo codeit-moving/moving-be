@@ -38,7 +38,7 @@ model Customer {
   id             Int              @id @unique @default(autoincrement()) // 자동 증가
   imageUrl       String
   services       Int[] // [1, 2]
-  regions        Int[] // 리전으로 변경
+  regions        Int[] // 리전으로 변경 // 지역
   createAt       DateTime         @default(now())
   updateAt       DateTime         @updatedAt
   user           User             @relation(fields: [userId], references: [id])
@@ -92,13 +92,13 @@ model Region {
   updateAt DateTime @updatedAt
 }
 
-// 이사정보 -> 고객이 등록
+// 이사정보 -> 고객이 등록 Requset
 model MovingInfo {
   id             Int             @id @unique @default(autoincrement()) //자동증가
   serviceType    Int //서비스 테이블의 코드값 예 ) 1
   movingDate     DateTime //이사하는 날
-  startAddress   String //출발지
-  endAddress     String //도착지
+  pickupAddress  String //출발지 pickupAddress
+  dropOffAddress String //도착지 dropoffAddress
   requestCount   Int             @default(0) //견적서 받은 수 예 0~5
   designateCount Int             @default(0) //지정 견적 보낸 수 예 0~3
   isDesignated   Boolean         @default(false) //지정유무 
