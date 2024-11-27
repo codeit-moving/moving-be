@@ -38,7 +38,7 @@ model Customer {
   id             Int              @id @unique @default(autoincrement()) // 자동 증가
   imageUrl       String
   services       Int[] // [1, 2]
-  areas          Int[] // 리전으로 변경
+  regions        Int[] // 리전으로 변경
   createAt       DateTime         @default(now())
   updateAt       DateTime         @updatedAt
   user           User             @relation(fields: [userId], references: [id])
@@ -55,7 +55,7 @@ model Mover {
   nickname       String // 별명 //이름 1~12 한글만
   imageUrl       String // 프로필 이미지
   services       Int[] // [1, 2] 
-  areas          Int[] // 지역코드 배열 -> 리전으로 변경 예 ) 경기 82031, 8202
+  regions        Int[] // 지역코드 배열 -> 리전으로 변경 예 ) 경기 82031, 8202
   career         Int // 경력
   description    String // 상세 설명 15~200
   introduction   String // 한 줄 소개 1~50
@@ -84,7 +84,7 @@ model Service {
 }
 
 // 지역 -> 리전
-model Area {
+model Region {
   id       Int      @id @unique @default(autoincrement()) //자동증가
   value    String //값 예 ) 서울, 경기, 전국
   code     Int // 8202 -> 대한 82 + 지역번호 02
