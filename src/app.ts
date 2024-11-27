@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import express from "express";
 import cors, { CorsOptions } from "cors";
 import errorHandler from "./middlewares/errorHandler";
+import authRouter from "./controllers/authController";
 
 const app = express();
 
@@ -29,6 +30,8 @@ app.use(cors(corsOptions));
 
 app.use(express.json()); //json parse
 app.use(cookieParser());
+
+app.use("/auth", authRouter);
 
 app.use(errorHandler); //전체 에러 핸들링 미들웨어
 
