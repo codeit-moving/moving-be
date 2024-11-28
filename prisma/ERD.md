@@ -10,8 +10,9 @@ erDiagram
   Int id PK
   String email UK
   String name
-  String password
-  String phoneNumber UK
+  String password "nullable"
+  String phoneNumber UK "nullable"
+  Boolean isOAuth
   DateTime createAt
   DateTime updateAt
 }
@@ -68,11 +69,11 @@ erDiagram
 }
 "Quote" {
   Int id PK
-  Int price
+  Int cost
   String comment
   DateTime createAt
   DateTime updateAt
-  Int movingInfoId FK
+  Int movingRequestId FK
   Int moverId FK
 }
 "ConfirmedQuote" {
@@ -148,6 +149,7 @@ erDiagram
   - `name`: 
   - `password`: 
   - `phoneNumber`: 
+  - `isOAuth`: 
   - `createAt`: 
   - `updateAt`: 
 
@@ -216,11 +218,11 @@ erDiagram
 
 **Properties**
   - `id`: 
-  - `price`: 
+  - `cost`: 
   - `comment`: 
   - `createAt`: 
   - `updateAt`: 
-  - `movingInfoId`: 
+  - `movingRequestId`: 
   - `moverId`: 
 
 ### `ConfirmedQuote`
