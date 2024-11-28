@@ -4,6 +4,8 @@ import express from "express";
 import cors, { CorsOptions } from "cors";
 import errorHandler from "./middlewares/errorHandler";
 import authRouter from "./controllers/authController";
+import serviceRouter from "./controllers/serviceController";
+import moverRouter from "./controllers/moverController";
 
 const app = express();
 
@@ -27,6 +29,10 @@ const corsOptions: CorsOptions = {
 
 // Express app에 CORS 적용
 app.use(cors(corsOptions));
+
+//라우터 모음 -> 컨트롤러
+app.use("/services", serviceRouter);
+app.use("/movers", moverRouter);
 
 app.use(express.json()); //json parse
 app.use(cookieParser());
