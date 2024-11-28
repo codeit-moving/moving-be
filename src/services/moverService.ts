@@ -18,6 +18,13 @@ interface whereConditions {
   OR?: object[];
 }
 
+interface RatingResult {
+  totalCount: number;
+  totalSum: number;
+  average?: number;
+  [key: string]: number | undefined;
+}
+
 const setOrderByOptions = (
   order: string
 ): { [key: string]: object | string } => {
@@ -82,7 +89,7 @@ const getMoverList = async (req: Request) => {
 
   //평균 평점 조회
   const moverIds = movers.map((mover) => mover.id);
-  const ratingsByMover = await moverRepository.getRatingsByMoverIds(moverIds);
+  const ratingsByMover = await getRatingsByMoverIds(moverIds);
 
   //커서 설정
   const nextMover = movers.length > parseLimit;
@@ -140,9 +147,7 @@ const getMoverDetail = async (req: Request) => {
   }
 
   //데이터 가공
-  const ratingsByMover = await moverRepository.getRatingsByMoverIds(
-    parseMoverId
-  );
+  const ratingsByMover = await getRatingsByMoverIds(parseMoverId);
   const { _count, favorite, ...rest } = mover;
 
   return {
@@ -153,6 +158,46 @@ const getMoverDetail = async (req: Request) => {
     isFavorite,
     rating: ratingsByMover[mover.id],
   };
+};
+
+//평점 조회
+const getRatingsByMoverIds = async (moverIds: number | number[]) => {
+  const moverIdArray = Array.isArray(moverIds) ? moverIds : [moverIds];
+
+  const ratings = await moverRepository.getRatingsByMoverIds(moverIdArray);
+
+  // moverId별로 그룹화
+  const ratingsByMover = moverIdArray.reduce((acc, moverId) => {
+    acc[moverId] = {
+      totalCount: 0,
+      totalSum: 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      average: 0,
+    };
+    return acc;
+  }, {} as Record<number, RatingResult>);
+
+  // 각 rating 데이터 처리
+  ratings.forEach((rating) => {
+    const moverRating = ratingsByMover[rating.moverId];
+    moverRating.totalCount += rating._count.rating;
+    moverRating.totalSum += rating.rating * rating._count.rating;
+    moverRating[`${rating.rating}`] = rating._count.rating;
+  });
+
+  // 평균 계산 및 totalSum 제거
+  Object.values(ratingsByMover).forEach((rating) => {
+    rating.average =
+      Math.round((rating.totalSum / rating.totalCount) * 10) / 10;
+    const { totalSum, ...returnResult } = rating;
+    return returnResult;
+  });
+
+  return ratingsByMover;
 };
 
 export default {
