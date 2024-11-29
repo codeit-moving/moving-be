@@ -17,7 +17,7 @@ const getMovingRequestList = (customerId: number, query: queryString) => {
       ...(isCompleted
         ? {
             confirmedQuote: {
-              isNot: null,
+              isNot: null, //환정견적과의 관계가 null이 아닌 경우
             },
           }
         : {}),
@@ -125,6 +125,7 @@ const updateDesignatedCancel = (movingRequestId: number, moverId: number) => {
   });
 };
 
+//이사요청 지정 개수 조회
 const getDesignateCount = (movingRequestId: number) => {
   return prismaClient.movingRequest.findUnique({
     where: { id: movingRequestId },
