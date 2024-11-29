@@ -1,4 +1,3 @@
-import { int } from "aws-sdk/clients/datapipeline";
 import prismaClient from "../utils/prismaClient";
 
 interface whereConditions {
@@ -16,11 +15,13 @@ const getMoverCount = async (where: whereConditions) => {
 const getMoverList = (
   orderBy: { [key: string]: object | string },
   where: whereConditions,
-  cursor: int
+  cursor: number,
+  limit: number
 ) => {
   return prismaClient.mover.findMany({
     orderBy,
     where,
+    take: limit,
     skip: cursor ? 1 : 0, //커서 자신을 스킵하기 위함
     cursor: cursor ? { id: cursor } : undefined,
     select: {
@@ -32,6 +33,16 @@ const getMoverList = (
       description: true,
       services: true,
       regions: true,
+      movingRequest: {
+        select: {
+          id: true,
+        },
+      },
+      favorite: {
+        select: {
+          id: true,
+        },
+      },
       _count: {
         select: {
           review: true,
@@ -53,6 +64,7 @@ const getMoverById = (customerId: number | null, moverId: number) => {
     career: true,
     regions: true,
     introduction: true,
+    movingRequest: true,
     _count: {
       select: {
         review: true,
@@ -99,9 +111,20 @@ const getRatingsByMoverIds = async (moverIds: number[]) => {
   return ratings;
 };
 
+const toggleFavorite = async (moverId: number, favorite: object) => {
+  return prismaClient.mover.update({
+    where: { id: moverId },
+    data: { favorite },
+    select: {
+      id: true,
+    },
+  });
+};
+
 export default {
   getMoverCount,
   getMoverList,
   getRatingsByMoverIds,
   getMoverById,
+  toggleFavorite,
 };

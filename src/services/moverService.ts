@@ -1,6 +1,7 @@
 import { Request } from "express";
 import moverRepository from "../repositorys/moverRepository";
 import CustomError from "../utils/interfaces/customError";
+import processMoversData from "../utils/processMoverData";
 
 interface queryString {
   nextCursorId: string;
@@ -23,6 +24,10 @@ interface RatingResult {
   totalSum: number;
   average?: number;
   [key: string]: number | undefined;
+}
+
+interface FavoriteData {
+  favorite?: object;
 }
 
 const setOrderByOptions = (
@@ -50,6 +55,9 @@ const getMoverList = async (req: Request) => {
     region = "0",
     service = "0",
   } = req.query as unknown as queryString;
+
+  //나중에 토큰의 검사가 가능할때 업데이트 필요
+  // const { id: customerId } = req.user as { id: number | null };
 
   //스크링 쿼리 파싱
   const parseCursor = parseInt(nextCursorId);
@@ -84,8 +92,18 @@ const getMoverList = async (req: Request) => {
   const movers = await moverRepository.getMoverList(
     orderByOptions,
     whereConditions,
-    parseCursor
+    parseCursor,
+    parseLimit
   );
+
+  if (!movers) {
+    const error: CustomError = new Error("Not Found");
+    error.status = 404;
+    error.data = {
+      message: "조건에 맞는 기사 목록이 없습니다.",
+    };
+    throw error;
+  }
 
   //평균 평점 조회
   const moverIds = movers.map((mover) => mover.id);
@@ -97,16 +115,7 @@ const getMoverList = async (req: Request) => {
   const hasNext = Boolean(nextCursor);
 
   //데이터 가공
-  const resMovers = movers.map((mover) => {
-    const { _count, ...rest } = mover;
-    return {
-      ...rest,
-      reviewCount: _count.review,
-      favoriteCount: _count.favorite,
-      confirmCount: _count.confirmedQuote,
-      rating: ratingsByMover[mover.id],
-    };
-  });
+  const resMovers = processMoversData(movers, ratingsByMover);
 
   //평균 평점으로 정렬
   if (order === "rating") {
@@ -141,9 +150,19 @@ const getMoverDetail = async (req: Request) => {
     throw error;
   }
 
+  //찜 여부 확인 값 변경
   let isFavorite = false;
   if (mover.favorite && mover.favorite.length > 0) {
     isFavorite = true;
+  }
+
+  //지정 여부 확인 값 변경
+  let isDesignated = false;
+  if (
+    mover.movingRequest.length > 0 &&
+    mover.movingRequest.some((request) => request.id === parseMoverId)
+  ) {
+    isDesignated = true;
   }
 
   //데이터 가공
@@ -156,6 +175,7 @@ const getMoverDetail = async (req: Request) => {
     confirmCount: _count.confirmedQuote,
     favoriteCount: _count.favorite,
     isFavorite,
+    isDesignated,
     rating: ratingsByMover[mover.id],
   };
 };
@@ -200,7 +220,42 @@ const getRatingsByMoverIds = async (moverIds: number | number[]) => {
   return ratingsByMover;
 };
 
+//찜 토글
+const toggleFavorite = async (
+  customerId: number,
+  moverId: number,
+  favorite: boolean
+) => {
+  const favoriteData: FavoriteData = {};
+  if (favorite) {
+    favoriteData.favorite = {
+      connect: {
+        id: customerId,
+      },
+    };
+  } else {
+    favoriteData.favorite = {
+      disconnect: {
+        id: customerId,
+      },
+    };
+  }
+
+  const mover = await moverRepository.toggleFavorite(moverId, favoriteData);
+  if (!mover) {
+    const error: CustomError = new Error("Not Found");
+    error.status = 404;
+    error.data = {
+      message: "기사 정보를 찾을 수 없습니다.",
+    };
+    throw error;
+  }
+
+  return { ...mover, isFavorite: favorite };
+};
+
 export default {
   getMoverList,
   getMoverDetail,
+  toggleFavorite,
 };
