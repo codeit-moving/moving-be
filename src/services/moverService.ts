@@ -1,14 +1,16 @@
 import { Request } from "express";
 import moverRepository from "../repositorys/moverRepository";
 import CustomError from "../utils/interfaces/customError";
+import processMoversData from "../utils/processMoverData";
+import RatingResult from "../utils/interfaces/mover/ratingResult";
 
 interface queryString {
-  nextCursorId: string;
   order: string;
-  region: string;
-  service: string;
+  region: number;
+  service: number;
   keyword: string;
-  limit: string;
+  limit: number;
+  cursor: number;
 }
 
 interface whereConditions {
@@ -18,11 +20,8 @@ interface whereConditions {
   OR?: object[];
 }
 
-interface RatingResult {
-  totalCount: number;
-  totalSum: number;
-  average?: number;
-  [key: string]: number | undefined;
+interface FavoriteData {
+  favorite?: object;
 }
 
 const setOrderByOptions = (
@@ -41,21 +40,8 @@ const setOrderByOptions = (
 };
 
 //기사 목록 조회
-const getMoverList = async (req: Request) => {
-  const {
-    nextCursorId = "0",
-    order = "",
-    limit = "10",
-    keyword = "",
-    region = "0",
-    service = "0",
-  } = req.query as unknown as queryString;
-
-  //스크링 쿼리 파싱
-  const parseCursor = parseInt(nextCursorId);
-  const parseRegion = parseInt(region);
-  const parseService = parseInt(service);
-  const parseLimit = parseInt(limit);
+const getMoverList = async (query: queryString, customerId: number | null) => {
+  const { order, keyword, region, service, cursor, limit } = query;
 
   //정렬 옵션 설정
   const orderByOptions = setOrderByOptions(order);
@@ -69,44 +55,41 @@ const getMoverList = async (req: Request) => {
       { description: { contains: keyword, mode: "insensitive" } },
     ];
   }
-  if (parseRegion) {
-    whereConditions.regions = {
-      has: parseRegion,
-    };
+  if (region) {
+    whereConditions.regions = { has: region };
   }
-  if (parseService) {
-    whereConditions.services = {
-      has: parseService,
-    };
+  if (service) {
+    whereConditions.services = { has: service };
   }
 
   //데이터 조회
   const movers = await moverRepository.getMoverList(
     orderByOptions,
     whereConditions,
-    parseCursor
+    cursor,
+    limit
   );
+
+  if (!movers) {
+    const error: CustomError = new Error("Not Found");
+    error.status = 404;
+    error.data = {
+      message: "조건에 맞는 기사 목록이 없습니다.",
+    };
+    throw error;
+  }
 
   //평균 평점 조회
   const moverIds = movers.map((mover) => mover.id);
   const ratingsByMover = await getRatingsByMoverIds(moverIds);
 
   //커서 설정
-  const nextMover = movers.length > parseLimit;
-  const nextCursor = nextMover ? movers[parseLimit - 1].id : "";
+  const nextMover = movers.length > limit;
+  const nextCursor = nextMover ? movers[limit - 1].id : "";
   const hasNext = Boolean(nextCursor);
 
   //데이터 가공
-  const resMovers = movers.map((mover) => {
-    const { _count, ...rest } = mover;
-    return {
-      ...rest,
-      reviewCount: _count.review,
-      favoriteCount: _count.favorite,
-      confirmCount: _count.confirmedQuote,
-      rating: ratingsByMover[mover.id],
-    };
-  });
+  const resMovers = processMoversData(customerId, movers, ratingsByMover);
 
   //평균 평점으로 정렬
   if (order === "rating") {
@@ -119,19 +102,13 @@ const getMoverList = async (req: Request) => {
   return {
     nextCursor,
     hasNext,
-    list: resMovers.slice(0, parseLimit),
+    list: resMovers.slice(0, limit),
   };
 };
 
 //기사 상세 조회
-const getMoverDetail = async (req: Request) => {
-  const { id: moverId } = req.params;
-  const parseMoverId = parseInt(moverId);
-
-  //나중에 토큰의 검사가 가능할때 업데이트 필요
-  // const { id: customerId } = req.user as { id: number | null };
-
-  const mover = await moverRepository.getMoverById(1, parseInt(moverId));
+const getMoverDetail = async (customerId: number | null, moverId: number) => {
+  const mover = await moverRepository.getMoverById(customerId, moverId);
   if (!mover) {
     const error: CustomError = new Error("Not Found");
     error.status = 404;
@@ -141,23 +118,60 @@ const getMoverDetail = async (req: Request) => {
     throw error;
   }
 
+  //찜 여부 확인 값 변경
   let isFavorite = false;
   if (mover.favorite && mover.favorite.length > 0) {
     isFavorite = true;
   }
 
-  //데이터 가공
-  const ratingsByMover = await getRatingsByMoverIds(parseMoverId);
-  const { _count, favorite, ...rest } = mover;
+  //지정 여부 확인 값 변경
+  let isDesignated = false;
+  if (
+    mover.movingRequest.length > 0 &&
+    mover.movingRequest.some((request) => request.id === moverId)
+  ) {
+    isDesignated = true;
+  }
 
-  return {
-    ...rest,
-    reviewCount: _count.review,
-    confirmCount: _count.confirmedQuote,
-    favoriteCount: _count.favorite,
-    isFavorite,
-    rating: ratingsByMover[mover.id],
-  };
+  //데이터 가공
+  const ratingsByMover = await getRatingsByMoverIds(moverId);
+  const processMover = processMoversData(customerId, mover, ratingsByMover);
+
+  return processMover;
+};
+
+//찜 토글
+const toggleFavorite = async (
+  customerId: number,
+  moverId: number,
+  favorite: boolean
+) => {
+  const favoriteData: FavoriteData = {};
+  if (favorite) {
+    favoriteData.favorite = {
+      connect: {
+        id: customerId,
+      },
+    };
+  } else {
+    favoriteData.favorite = {
+      disconnect: {
+        id: customerId,
+      },
+    };
+  }
+
+  const mover = await moverRepository.toggleFavorite(moverId, favoriteData);
+  if (!mover) {
+    const error: CustomError = new Error("Not Found");
+    error.status = 404;
+    error.data = {
+      message: "기사 정보를 찾을 수 없습니다.",
+    };
+    throw error;
+  }
+
+  return { ...mover, isFavorite: favorite };
 };
 
 //평점 조회
@@ -203,4 +217,5 @@ const getRatingsByMoverIds = async (moverIds: number | number[]) => {
 export default {
   getMoverList,
   getMoverDetail,
+  toggleFavorite,
 };
