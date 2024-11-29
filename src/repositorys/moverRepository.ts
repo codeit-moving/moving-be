@@ -7,6 +7,24 @@ interface whereConditions {
   OR?: object[];
 }
 
+const defaultSelect = {
+  id: true,
+  imageUrl: true,
+  services: true,
+  nickname: true,
+  career: true,
+  regions: true,
+  introduction: true,
+  movingRequest: true,
+  _count: {
+    select: {
+      review: true,
+      favorite: true,
+      confirmedQuote: true,
+    },
+  },
+};
+
 const getMoverCount = async (where: whereConditions) => {
   return prismaClient.mover.count({ where });
 };
@@ -25,14 +43,7 @@ const getMoverList = (
     skip: cursor ? 1 : 0, //커서 자신을 스킵하기 위함
     cursor: cursor ? { id: cursor } : undefined,
     select: {
-      id: true,
-      imageUrl: true,
-      nickname: true,
-      career: true,
-      introduction: true,
-      description: true,
-      services: true,
-      regions: true,
+      ...defaultSelect,
       movingRequest: {
         select: {
           id: true,
@@ -43,41 +54,16 @@ const getMoverList = (
           id: true,
         },
       },
-      _count: {
-        select: {
-          review: true,
-          favorite: true,
-          confirmedQuote: true,
-        },
-      },
     },
   });
 };
 
 //기사 상세 조회
 const getMoverById = (customerId: number | null, moverId: number) => {
-  const baseSelect = {
-    id: true,
-    imageUrl: true,
-    services: true,
-    nickname: true,
-    career: true,
-    regions: true,
-    introduction: true,
-    movingRequest: true,
-    _count: {
-      select: {
-        review: true,
-        favorite: true,
-        confirmedQuote: true,
-      },
-    },
-  };
-
   return prismaClient.mover.findUnique({
     where: { id: moverId },
     select: {
-      ...baseSelect,
+      ...defaultSelect,
       ...(customerId
         ? {
             favorite: {

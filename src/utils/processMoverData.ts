@@ -1,33 +1,30 @@
+import RatingResult from "./interfaces/mover/ratingResult";
+
 interface Mover {
   id: number;
   imageUrl: string | null;
   nickname: string;
   career: number;
-  introduction: string;
-  description: string;
-  services: number[];
-  regions: number[];
+  introduction?: string;
+  description?: string;
+  services?: number[];
+  regions?: number[];
   movingRequest: { id: number }[];
   favorite: { id: number }[];
   _count: { review: number; favorite: number; confirmedQuote: number };
 }
 
-interface RatingResult {
-  totalCount: number;
-  totalSum: number;
-  average?: number;
-  [key: string]: number | undefined;
-}
-
 const processMoversData = (
-  movers: Mover[],
+  customerId: number | null,
+  movers: Mover[] | Mover,
   ratingsByMover: Record<number, RatingResult>
 ) => {
-  return movers.map((mover) => {
-    const { _count, favorite, ...rest } = mover;
+  const moverIdArray = Array.isArray(movers) ? movers : [movers];
+  return moverIdArray.map((mover) => {
+    const { _count, favorite, movingRequest, ...rest } = mover;
 
     const isFavorite = favorite.some(
-      (favorite) => favorite.id === 1 //나중에 토큰의 검사가 가능할때 업데이트 필요
+      (favorite) => (favorite.id === customerId ? customerId : null) //나중에 토큰의 검사가 가능할때 업데이트 필요
     );
 
     const isDesignated = mover.movingRequest.some(

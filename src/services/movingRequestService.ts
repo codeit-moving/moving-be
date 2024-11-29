@@ -1,6 +1,9 @@
 import movingRequestRepository from "../repositorys/movingRequestRepository";
 import { MovingRequestData } from "../utils/interfaces/movingRequest/movingRequest";
 import CustomError from "../utils/interfaces/customError";
+import quoteRepository from "../repositorys/quoteRepository";
+import getRatingsByMoverIds from "../utils/mover/getRatingsByMover";
+import processMoverData from "../utils/processMoverData";
 
 interface queryString {
   limit: number;
@@ -8,6 +11,7 @@ interface queryString {
   cursor: number | null;
 }
 
+//이사요청 목록 조회
 const getMovingRequestList = async (customerId: number, query: queryString) => {
   const { limit, isCompleted, cursor } = query;
 
@@ -39,7 +43,7 @@ const getMovingRequestList = async (customerId: number, query: queryString) => {
       name: customer.user.name,
       requestDate: createAt,
       isDesignated: _count.mover > 0, //관계가 있다면 true
-      isConfirmed: Boolean(confirmedQuote), //견적서가 있다면 true
+      isConfirmed: Boolean(confirmedQuote), //완료된 견적서와 관계가 있다면 true
       ...rest,
     };
   });
@@ -51,6 +55,51 @@ const getMovingRequestList = async (customerId: number, query: queryString) => {
   };
 };
 
+//이사요청의 견적서 조회
+const getQuoteByMovingRequestId = async (
+  customerId: number,
+  movingRequestId: number
+) => {
+  const quotes = await quoteRepository.getQuoteByMovingRequestId(
+    movingRequestId
+  );
+
+  if (!quotes) {
+    const error: CustomError = new Error("Not Found");
+    error.status = 404;
+    error.data = {
+      message: "견적서 목록이 없습니다.",
+    };
+    throw error;
+  }
+
+  // moverIds와 movers를 한 번의 순회로 처리
+  const moverIds: number[] = [];
+  const movers = quotes.reduce((acc: any[], quote) => {
+    moverIds.push(quote.mover.id);
+    acc.push(quote.mover);
+    return acc;
+  }, []);
+
+  const ratingsByMover = await getRatingsByMoverIds(moverIds);
+  const processMovers = processMoverData(customerId, movers, ratingsByMover);
+
+  // Map을 사용하여 mover 검색 최적화
+  const moverMap = new Map(processMovers.map((mover) => [mover.id, mover]));
+
+  const processQuotes = quotes.map((quote) => {
+    const { mover, movingRequest, confirmedQuote, ...rest } = quote;
+    return {
+      serviceType: movingRequest.serviceType,
+      isConfirmed: Boolean(confirmedQuote),
+      mover: moverMap.get(mover.id), // O(1) 검색
+      ...rest,
+    };
+  });
+  return processQuotes;
+};
+
+//이사요청 생성
 const createMovingRequest = async (
   customerId: number,
   requestData: MovingRequestData
@@ -70,6 +119,7 @@ const designateMover = async (movingRequestId: number, moverId: number) => {
     movingRequestId
   );
 
+  //지정 가능 인원 초과 체크
   if (!result || result._count.mover >= 3) {
     const error: CustomError = new Error("Bad Request");
     error.status = 400;
@@ -111,4 +161,5 @@ export default {
   createMovingRequest,
   designateMover,
   cancelDesignateMover,
+  getQuoteByMovingRequestId,
 };

@@ -32,6 +32,23 @@ router.get(
   })
 );
 
+router.get(
+  "/:id/quotes",
+  asyncHandle(async (req, res, next) => {
+    try {
+      const { id: movingRequestId } = req.params;
+      const { id: customerId } = req.user as { id: number };
+      const quotes = await movingRequestService.getQuoteByMovingRequestId(
+        customerId,
+        parseInt(movingRequestId)
+      );
+      return res.status(200).send(quotes);
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
 router.post(
   "/",
   movingRequest.createMovingRequestValidation,
