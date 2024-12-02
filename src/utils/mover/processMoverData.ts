@@ -10,22 +10,22 @@ interface Mover {
   description?: string;
   services?: number[];
   regions?: number[];
-  movingRequest: { id: number; mover: object }[];
+  movingRequest: { id: number; serviceType: number }[];
   favorite: { id: number }[];
   _count: { review: number; favorite: number; confirmedQuote: number };
 }
 
 const processMoversData = async (
   customerId: number | null,
-  movers: Mover[] | Mover,
+  mover: Mover[] | Mover,
   ratingsByMover: Record<number, RatingResult>
 ) => {
-  const moverIdArray = Array.isArray(movers) ? movers : [movers];
+  const movers = Array.isArray(mover) ? mover : [mover];
   let activeRequest: { id: number; mover: { id: number }[] } | null = null;
   if (customerId) {
     activeRequest = await movingRequestRepository.getActiveRequest(customerId);
   }
-  return moverIdArray.map((mover) => {
+  return movers.map((mover) => {
     const { _count, favorite, movingRequest, ...rest } = mover;
 
     let isFavorite = false;

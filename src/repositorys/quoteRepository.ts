@@ -74,6 +74,16 @@ const getQuoteById = (quoteId: number) => {
       id: true,
       cost: true,
       comment: true,
+      movingRequest: {
+        select: {
+          serviceType: true,
+        },
+      },
+      confirmedQuote: {
+        select: {
+          id: true,
+        },
+      },
       mover: {
         select: {
           id: true,
@@ -96,26 +106,6 @@ const getQuoteById = (quoteId: number) => {
             select: {
               id: true,
               serviceType: true,
-              mover: {
-                select: {
-                  id: true,
-                },
-              },
-            },
-          },
-        },
-      },
-      movingRequest: {
-        select: {
-          id: true,
-          serviceType: true,
-          createAt: true,
-          movingDate: true,
-          pickupAddress: true,
-          dropOffAddress: true,
-          mover: {
-            select: {
-              id: true,
             },
           },
         },

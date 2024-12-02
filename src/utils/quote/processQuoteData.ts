@@ -5,29 +5,32 @@ interface Quote {
   id: number;
   comment: string;
   cost: number;
-  mover: {
-    id: number;
-    nickname: string;
-    imageUrl: string | null;
-    career: number;
-    _count: {
-      review: number;
-      favorite: number;
-      confirmedQuote: number;
-    };
-    favorite: { id: number }[];
-    movingRequest: { id: number; serviceType: number }[];
-  };
+  mover: Mover;
   movingRequest: {
     serviceType: number;
   };
   confirmedQuote: { id: number } | null;
 }
 
-const processQuotes = async (customerId: number, quotes: Quote[]) => {
+interface Mover {
+  id: number;
+  nickname: string;
+  imageUrl: string | null;
+  career: number;
+  _count: {
+    review: number;
+    favorite: number;
+    confirmedQuote: number;
+  };
+  favorite: { id: number }[];
+  movingRequest: { id: number; serviceType: number }[];
+}
+
+const processQuotes = async (customerId: number, quote: Quote[] | Quote) => {
+  const quotes = Array.isArray(quote) ? quote : [quote];
   // moverIds와 movers를 한 번의 순회로 처리
   const moverIds: number[] = [];
-  const movers = quotes.reduce((acc: any[], quote) => {
+  const movers = quotes.reduce((acc: Mover[], quote) => {
     moverIds.push(quote.mover.id);
     acc.push(quote.mover);
     return acc;
@@ -53,7 +56,10 @@ const processQuotes = async (customerId: number, quotes: Quote[]) => {
     };
   });
 
-  return processQuotes;
+  if (Array.isArray(quote)) {
+    return processQuotes;
+  }
+  return processQuotes[0];
 };
 
 export default processQuotes;

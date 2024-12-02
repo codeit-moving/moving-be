@@ -7,12 +7,10 @@ router.get(
   "/:id",
   asyncHandle(async (req, res, next) => {
     try {
-      const { id: customerId } = req.user as { id: number };
+      //추후 로그인 구현 시 수정
+      //const { id: customerId } = req.user as { id: number };
       const { id: quoteId } = req.params;
-      const quote = await quoteService.getQuoteById(
-        customerId,
-        parseInt(quoteId)
-      );
+      const quote = await quoteService.getQuoteById(1, parseInt(quoteId));
       return res.status(200).send(quote);
     } catch (error) {
       next(error);

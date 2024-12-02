@@ -1,7 +1,6 @@
 import quoteRepository from "../repositorys/quoteRepository";
 import customError from "../utils/interfaces/customError";
-import getRatingsByMoverIds from "../utils/mover/getRatingsByMover";
-import processMoverData from "../utils/mover/processMoverData";
+import processQuoteData from "../utils/quote/processQuoteData";
 
 const getQuoteById = async (customerId: number, quoteId: number) => {
   const quote = await quoteRepository.getQuoteById(quoteId);
@@ -16,27 +15,9 @@ const getQuoteById = async (customerId: number, quoteId: number) => {
     throw error;
   }
 
-  const isDesignated = quote.movingRequest.mover.some(
-    (mover) => mover.id === quote.mover.id
-  );
+  const processedQuote = await processQuoteData(customerId, quote);
 
-  const ratingsByMover = await getRatingsByMoverIds(quote.mover.id);
-  const processMovers = processMoverData(
-    customerId,
-    quote.mover,
-    ratingsByMover
-  );
-
-  const { mover: movingRequestMover, ...movingRequestRest } =
-    quote.movingRequest;
-  const { mover, movingRequest, ...rest } = quote;
-
-  return {
-    movingRequest: movingRequestRest,
-    ...rest,
-    mover: processMovers,
-    isDesignated,
-  };
+  return processedQuote;
 };
 
 export default {

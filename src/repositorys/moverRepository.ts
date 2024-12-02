@@ -47,11 +47,7 @@ const getMoverList = (
       movingRequest: {
         select: {
           id: true,
-          mover: {
-            select: {
-              id: true,
-            },
-          },
+          serviceType: true,
         },
       },
       favorite: {
@@ -72,11 +68,7 @@ const getMoverById = (customerId: number | null, moverId: number) => {
       movingRequest: {
         select: {
           id: true,
-          mover: {
-            select: {
-              id: true,
-            },
-          },
+          serviceType: true,
         },
       },
       ...(customerId
