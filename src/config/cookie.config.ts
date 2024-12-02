@@ -25,4 +25,13 @@ const refreshTokenOption: CookieOptions = {
   path: "/",
 };
 
-export default { accessTokenOption, refreshTokenOption };
+const clearCookieOption: CookieOptions = {
+  httpOnly: false,
+  secure: false,
+  sameSite: "lax",
+  maxAge: 0,
+  domain: "localhost",
+  path: "/",
+};
+
+export default { accessTokenOption, refreshTokenOption, clearCookieOption };

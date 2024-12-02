@@ -16,6 +16,7 @@ interface User {
   email: string;
   password: string;
   phoneNumber: string;
+  isOAuth: boolean;
 }
 
 interface SignUpCustomer extends User {
@@ -52,7 +53,7 @@ router.post(
           refreshToken,
           cookieConfig.refreshTokenOption
         );
-        res.status(200).send({ message: "로그인 성공", user });
+        res.status(200).send({ message: "로그인 성공" });
       } else {
         return res.status(400).send({ message: "로그인 실패" });
       }
@@ -61,6 +62,12 @@ router.post(
     }
   })
 );
+
+router.post("/signout", (_, res) => {
+  res.clearCookie("accessToken", cookieConfig.clearCookieOption);
+  res.clearCookie("refreshToken", cookieConfig.clearCookieOption);
+  res.status(200).send({ message: "로그아웃 성공" });
+});
 
 router.post(
   "/signup/customer",
@@ -82,6 +89,19 @@ router.post(
       const SignUpMover: SignUpMover = req.body;
       await authService.signUpMover(SignUpMover);
       res.status(201).send({ message: "회원가입 성공" });
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
+router.get(
+  "/user",
+  asyncHandle(async (req, res, next) => {
+    try {
+      const userId = req.body.userId;
+      const user = await authService.getUser(userId);
+      res.status(200).send({ user });
     } catch (error) {
       next(error);
     }
