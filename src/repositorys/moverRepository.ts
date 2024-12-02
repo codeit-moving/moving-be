@@ -1,4 +1,3 @@
-import { int } from "aws-sdk/clients/datapipeline";
 import prismaClient from "../utils/prismaClient";
 
 interface whereConditions {
@@ -8,6 +7,24 @@ interface whereConditions {
   OR?: object[];
 }
 
+const defaultSelect = {
+  id: true,
+  imageUrl: true,
+  services: true,
+  nickname: true,
+  career: true,
+  regions: true,
+  introduction: true,
+  movingRequest: true,
+  _count: {
+    select: {
+      review: true,
+      favorite: true,
+      confirmedQuote: true,
+    },
+  },
+};
+
 const getMoverCount = async (where: whereConditions) => {
   return prismaClient.mover.count({ where });
 };
@@ -16,27 +33,25 @@ const getMoverCount = async (where: whereConditions) => {
 const getMoverList = (
   orderBy: { [key: string]: object | string },
   where: whereConditions,
-  cursor: int
+  cursor: number,
+  limit: number
 ) => {
   return prismaClient.mover.findMany({
     orderBy,
     where,
+    take: limit,
     skip: cursor ? 1 : 0, //커서 자신을 스킵하기 위함
     cursor: cursor ? { id: cursor } : undefined,
     select: {
-      id: true,
-      imageUrl: true,
-      nickname: true,
-      career: true,
-      introduction: true,
-      description: true,
-      services: true,
-      regions: true,
-      _count: {
+      ...defaultSelect,
+      movingRequest: {
         select: {
-          review: true,
-          favorite: true,
-          confirmedQuote: true,
+          id: true,
+        },
+      },
+      favorite: {
+        select: {
+          id: true,
         },
       },
     },
@@ -45,27 +60,10 @@ const getMoverList = (
 
 //기사 상세 조회
 const getMoverById = (customerId: number | null, moverId: number) => {
-  const baseSelect = {
-    id: true,
-    imageUrl: true,
-    services: true,
-    nickname: true,
-    career: true,
-    regions: true,
-    introduction: true,
-    _count: {
-      select: {
-        review: true,
-        favorite: true,
-        confirmedQuote: true,
-      },
-    },
-  };
-
   return prismaClient.mover.findUnique({
     where: { id: moverId },
     select: {
-      ...baseSelect,
+      ...defaultSelect,
       ...(customerId
         ? {
             favorite: {
@@ -99,9 +97,20 @@ const getRatingsByMoverIds = async (moverIds: number[]) => {
   return ratings;
 };
 
+const toggleFavorite = async (moverId: number, favorite: object) => {
+  return prismaClient.mover.update({
+    where: { id: moverId },
+    data: { favorite },
+    select: {
+      id: true,
+    },
+  });
+};
+
 export default {
   getMoverCount,
   getMoverList,
   getRatingsByMoverIds,
   getMoverById,
+  toggleFavorite,
 };
