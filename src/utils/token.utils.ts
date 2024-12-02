@@ -3,7 +3,9 @@ import jwt from "jsonwebtoken";
 import { JWT_SECRET, REFRESH_SECRET } from "../env";
 
 interface TokenUser {
-  name: string;
+  id: number;
+  customer?: { id: number } | null;
+  mover?: { id: number } | null;
 }
 
 const createToken = (
@@ -11,7 +13,9 @@ const createToken = (
   type: "access" | "refresh" = "access"
 ) => {
   const payload = {
-    name: user.name,
+    id: user.id,
+    customerId: user.customer?.id || null,
+    moverId: user.mover?.id || null,
   };
 
   const options = {
