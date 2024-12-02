@@ -1,3 +1,4 @@
+import movingRequestRepository from "../repositorys/movingRequestRepository";
 import RatingResult from "./interfaces/mover/ratingResult";
 
 interface Mover {
@@ -9,27 +10,35 @@ interface Mover {
   description?: string;
   services?: number[];
   regions?: number[];
-  movingRequest: { id: number }[];
+  movingRequest: { id: number; mover: object }[];
   favorite: { id: number }[];
   _count: { review: number; favorite: number; confirmedQuote: number };
 }
 
-const processMoversData = (
+const processMoversData = async (
   customerId: number | null,
   movers: Mover[] | Mover,
   ratingsByMover: Record<number, RatingResult>
 ) => {
   const moverIdArray = Array.isArray(movers) ? movers : [movers];
+  let activeRequest: { id: number; mover: { id: number }[] } | null = null;
+  if (customerId) {
+    activeRequest = await movingRequestRepository.getActiveRequest(customerId);
+  }
   return moverIdArray.map((mover) => {
     const { _count, favorite, movingRequest, ...rest } = mover;
 
-    const isFavorite = favorite.some(
-      (favorite) => (favorite.id === customerId ? customerId : null) //나중에 토큰의 검사가 가능할때 업데이트 필요
-    );
+    let isFavorite = false;
+    let isDesignated = false;
 
-    const isDesignated = mover.movingRequest.some(
-      (request) => request.id === mover.id
-    );
+    if (customerId) {
+      isFavorite = favorite.some((favorite) => favorite.id === customerId);
+      isDesignated =
+        activeRequest?.mover.some(
+          (designatedMover) => designatedMover.id === mover.id
+        ) ?? false;
+    }
+
     return {
       ...rest,
       isDesignated,

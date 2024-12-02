@@ -39,7 +39,7 @@ const getMoverList = (
   return prismaClient.mover.findMany({
     orderBy,
     where,
-    take: limit,
+    take: limit + 1,
     skip: cursor ? 1 : 0, //커서 자신을 스킵하기 위함
     cursor: cursor ? { id: cursor } : undefined,
     select: {
@@ -47,6 +47,11 @@ const getMoverList = (
       movingRequest: {
         select: {
           id: true,
+          mover: {
+            select: {
+              id: true,
+            },
+          },
         },
       },
       favorite: {
@@ -64,6 +69,16 @@ const getMoverById = (customerId: number | null, moverId: number) => {
     where: { id: moverId },
     select: {
       ...defaultSelect,
+      movingRequest: {
+        select: {
+          id: true,
+          mover: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      },
       ...(customerId
         ? {
             favorite: {
