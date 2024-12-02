@@ -17,7 +17,7 @@ const getQuoteByMovingRequestId = (
       ...(isCompleted
         ? {
             confirmedQuote: {
-              isNot: null, //환정견적과의 관계가 null이 아닌 경우
+              isNot: null, //확정견적과의 관계가 null이 아닌 경우
             },
           }
         : {}),
@@ -100,12 +100,6 @@ const getQuoteById = (quoteId: number) => {
           favorite: {
             select: {
               id: true,
-            },
-          },
-          movingRequest: {
-            select: {
-              id: true,
-              serviceType: true,
             },
           },
         },

@@ -15,7 +15,6 @@ const defaultSelect = {
   career: true,
   regions: true,
   introduction: true,
-  movingRequest: true,
   _count: {
     select: {
       review: true,
@@ -44,12 +43,6 @@ const getMoverList = (
     cursor: cursor ? { id: cursor } : undefined,
     select: {
       ...defaultSelect,
-      movingRequest: {
-        select: {
-          id: true,
-          serviceType: true,
-        },
-      },
       favorite: {
         select: {
           id: true,
@@ -65,12 +58,6 @@ const getMoverById = (customerId: number | null, moverId: number) => {
     where: { id: moverId },
     select: {
       ...defaultSelect,
-      movingRequest: {
-        select: {
-          id: true,
-          serviceType: true,
-        },
-      },
       ...(customerId
         ? {
             favorite: {

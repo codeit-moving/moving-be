@@ -23,7 +23,6 @@ interface Mover {
     confirmedQuote: number;
   };
   favorite: { id: number }[];
-  movingRequest: { id: number; serviceType: number }[];
 }
 
 const processQuotes = async (customerId: number, quote: Quote[] | Quote) => {

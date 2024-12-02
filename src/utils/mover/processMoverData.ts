@@ -10,7 +10,6 @@ interface Mover {
   description?: string;
   services?: number[];
   regions?: number[];
-  movingRequest: { id: number; serviceType: number }[];
   favorite: { id: number }[];
   _count: { review: number; favorite: number; confirmedQuote: number };
 }
@@ -26,7 +25,7 @@ const processMoversData = async (
     activeRequest = await movingRequestRepository.getActiveRequest(customerId);
   }
   return movers.map((mover) => {
-    const { _count, favorite, movingRequest, ...rest } = mover;
+    const { _count, favorite, ...rest } = mover;
 
     let isFavorite = false;
     let isDesignated = false;

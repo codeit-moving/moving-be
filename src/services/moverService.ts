@@ -132,7 +132,7 @@ const getMoverDetail = async (customerId: number | null, moverId: number) => {
     ratingsByMover
   );
 
-  return processMover;
+  return processMover[0];
 };
 
 //찜 토글
