@@ -1,7 +1,7 @@
 import { Request } from "express";
 import moverRepository from "../repositorys/moverRepository";
 import CustomError from "../utils/interfaces/customError";
-import processMoversData from "../utils/processMoverData";
+import processMoversData from "../utils/mover/processMoverData";
 import RatingResult from "../utils/interfaces/mover/ratingResult";
 
 interface queryString {

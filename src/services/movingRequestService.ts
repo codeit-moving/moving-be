@@ -3,7 +3,8 @@ import { MovingRequestData } from "../utils/interfaces/movingRequest/movingReque
 import CustomError from "../utils/interfaces/customError";
 import quoteRepository from "../repositorys/quoteRepository";
 import getRatingsByMoverIds from "../utils/mover/getRatingsByMover";
-import processMoverData from "../utils/processMoverData";
+import processMoverData from "../utils/mover/processMoverData";
+import processQuotes from "../utils/quote/processQuoteData";
 
 interface queryString {
   limit: number;
@@ -67,45 +68,45 @@ const getQuoteByMovingRequestId = async (
     isCompleted
   );
 
-  if (!quotes) {
+  const processedQuotes = await processQuotes(customerId, quotes);
+
+  return {
+    movingRequestId,
+    list: processedQuotes,
+  };
+};
+
+//대기중인 견적서 조회
+const getPendingQuotes = async (customerId: number) => {
+  const activeRequest = await movingRequestRepository.getActiveRequest(
+    customerId
+  );
+
+  if (!activeRequest) {
     const error: CustomError = new Error("Not Found");
     error.status = 404;
     error.data = {
-      message: "견적서 목록이 없습니다.",
+      message: "활성중인 이사요청이 없습니다.",
     };
     throw error;
   }
 
-  // moverIds와 movers를 한 번의 순회로 처리
-  const moverIds: number[] = [];
-  const movers = quotes.reduce((acc: any[], quote) => {
-    moverIds.push(quote.mover.id);
-    acc.push(quote.mover);
-    return acc;
-  }, []);
-
-  const ratingsByMover = await getRatingsByMoverIds(moverIds);
-  const processMovers = await processMoverData(
-    customerId,
-    movers,
-    ratingsByMover
+  const quoteCount = await quoteRepository.getQuoteCountByMovingRequestId(
+    activeRequest.id
   );
 
-  // Map을 사용하여 mover 검색 최적화
-  const moverMap = new Map(processMovers.map((mover) => [mover.id, mover]));
+  const quotes = quoteRepository.getQuoteByMovingRequestId(activeRequest.id);
 
-  const processQuotes = quotes.map((quote) => {
-    const { mover, movingRequest, confirmedQuote, ...rest } = quote;
-    return {
-      serviceType: movingRequest.serviceType,
-      isConfirmed: Boolean(confirmedQuote),
-      mover: moverMap.get(mover.id), // O(1) 검색
-      ...rest,
-    };
-  });
+  const [promiseQuotes, promiseQuoteCount] = await Promise.all([
+    quotes,
+    quoteCount,
+  ]);
+
+  const processedQuotes = await processQuotes(customerId, promiseQuotes);
+
   return {
-    movingRequestId,
-    list: processQuotes,
+    totalCount: promiseQuoteCount,
+    list: processedQuotes,
   };
 };
 
@@ -185,4 +186,5 @@ export default {
   designateMover,
   cancelDesignateMover,
   getQuoteByMovingRequestId,
+  getPendingQuotes,
 };

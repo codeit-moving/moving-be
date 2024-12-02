@@ -1,9 +1,15 @@
 import prismaClient from "../utils/prismaClient";
 
+const getQuoteCountByMovingRequestId = (movingRequestId: number) => {
+  return prismaClient.quote.count({
+    where: { movingRequestId },
+  });
+};
+
 //이사요청에 대한 견적서 조회
 const getQuoteByMovingRequestId = (
   movingRequestId: number,
-  isCompleted: boolean
+  isCompleted = false
 ) => {
   return prismaClient.quote.findMany({
     where: {
@@ -121,4 +127,5 @@ const getQuoteById = (quoteId: number) => {
 export default {
   getQuoteByMovingRequestId,
   getQuoteById,
+  getQuoteCountByMovingRequestId,
 };

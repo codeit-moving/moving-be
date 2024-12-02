@@ -1,5 +1,5 @@
-import movingRequestRepository from "../repositorys/movingRequestRepository";
-import RatingResult from "./interfaces/mover/ratingResult";
+import movingRequestRepository from "../../repositorys/movingRequestRepository";
+import RatingResult from "../interfaces/mover/ratingResult";
 
 interface Mover {
   id: number;

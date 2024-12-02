@@ -56,6 +56,20 @@ router.get(
   })
 );
 
+//대기중인 견적서 조회
+router.get(
+  "/pending-quotes",
+  asyncHandle(async (req, res, next) => {
+    try {
+      // const { id: customerId } = req.user as { id: number };
+      const pendingQuotes = await movingRequestService.getPendingQuotes(1);
+      return res.status(200).send(pendingQuotes);
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
 //이사요청 생성
 router.post(
   "/",

@@ -1,7 +1,7 @@
 import quoteRepository from "../repositorys/quoteRepository";
 import customError from "../utils/interfaces/customError";
 import getRatingsByMoverIds from "../utils/mover/getRatingsByMover";
-import processMoverData from "../utils/processMoverData";
+import processMoverData from "../utils/mover/processMoverData";
 
 const getQuoteById = async (customerId: number, quoteId: number) => {
   const quote = await quoteRepository.getQuoteById(quoteId);
