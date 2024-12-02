@@ -139,10 +139,31 @@ const getDesignateCount = (movingRequestId: number) => {
   });
 };
 
+//활성중인 이사요청 조회
+const getActiveRequest = (customerId: number) => {
+  return prismaClient.movingRequest.findFirst({
+    where: {
+      customerId,
+      confirmedQuote: {
+        is: null,
+      },
+    },
+    select: {
+      id: true,
+      mover: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+};
+
 export default {
   getMovingRequestList,
   createMovingRequest,
   updateDesignated,
   updateDesignatedCancel,
   getDesignateCount,
+  getActiveRequest,
 };
