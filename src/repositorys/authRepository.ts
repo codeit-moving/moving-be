@@ -3,19 +3,18 @@ import prismaClient from "../utils/prismaClient";
 interface User {
   name: string;
   email: string;
-  password: string;
+  password: string | null;
   phoneNumber: string;
+  isOAuth: boolean;
 }
 
-interface Customer {
-  userId: number;
+interface Customer extends User {
   imageUrl: string | null;
   services: number[];
   regions: number[];
 }
 
-interface Mover {
-  userId: number;
+interface Mover extends User {
   nickname: string;
   career: number;
   introduction: string;
@@ -29,8 +28,14 @@ const findByEmail = (email: string) => {
   return prismaClient.user.findUnique({
     where: { email: email },
     select: {
-      name: true,
+      id: true,
       password: true,
+      customer: {
+        select: { id: true },
+      },
+      mover: {
+        select: { id: true },
+      },
     },
   });
 };
@@ -41,34 +46,107 @@ const existingUser = (email: string, phoneNumber: string) => {
   });
 };
 
-const createUser = (tx: any, userData: User) => {
-  return tx.user.create({
-    data: userData,
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      phoneNumber: true,
+const createUser = (user: User) => {
+  return prismaClient.user.create({
+    data: user,
+  });
+};
+
+const createCustomer = (customer: Customer) => {
+  const {
+    name,
+    email,
+    password,
+    phoneNumber,
+    isOAuth,
+    imageUrl,
+    services,
+    regions,
+  } = customer;
+
+  const userData = {
+    name,
+    email,
+    password,
+    phoneNumber,
+    isOAuth,
+  };
+
+  const customerData = {
+    imageUrl,
+    services,
+    regions,
+  };
+
+  return prismaClient.user.create({
+    data: {
+      ...userData,
+      customer: {
+        create: customerData,
+      },
     },
   });
 };
 
-const createCustomer = (tx: any, customerData: Customer) => {
-  return tx.customer.create({
-    data: customerData,
+const createMover = (mover: Mover) => {
+  const {
+    name,
+    email,
+    password,
+    phoneNumber,
+    isOAuth,
+    nickname,
+    career,
+    introduction,
+    description,
+    imageUrl,
+    services,
+    regions,
+  } = mover;
+
+  const userData = {
+    name,
+    email,
+    password,
+    phoneNumber,
+    isOAuth,
+  };
+
+  const moverData = {
+    nickname,
+    career,
+    introduction,
+    description,
+    imageUrl,
+    services,
+    regions,
+  };
+
+  return prismaClient.user.create({
+    data: {
+      ...userData,
+      mover: {
+        create: moverData,
+      },
+    },
   });
 };
 
-const createMover = (tx: any, moverData: Mover) => {
-  return tx.mover.create({
-    data: moverData,
+const getUser = (userId: number) => {
+  return prismaClient.user.findUnique({
+    where: { id: userId },
+    include: {
+      customer: true,
+      mover: true,
+    },
   });
 };
 
 export default {
   findByEmail,
-  createUser,
   createCustomer,
   createMover,
   existingUser,
+  createUser,
+  getUser,
 };

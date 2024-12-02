@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt";
 import authRepository from "../repositorys/authRepository";
 import CustomError from "../utils/interfaces/customError";
-import prismaClient from "../utils/prismaClient";
 
 interface SignInData {
   email: string;
@@ -13,6 +12,7 @@ interface User {
   email: string;
   password: string;
   phoneNumber: string;
+  isOAuth: boolean;
 }
 
 interface SignUpCustomer extends User {
@@ -33,7 +33,6 @@ interface SignUpMover extends User {
 
 const signIn = async ({ email, password }: SignInData) => {
   const user = await authRepository.findByEmail(email);
-
   if (!user) {
     const error: CustomError = new Error("Not Found");
     error.status = 404;
@@ -63,8 +62,7 @@ const signIn = async ({ email, password }: SignInData) => {
 };
 
 const signUpCustomer = async (customer: SignUpCustomer) => {
-  const { name, email, password, phoneNumber, imageUrl, services, regions } =
-    customer;
+  const { email, phoneNumber } = customer;
 
   try {
     const existingUser = await authRepository.existingUser(email, phoneNumber);
@@ -87,22 +85,7 @@ const signUpCustomer = async (customer: SignUpCustomer) => {
       }
     }
 
-    const result = await prismaClient.$transaction(async (tx) => {
-      const user = await authRepository.createUser(tx, {
-        name,
-        email,
-        password,
-        phoneNumber,
-      });
-      const customer = await authRepository.createCustomer(tx, {
-        userId: user.id,
-        imageUrl,
-        services,
-        regions,
-      });
-
-      return { user, customer };
-    });
+    const result = await authRepository.createCustomer(customer);
 
     return result;
   } catch (error) {
@@ -111,19 +94,7 @@ const signUpCustomer = async (customer: SignUpCustomer) => {
 };
 
 const signUpMover = async (mover: SignUpMover) => {
-  const {
-    name,
-    email,
-    password,
-    phoneNumber,
-    imageUrl,
-    services,
-    regions,
-    nickname,
-    career,
-    introduction,
-    description,
-  } = mover;
+  const { email, phoneNumber } = mover;
 
   try {
     const existingUser = await authRepository.existingUser(email, phoneNumber);
@@ -146,32 +117,17 @@ const signUpMover = async (mover: SignUpMover) => {
       }
     }
 
-    const result = await prismaClient.$transaction(async (tx) => {
-      const user = await authRepository.createUser(tx, {
-        name,
-        email,
-        password,
-        phoneNumber,
-      });
-      const mover = await authRepository.createMover(tx, {
-        userId: user.id,
-        imageUrl,
-        services,
-        regions,
-        nickname,
-        career,
-        introduction,
-        description,
-      });
+    const result = await authRepository.createMover(mover);
 
-      console.log(mover);
-
-      return { user, mover };
-    });
     return result;
   } catch (error) {
     throw error;
   }
 };
 
-export default { signIn, signUpCustomer, signUpMover };
+const getUser = async (userId: number) => {
+  const user = await authRepository.getUser(userId);
+  return user;
+};
+
+export default { signIn, signUpCustomer, signUpMover, getUser };
