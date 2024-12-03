@@ -11,5 +11,6 @@ declare namespace NodeJS {
     NAVER_CLIENT_ID: string;
     NAVER_CLIENT_SECRET: string;
     NAVER_REDIRECT_URI: string;
+    SESSION_SECRET: string;
   }
 }
