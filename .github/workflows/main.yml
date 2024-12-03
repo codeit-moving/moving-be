@@ -25,7 +25,7 @@ jobs:
 
     - name: Deploy to EC2
       run: |
-        ssh -i ~/.ssh/ec2.pem ec2-user@YOUR_EC2_PUBLIC_IP << 'EOF'
+        ssh -i ~/.ssh/ec2.pem -T ec2-user@${{ secrets.EC2_ADDRESS }} << 'EOF'
           cd ~/moving-be
           git pull origin main  # GitHub에서 최신 변경 사항을 pull
           npm install  # 필요에 따라 의존성 설치
