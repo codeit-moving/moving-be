@@ -54,9 +54,9 @@ router.post(
           refreshToken,
           cookieConfig.refreshTokenOption
         );
-        res.status(200).send({ message: "로그인 성공" });
+        res.status(204);
       } else {
-        return res.status(400).send({ message: "로그인 실패" });
+        return res.status(400).send({ message: "로그인에 실패하였습니다." });
       }
     } catch (error) {
       next(error);
@@ -67,7 +67,7 @@ router.post(
 router.post("/signout", (_, res) => {
   res.clearCookie("accessToken", cookieConfig.clearCookieOption);
   res.clearCookie("refreshToken", cookieConfig.clearCookieOption);
-  res.status(200).send({ message: "로그아웃 성공" });
+  res.status(204);
 });
 
 router.post(
@@ -76,7 +76,7 @@ router.post(
     try {
       const SignUpCustomer: SignUpCustomer = req.body;
       await authService.signUpCustomer(SignUpCustomer);
-      res.status(201).send({ message: "회원가입 성공" });
+      res.status(204);
     } catch (error) {
       next(error);
     }
@@ -89,7 +89,7 @@ router.post(
     try {
       const SignUpMover: SignUpMover = req.body;
       await authService.signUpMover(SignUpMover);
-      res.status(201).send({ message: "회원가입 성공" });
+      res.status(204);
     } catch (error) {
       next(error);
     }

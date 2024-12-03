@@ -1,37 +1,24 @@
-interface CookieOptions {
-  httpOnly: boolean;
-  secure: boolean;
-  sameSite: "lax" | "strict" | "none";
-  maxAge: number;
-  domain: string;
-  path: string;
-}
+import { CookieOptions } from "express";
 
 const accessTokenOption: CookieOptions = {
-  httpOnly: false,
+  httpOnly: true,
   secure: false,
   sameSite: "lax",
-  maxAge: 1000 * 60 * 60,
-  domain: "localhost",
-  path: "/",
+  maxAge: 1000 * 60 * 60, // 1시간
 };
 
 const refreshTokenOption: CookieOptions = {
-  httpOnly: false,
+  httpOnly: true,
   secure: false,
   sameSite: "lax",
-  maxAge: 1000 * 60 * 60 * 24 * 7,
-  domain: "localhost",
-  path: "/",
+  maxAge: 1000 * 60 * 60 * 24 * 7, // 7일
 };
 
 const clearCookieOption: CookieOptions = {
-  httpOnly: false,
+  httpOnly: true,
   secure: false,
   sameSite: "lax",
   maxAge: 0,
-  domain: "localhost",
-  path: "/",
 };
 
 export default { accessTokenOption, refreshTokenOption, clearCookieOption };
