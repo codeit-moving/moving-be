@@ -2,6 +2,7 @@ import moverService from "../services/moverService";
 import { asyncHandle } from "../utils/asyncHandler";
 import express from "express";
 import checkBoolean from "../utils/checkBoolean";
+import passport from "passport";
 
 interface queryString {
   nextCursorId: string;
@@ -18,12 +19,12 @@ const router = express.Router();
 //기사 목록 조회
 router.get(
   "/",
+  // passport.authenticate("jwt", { session: false }),
   asyncHandle(async (req, res, next) => {
     try {
-      //나중에 토큰의 검사가 가능할때 업데이트 필요
       let customerId: number | null = null;
       if (req.user) {
-        customerId = (req.user as { id: number | null }).id;
+        customerId = (req.user as { customerId: number | null }).customerId;
       }
 
       const {
@@ -51,7 +52,7 @@ router.get(
           service: parseService,
           isFavorite,
         },
-        1
+        customerId
       );
       return res.status(200).send(movers);
     } catch (error) {
@@ -66,17 +67,16 @@ router.get(
   //미들웨어
   asyncHandle(async (req, res, next) => {
     try {
-      //나중에 토큰의 검사가 가능할때 업데이트 필요
-      // let customerId: number | null = null;
-      // if (req.user) {
-      //   customerId = (req.user as { id: number | null }).id;
-      // }
+      let customerId: number | null = null;
+      if (req.user) {
+        customerId = (req.user as { customerId: number | null }).customerId;
+      }
 
       const { id: moverId } = req.params;
 
       const parseMoverId = parseInt(moverId);
 
-      const mover = await moverService.getMoverDetail(1, parseMoverId);
+      const mover = await moverService.getMoverDetail(customerId, parseMoverId);
       return res.status(200).send(mover);
     } catch (error) {
       next(error);
@@ -87,14 +87,14 @@ router.get(
 //기사 찜
 router.post(
   "/:id/favorite",
+  passport.authenticate("jwt", { session: false }),
   asyncHandle(async (req, res, next) => {
     try {
-      //나중에 토큰의 검사가 가능할때 업데이트 필요
-      // const { id: customerId } = req.user as { id: number };
+      const { customerId } = req.user as { customerId: number };
       const { id: moverId } = req.params;
       const { favorite = "true" } = req.query;
       const mover = await moverService.toggleFavorite(
-        1,
+        customerId,
         parseInt(moverId),
         checkBoolean(favorite as string)
       );
