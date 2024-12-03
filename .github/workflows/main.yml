@@ -25,7 +25,7 @@ jobs:
 
     - name: Set up environment variables
       run: |
-        ssh -i ~/.ssh/ec2.pem ec2-user@<YOUR_EC2_PUBLIC_IP> "bash -s" << 'EOF'
+        ssh -i ~/.ssh/ec2.pem ec2-user@${{ secrets.EC2_ADDRESS }} "bash -s" << 'EOF'
           if [ ! -f ~/moving-be/.env ]; then
             echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > ~/moving-be/.env
             echo "PORT=${{ secrets.PORT }}" >> ~/moving-be/.env
