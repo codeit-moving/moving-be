@@ -3,6 +3,7 @@ import authService from "../services/authService";
 import { asyncHandle } from "../utils/asyncHandler";
 import cookieConfig from "../config/cookie.config";
 import createToken from "../utils/token.utils";
+import passport from "passport";
 
 const router = Router();
 
@@ -97,9 +98,10 @@ router.post(
 
 router.get(
   "/user",
+  passport.authenticate("jwt", { session: false }),
   asyncHandle(async (req, res, next) => {
     try {
-      const userId = req.body.userId;
+      const userId = (req.user as any).id;
       const user = await authService.getUser(userId);
       res.status(200).send({ user });
     } catch (error) {
