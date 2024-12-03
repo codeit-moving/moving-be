@@ -26,13 +26,20 @@ jobs:
     - name: Set up environment variables
       run: |
         ssh -i ~/.ssh/ec2.pem ec2-user@${{ secrets.EC2_ADDRESS }} "bash -s" << 'EOF'
-          if [ ! -f ~/moving-be/.env ]; then
-            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > ~/moving-be/.env
-            echo "PORT=${{ secrets.PORT }}" >> ~/moving-be/.env
-          else
-            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> ~/moving-be/.env
-            echo "PORT=${{ secrets.PORT }}" >> ~/moving-be/.env
-          fi
+          if grep -q "DATABASE_URL=" ~/moving-be/.env; then
+        # DATABASE_URL이 존재하면 덮어쓰기
+        sed -i 's|^DATABASE_URL=.*$|DATABASE_URL=${{ secrets.DATABASE_URL }}|' ~/moving-be/.env
+        else
+        # DATABASE_URL이 없으면 추가
+        echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> ~/moving-be/.env
+        fi
+        if grep -q "PORT=" ~/moving-be/.env; then
+        # PORT가 존재하면 덮어쓰기
+        sed -i 's|^PORT=.*$|PORT=${{ secrets.PORT }}|' ~/moving-be/.env
+        else
+        # PORT가 없으면 추가
+        echo "PORT=${{ secrets.PORT }}" >> ~/moving-be/.env
+        fi
         EOF
 
     - name: Deploy to EC2
