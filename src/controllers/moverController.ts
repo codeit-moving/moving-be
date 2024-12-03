@@ -63,6 +63,7 @@ router.get(
 //기사 상세 조회
 router.get(
   "/:id",
+  //미들웨어
   asyncHandle(async (req, res, next) => {
     try {
       //나중에 토큰의 검사가 가능할때 업데이트 필요
