@@ -23,6 +23,20 @@ jobs:
         # EC2 인스턴스의 호스트 키를 확인하지 않도록 설정 (보안을 강화하려면 이 부분을 수정)
         echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
 
+    - name: Set up environment variables  
+      run: |
+        # .env 파일을 EC2 인스턴스에서 생성 (EC2 인스턴스에서 실행)
+        ssh -i ~/.ssh/ec2.pem ec2-user@<YOUR_EC2_PUBLIC_IP> << 'EOF'
+          # .env 파일이 없으면 새로 생성, 있으면 추가
+          if [ ! -f ~/moving-be/.env ]; then
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > ~/moving-be/.env
+            echo "PORT=${{ secrets.PORT }}" >> ~/moving-be/.env
+          else
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> ~/moving-be/.env
+            echo "PORT=${{ secrets.PORT }}" >> ~/moving-be/.env
+          fi
+        EOF
+
     - name: Deploy to EC2
       run: |
         ssh -i ~/.ssh/ec2.pem -T ec2-user@${{ secrets.EC2_ADDRESS }} << 'EOF'
