@@ -151,7 +151,7 @@ const getCustomer = (userId: number) => {
       },
     },
   });
-}; //프론트엔드와 상의, 최종 수정 후 customerRepository로 이동예정
+};
 
 const getMover = (userId: number) => {
   return prismaClient.user.findUnique({
@@ -176,7 +176,7 @@ const getMover = (userId: number) => {
       },
     },
   });
-}; //프론트엔드와 상의, 최종 수정 후 moverRepository로 이동예정
+};
 
 const getUserType = async (userId: number) => {
   const user = await prismaClient.user.findUnique({
