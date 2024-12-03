@@ -1,7 +1,7 @@
 import { Request } from "express";
 import moverRepository from "../repositorys/moverRepository";
 import CustomError from "../utils/interfaces/customError";
-import processMoversData from "../utils/processMoverData";
+import processMoversData from "../utils/mover/processMoverData";
 import RatingResult from "../utils/interfaces/mover/ratingResult";
 
 interface queryString {
@@ -11,6 +11,7 @@ interface queryString {
   keyword: string;
   limit: number;
   cursor: number;
+  isFavorite: string;
 }
 
 interface whereConditions {
@@ -18,10 +19,12 @@ interface whereConditions {
   regions?: object;
   services?: object;
   OR?: object[];
+  customer?: object;
 }
 
 interface FavoriteData {
-  favorite?: object;
+  connect?: object;
+  disconnect?: object;
 }
 
 const setOrderByOptions = (
@@ -41,7 +44,7 @@ const setOrderByOptions = (
 
 //기사 목록 조회
 const getMoverList = async (query: queryString, customerId: number | null) => {
-  const { order, keyword, region, service, cursor, limit } = query;
+  const { order, keyword, region, service, cursor, limit, isFavorite } = query;
 
   //정렬 옵션 설정
   const orderByOptions = setOrderByOptions(order);
@@ -60,6 +63,9 @@ const getMoverList = async (query: queryString, customerId: number | null) => {
   }
   if (service) {
     whereConditions.services = { has: service };
+  }
+  if (isFavorite === "true" && customerId) {
+    whereConditions.customer = { has: customerId };
   }
 
   //데이터 조회
@@ -89,7 +95,7 @@ const getMoverList = async (query: queryString, customerId: number | null) => {
   const hasNext = Boolean(nextCursor);
 
   //데이터 가공
-  const resMovers = processMoversData(customerId, movers, ratingsByMover);
+  const resMovers = await processMoversData(customerId, movers, ratingsByMover);
 
   //평균 평점으로 정렬
   if (order === "rating") {
@@ -118,26 +124,15 @@ const getMoverDetail = async (customerId: number | null, moverId: number) => {
     throw error;
   }
 
-  //찜 여부 확인 값 변경
-  let isFavorite = false;
-  if (mover.favorite && mover.favorite.length > 0) {
-    isFavorite = true;
-  }
-
-  //지정 여부 확인 값 변경
-  let isDesignated = false;
-  if (
-    mover.movingRequest.length > 0 &&
-    mover.movingRequest.some((request) => request.id === moverId)
-  ) {
-    isDesignated = true;
-  }
-
   //데이터 가공
   const ratingsByMover = await getRatingsByMoverIds(moverId);
-  const processMover = processMoversData(customerId, mover, ratingsByMover);
+  const processMover = await processMoversData(
+    customerId,
+    mover,
+    ratingsByMover
+  );
 
-  return processMover;
+  return processMover[0];
 };
 
 //찜 토글
@@ -148,16 +143,12 @@ const toggleFavorite = async (
 ) => {
   const favoriteData: FavoriteData = {};
   if (favorite) {
-    favoriteData.favorite = {
-      connect: {
-        id: customerId,
-      },
+    favoriteData.connect = {
+      id: customerId,
     };
   } else {
-    favoriteData.favorite = {
-      disconnect: {
-        id: customerId,
-      },
+    favoriteData.disconnect = {
+      id: customerId,
     };
   }
 

@@ -15,7 +15,6 @@ const defaultSelect = {
   career: true,
   regions: true,
   introduction: true,
-  movingRequest: true,
   _count: {
     select: {
       review: true,
@@ -39,16 +38,11 @@ const getMoverList = (
   return prismaClient.mover.findMany({
     orderBy,
     where,
-    take: limit,
+    take: limit + 1,
     skip: cursor ? 1 : 0, //커서 자신을 스킵하기 위함
     cursor: cursor ? { id: cursor } : undefined,
     select: {
       ...defaultSelect,
-      movingRequest: {
-        select: {
-          id: true,
-        },
-      },
       favorite: {
         select: {
           id: true,

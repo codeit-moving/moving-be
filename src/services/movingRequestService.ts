@@ -3,7 +3,8 @@ import { MovingRequestData } from "../utils/interfaces/movingRequest/movingReque
 import CustomError from "../utils/interfaces/customError";
 import quoteRepository from "../repositorys/quoteRepository";
 import getRatingsByMoverIds from "../utils/mover/getRatingsByMover";
-import processMoverData from "../utils/processMoverData";
+import processMoverData from "../utils/mover/processMoverData";
+import processQuotes from "../utils/quote/processQuoteData";
 
 interface queryString {
   limit: number;
@@ -23,6 +24,7 @@ const getMovingRequestList = async (customerId: number, query: queryString) => {
   if (!movingRequestList) {
     const error: CustomError = new Error("Not Found");
     error.status = 404;
+    error.message = "Not Found";
     error.data = {
       message: "이사요청 목록이 없습니다.",
     };
@@ -40,11 +42,11 @@ const getMovingRequestList = async (customerId: number, query: queryString) => {
       movingRequest;
 
     return {
-      name: customer.user.name,
-      requestDate: createAt,
-      isDesignated: _count.mover > 0, //관계가 있다면 true
-      isConfirmed: Boolean(confirmedQuote), //완료된 견적서와 관계가 있다면 true
       ...rest,
+      requestDate: createAt,
+      isConfirmed: Boolean(confirmedQuote), //완료된 견적서와 관계가 있다면 true
+      // name: customer.user.name,
+      // isDesignated: _count.mover > 0, //관계가 있다면 true
     };
   });
 
@@ -58,45 +60,54 @@ const getMovingRequestList = async (customerId: number, query: queryString) => {
 //이사요청의 견적서 조회
 const getQuoteByMovingRequestId = async (
   customerId: number,
-  movingRequestId: number
+  movingRequestId: number,
+  isCompleted: boolean
 ) => {
   const quotes = await quoteRepository.getQuoteByMovingRequestId(
-    movingRequestId
+    movingRequestId,
+    isCompleted
   );
 
-  if (!quotes) {
+  const processedQuotes = await processQuotes(customerId, quotes);
+
+  return {
+    movingRequestId,
+    list: processedQuotes,
+  };
+};
+
+//대기중인 견적서 조회
+const getPendingQuotes = async (customerId: number) => {
+  const activeRequest = await movingRequestRepository.getActiveRequest(
+    customerId
+  );
+
+  if (!activeRequest) {
     const error: CustomError = new Error("Not Found");
     error.status = 404;
     error.data = {
-      message: "견적서 목록이 없습니다.",
+      message: "활성중인 이사요청이 없습니다.",
     };
     throw error;
   }
 
-  // moverIds와 movers를 한 번의 순회로 처리
-  const moverIds: number[] = [];
-  const movers = quotes.reduce((acc: any[], quote) => {
-    moverIds.push(quote.mover.id);
-    acc.push(quote.mover);
-    return acc;
-  }, []);
+  const quoteCount = await quoteRepository.getQuoteCountByMovingRequestId(
+    activeRequest.id
+  );
 
-  const ratingsByMover = await getRatingsByMoverIds(moverIds);
-  const processMovers = processMoverData(customerId, movers, ratingsByMover);
+  const quotes = quoteRepository.getQuoteByMovingRequestId(activeRequest.id);
 
-  // Map을 사용하여 mover 검색 최적화
-  const moverMap = new Map(processMovers.map((mover) => [mover.id, mover]));
+  const [promiseQuotes, promiseQuoteCount] = await Promise.all([
+    quotes,
+    quoteCount,
+  ]);
 
-  const processQuotes = quotes.map((quote) => {
-    const { mover, movingRequest, confirmedQuote, ...rest } = quote;
-    return {
-      serviceType: movingRequest.serviceType,
-      isConfirmed: Boolean(confirmedQuote),
-      mover: moverMap.get(mover.id), // O(1) 검색
-      ...rest,
-    };
-  });
-  return processQuotes;
+  const processedQuotes = await processQuotes(customerId, promiseQuotes);
+
+  return {
+    totalCount: promiseQuoteCount,
+    list: processedQuotes,
+  };
 };
 
 //이사요청 생성
@@ -104,6 +115,19 @@ const createMovingRequest = async (
   customerId: number,
   requestData: MovingRequestData
 ) => {
+  const activeRequest = await movingRequestRepository.getActiveRequest(
+    customerId
+  );
+
+  if (activeRequest) {
+    const error: CustomError = new Error("Bad Request");
+    error.status = 400;
+    error.data = {
+      message: "활성중인 이사요청이 있습니다.",
+    };
+    throw error;
+  }
+
   const movingRequest = await movingRequestRepository.createMovingRequest(
     customerId,
     requestData
@@ -162,4 +186,5 @@ export default {
   designateMover,
   cancelDesignateMover,
   getQuoteByMovingRequestId,
+  getPendingQuotes,
 };

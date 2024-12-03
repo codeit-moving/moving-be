@@ -11,3 +11,5 @@ router.get(
     return res.status(200).send(services);
   })
 );
+
+export default router;

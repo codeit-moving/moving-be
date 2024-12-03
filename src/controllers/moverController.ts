@@ -10,16 +10,21 @@ interface queryString {
   service: string;
   keyword: string;
   limit: string;
+  isFavorite: string;
 }
 
 const router = express.Router();
 
+//기사 목록 조회
 router.get(
   "/",
   asyncHandle(async (req, res, next) => {
     try {
       //나중에 토큰의 검사가 가능할때 업데이트 필요
-      const { id: customerId } = req.user as { id: number | null };
+      let customerId: number | null = null;
+      if (req.user) {
+        customerId = (req.user as { id: number | null }).id;
+      }
 
       const {
         nextCursorId = "0",
@@ -28,6 +33,7 @@ router.get(
         keyword = "",
         region = "0",
         service = "0",
+        isFavorite = "false",
       } = req.query as unknown as queryString;
 
       //스크링 쿼리 파싱
@@ -43,8 +49,9 @@ router.get(
           keyword,
           region: parseRegion,
           service: parseService,
+          isFavorite,
         },
-        customerId
+        1
       );
       return res.status(200).send(movers);
     } catch (error) {
@@ -53,16 +60,22 @@ router.get(
   })
 );
 
+//기사 상세 조회
 router.get(
   "/:id",
   asyncHandle(async (req, res, next) => {
     try {
+      //나중에 토큰의 검사가 가능할때 업데이트 필요
+      // let customerId: number | null = null;
+      // if (req.user) {
+      //   customerId = (req.user as { id: number | null }).id;
+      // }
+
       const { id: moverId } = req.params;
-      const { id: customerId } = req.user as { id: number | null };
 
       const parseMoverId = parseInt(moverId);
 
-      const mover = await moverService.getMoverDetail(customerId, parseMoverId);
+      const mover = await moverService.getMoverDetail(1, parseMoverId);
       return res.status(200).send(mover);
     } catch (error) {
       next(error);
@@ -70,16 +83,17 @@ router.get(
   })
 );
 
+//기사 찜
 router.post(
   "/:id/favorite",
   asyncHandle(async (req, res, next) => {
     try {
+      //나중에 토큰의 검사가 가능할때 업데이트 필요
+      // const { id: customerId } = req.user as { id: number };
       const { id: moverId } = req.params;
-      const { id: customerId } = req.user as { id: number };
       const { favorite = "true" } = req.query;
-      checkBoolean(favorite as string);
       const mover = await moverService.toggleFavorite(
-        customerId,
+        1,
         parseInt(moverId),
         checkBoolean(favorite as string)
       );
