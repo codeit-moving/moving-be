@@ -1,4 +1,7 @@
-APP_HOST="ec2-user@ec2-43-203-248-67.ap-northeast-2.compute.amazonaws.com"
+
+APP_HOST="ec2-user@ec2-52-78-245-231.ap-northeast-2.compute.amazonaws.com"
+
+
 APP_PATH="~/project"
 APP_ENTRY="dist/app.js"
 APP_NAME="app"
