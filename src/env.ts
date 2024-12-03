@@ -10,3 +10,4 @@ export const REFRESH_SECRET = process.env.REFRESH_SECRET || "secret";
 export const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID;
 export const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET;
 export const NAVER_REDIRECT_URI = process.env.NAVER_REDIRECT_URI;
+export const SESSION_SECRET = process.env.SESSION_SECRET;

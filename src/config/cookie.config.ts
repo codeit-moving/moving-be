@@ -21,4 +21,16 @@ const clearCookieOption: CookieOptions = {
   maxAge: 0,
 };
 
-export default { accessTokenOption, refreshTokenOption, clearCookieOption };
+const sessionOption: CookieOptions = {
+  httpOnly: true,
+  secure: false,
+  sameSite: "lax",
+  maxAge: 1000 * 60 * 60, //1시간
+};
+
+export default {
+  accessTokenOption,
+  refreshTokenOption,
+  clearCookieOption,
+  sessionOption,
+};

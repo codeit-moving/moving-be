@@ -1,4 +1,4 @@
-import { PORT } from "./env";
+import { PORT, SESSION_SECRET } from "./env";
 import cookieParser from "cookie-parser";
 import express from "express";
 import cors, { CorsOptions } from "cors";
@@ -12,6 +12,7 @@ import quoteRouter from "./controllers/quoteController";
 import oauthRouter from "./controllers/oauthController";
 import passport from "./middlewares/passport";
 import session from "express-session";
+import cookieConfig from "./config/cookie.config";
 
 const app = express();
 
@@ -42,13 +43,10 @@ app.use(cookieParser());
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "secret-key",
+    secret: SESSION_SECRET || "secret-key",
     resave: false,
     saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000,
-    },
+    cookie: cookieConfig.sessionOption,
   })
 );
 
