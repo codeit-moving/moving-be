@@ -132,14 +132,73 @@ const createMover = (mover: Mover) => {
   });
 };
 
-const getUser = (userId: number) => {
+const getCustomer = (userId: number) => {
   return prismaClient.user.findUnique({
     where: { id: userId },
-    include: {
-      customer: true,
-      mover: true,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phoneNumber: true,
+      isOAuth: true,
+      customer: {
+        select: {
+          id: true,
+          imageUrl: true,
+          services: true,
+          regions: true,
+        },
+      },
     },
   });
+}; //프론트엔드와 상의, 최종 수정 후 customerRepository로 이동예정
+
+const getMover = (userId: number) => {
+  return prismaClient.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phoneNumber: true,
+      isOAuth: true,
+      mover: {
+        select: {
+          id: true,
+          nickname: true,
+          career: true,
+          introduction: true,
+          description: true,
+          imageUrl: true,
+          services: true,
+          regions: true,
+        },
+      },
+    },
+  });
+}; //프론트엔드와 상의, 최종 수정 후 moverRepository로 이동예정
+
+const getUserType = async (userId: number) => {
+  const user = await prismaClient.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      customer: {
+        select: { id: true },
+      },
+      mover: {
+        select: { id: true },
+      },
+    },
+  });
+
+  if (user?.customer) {
+    return "customer";
+  } else if (user?.mover) {
+    return "mover";
+  } else {
+    return null;
+  }
 };
 
 export default {
@@ -148,5 +207,7 @@ export default {
   createMover,
   existingUser,
   createUser,
-  getUser,
+  getUserType,
+  getCustomer,
+  getMover,
 };

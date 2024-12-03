@@ -126,8 +126,14 @@ const signUpMover = async (mover: SignUpMover) => {
 };
 
 const getUser = async (userId: number) => {
-  const user = await authRepository.getUser(userId);
-  return user;
+  const userType = await authRepository.getUserType(userId);
+  if (userType === "customer") {
+    return await authRepository.getCustomer(userId);
+  } else if (userType === "mover") {
+    return await authRepository.getMover(userId);
+  } else {
+    throw new Error("User not found");
+  }
 };
 
 export default { signIn, signUpCustomer, signUpMover, getUser };
