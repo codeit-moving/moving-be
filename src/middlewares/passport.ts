@@ -8,6 +8,7 @@ import {
 } from "../env";
 import { JWT_SECRET } from "../env";
 import oauthService from "../services/oauthService";
+import CustomError from "../utils/interfaces/customError";
 
 const cookieExtractor = (req: any) => {
   let token = null;
@@ -23,11 +24,31 @@ const opts = {
 };
 
 passport.use(
+  "jwt",
+  new JwtStrategy(opts, (jwtPayload, done) => {
+    try {
+      if (!jwtPayload) {
+        const error: CustomError = new Error("Unauthorized");
+        error.status = 401;
+        error.data = {
+          message: "유효하지 않은 토큰입니다.",
+        };
+        throw error;
+      }
+      return done(null, jwtPayload);
+    } catch (error) {
+      return done(error, false);
+    }
+  })
+);
+
+passport.use(
+  "jwt-optional",
   new JwtStrategy(opts, (jwtPayload, done) => {
     try {
       return done(null, jwtPayload);
     } catch (error) {
-      return done(error, false);
+      return done(null, null);
     }
   })
 );

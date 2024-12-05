@@ -82,13 +82,12 @@ router.post(
   asyncHandle(async (req, res, next) => {
     try {
       const { customerId } = req.user as { customerId: number };
-      const { serviceType, movingDate, pickupAddress, dropOffAddress } =
-        req.body;
+      const { service, movingDate, pickupAddress, dropOffAddress } = req.body;
       const date = new Date(movingDate);
       const movingRequest = await movingRequestService.createMovingRequest(
         customerId,
         {
-          serviceType,
+          service,
           movingDate: date,
           pickupAddress,
           dropOffAddress,

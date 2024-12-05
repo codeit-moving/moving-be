@@ -28,7 +28,7 @@ const getMovingRequestList = (customerId: number, query: queryString) => {
     cursor: cursor ? { id: cursor } : undefined,
     select: {
       id: true,
-      serviceType: true,
+      service: true,
       movingDate: true,
       pickupAddress: true,
       dropOffAddress: true,
@@ -68,7 +68,7 @@ const createMovingRequest = (
     },
     select: {
       id: true,
-      serviceType: true,
+      service: true,
       movingDate: true,
       pickupAddress: true,
       dropOffAddress: true,

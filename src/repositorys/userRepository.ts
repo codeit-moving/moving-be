@@ -24,6 +24,13 @@ interface Mover extends User {
   regions: number[];
 }
 
+interface UpdateUser {
+  name?: string;
+  email?: string;
+  password?: string;
+  phoneNumber?: string;
+}
+
 const findByEmail = (email: string) => {
   return prismaClient.user.findUnique({
     where: { email: email },
@@ -36,6 +43,17 @@ const findByEmail = (email: string) => {
       mover: {
         select: { id: true },
       },
+    },
+  });
+};
+
+const findById = (userId: number) => {
+  return prismaClient.user.findUnique({
+    where: { id: userId },
+    select: {
+      name: true,
+      phoneNumber: true,
+      password: true,
     },
   });
 };
@@ -191,7 +209,6 @@ const getUserType = async (userId: number) => {
       },
     },
   });
-
   if (user?.customer) {
     return "customer";
   } else if (user?.mover) {
@@ -199,6 +216,13 @@ const getUserType = async (userId: number) => {
   } else {
     return null;
   }
+};
+
+const updateUser = async (userId: number, data: UpdateUser) => {
+  return prismaClient.user.update({
+    where: { id: userId },
+    data,
+  });
 };
 
 export default {
@@ -210,4 +234,6 @@ export default {
   getUserType,
   getCustomer,
   getMover,
+  updateUser,
+  findById,
 };

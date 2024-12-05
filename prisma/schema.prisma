@@ -96,7 +96,7 @@ model Region {
 // 이사정보 -> 고객이 등록 Requset
 model MovingRequest {
   id             Int             @id @unique @default(autoincrement()) //자동증가
-  serviceType    Int //서비스 테이블의 코드값 예 ) 1
+  service        Int //서비스 테이블의 코드값 예 ) 1
   movingDate     DateTime //이사하는 날
   pickupAddress  String //출발지 pickupAddress
   dropOffAddress String //도착지 dropoffAddress
