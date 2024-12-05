@@ -28,13 +28,13 @@ passport.use(
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
       return done(null, decoded);
-    } catch (error) {
-      const customError: CustomError = new Error("Unauthorized");
-      customError.status = 401;
-      customError.data = {
+    } catch (err) {
+      const error: CustomError = new Error("Unauthorized");
+      error.status = 401;
+      error.data = {
         message: "유효하지 않은 토큰입니다.",
       };
-      return done(customError, false);
+      return done(error, false);
     }
   })
 );
