@@ -8,9 +8,9 @@ interface Profile {
 }
 
 interface UpdateProfile {
-  imageUrl: string | null;
-  services: number[] | null;
-  regions: number[] | null;
+  imageUrl?: string;
+  services?: number[];
+  regions?: number[];
 }
 
 const createCustomerProfile = async (profile: Profile) => {
@@ -21,11 +21,7 @@ const updateCustomerProfile = async (
   userId: number,
   profile: UpdateProfile
 ) => {
-  const filteredData = Object.fromEntries(
-    Object.entries(profile).filter(([_, value]) => value !== null)
-  );
-
-  return customerRepository.updateCustomerProfile(userId, filteredData);
+  return customerRepository.updateCustomerProfile(userId, profile);
 };
 
 export default { createCustomerProfile, updateCustomerProfile };

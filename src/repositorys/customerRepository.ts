@@ -19,10 +19,10 @@ const createCustomerProfile = (profile: Profile) => {
   });
 };
 
-const updateCustomerProfile = (userId: number, filteredData: UpdateProfile) => {
+const updateCustomerProfile = (userId: number, profile: UpdateProfile) => {
   return prismaClient.customer.update({
     where: { userId: userId },
-    data: filteredData,
+    data: profile,
   });
 };
 
