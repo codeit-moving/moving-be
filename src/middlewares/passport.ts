@@ -14,31 +14,27 @@ import jwt from "jsonwebtoken";
 passport.use(
   "jwt",
   new Strategy(async (req, done) => {
-    try {
-      const token = req.cookies["accessToken"];
+    const token = req.cookies["accessToken"];
 
-      if (!token) {
-        const error: CustomError = new Error("Unauthorized");
-        error.status = 401;
-        error.data = {
-          message: "토큰이 존재하지 않습니다.",
-        };
-        return done(error, false);
-      }
-
-      try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        return done(null, decoded);
-      } catch (jwtError) {
-        const error: CustomError = new Error("Unauthorized");
-        error.status = 401;
-        error.data = {
-          message: "유효하지 않은 토큰입니다.",
-        };
-        return done(error, false);
-      }
-    } catch (error) {
+    if (!token) {
+      const error: CustomError = new Error("Unauthorized");
+      error.status = 401;
+      error.data = {
+        message: "토큰이 존재하지 않습니다.",
+      };
       return done(error, false);
+    }
+
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      return done(null, decoded);
+    } catch (error) {
+      const customError: CustomError = new Error("Unauthorized");
+      customError.status = 401;
+      customError.data = {
+        message: "유효하지 않은 토큰입니다.",
+      };
+      return done(customError, false);
     }
   })
 );
