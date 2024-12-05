@@ -56,6 +56,39 @@ const getMovingRequestList = (customerId: number, query: queryString) => {
   });
 };
 
+const getMovingRequestById = (movingRequestId: number) => {
+  return prismaClient.movingRequest.findUnique({
+    where: { id: movingRequestId },
+    select: {
+      id: true,
+      service: true,
+      movingDate: true,
+      pickupAddress: true,
+      dropOffAddress: true,
+      createAt: true,
+      _count: {
+        select: {
+          mover: true,
+        },
+      },
+      confirmedQuote: {
+        select: {
+          id: true,
+        },
+      },
+      customer: {
+        select: {
+          user: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  });
+};
+
 //이사요청 생성
 const createMovingRequest = (
   customerId: number,
@@ -166,4 +199,5 @@ export default {
   updateDesignatedCancel,
   getDesignateCount,
   getActiveRequest,
+  getMovingRequestById,
 };
