@@ -1,5 +1,5 @@
 import passport from "passport";
-import authRepository from "../repositorys/authRepository";
+import userRepository from "../repositorys/userRepository";
 
 passport.serializeUser((user: any, done) => {
   done(null, user);
@@ -11,7 +11,7 @@ passport.deserializeUser((user: any, done) => {
 
 const naver = async (profile: any) => {
   try {
-    const existingUser = await authRepository.findByEmail(
+    const existingUser = await userRepository.findByEmail(
       profile.emails?.[0].value
     );
 
@@ -19,7 +19,7 @@ const naver = async (profile: any) => {
       return existingUser;
     }
 
-    const newUser = await authRepository.createUser({
+    const newUser = await userRepository.createUser({
       email: profile.emails?.[0].value!,
       name: "Unknown",
       phoneNumber: "Unknown",
