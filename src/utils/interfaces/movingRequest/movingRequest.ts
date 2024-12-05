@@ -1,5 +1,5 @@
 export interface MovingRequestData {
-  serviceType: number;
+  service: number;
   movingDate: Date;
   pickupAddress: string;
   dropOffAddress: string;

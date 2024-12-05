@@ -28,7 +28,7 @@ const getQuoteByMovingRequestId = (
       comment: true,
       movingRequest: {
         select: {
-          serviceType: true,
+          service: true,
         },
       },
       confirmedQuote: {
@@ -57,7 +57,7 @@ const getQuoteByMovingRequestId = (
           movingRequest: {
             select: {
               id: true,
-              serviceType: true,
+              service: true,
             },
           },
         },
@@ -76,7 +76,7 @@ const getQuoteById = (quoteId: number) => {
       comment: true,
       movingRequest: {
         select: {
-          serviceType: true,
+          service: true,
         },
       },
       confirmedQuote: {

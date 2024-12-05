@@ -56,7 +56,7 @@ erDiagram
 }
 "MovingRequest" {
   Int id PK
-  Int serviceType
+  Int service
   DateTime movingDate
   String pickupAddress
   String dropOffAddress
@@ -203,7 +203,7 @@ erDiagram
 
 **Properties**
   - `id`: 
-  - `serviceType`: 
+  - `service`: 
   - `movingDate`: 
   - `pickupAddress`: 
   - `dropOffAddress`: 
