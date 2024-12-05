@@ -113,9 +113,35 @@ const getMoverList = async (query: queryString, customerId: number | null) => {
 };
 
 //찜한 기사 목록 조회
-const getMoverByFavorite = async (customerId: number) => {
-  const movers = await moverRepository.getMoverByFavorite(customerId);
-  return movers;
+const getMoverByFavorite = async (
+  customerId: number,
+  limit: number,
+  cursor: number
+) => {
+  const movers = await moverRepository.getMoverByFavorite(
+    customerId,
+    limit,
+    cursor
+  );
+
+  const moverIds = movers.map((mover) => mover.id);
+  const ratingsByMover = await getRatingsByMoverIds(moverIds);
+  const processMovers = await processMoversData(
+    customerId,
+    movers,
+    ratingsByMover
+  );
+
+  //커서 설정
+  const nextMover = movers.length > limit;
+  const nextCursor = nextMover ? movers[limit - 1].id : "";
+  const hasNext = Boolean(nextCursor);
+
+  return {
+    nextCursor,
+    hasNext,
+    list: processMovers.slice(0, limit),
+  };
 };
 
 //기사 상세 조회
