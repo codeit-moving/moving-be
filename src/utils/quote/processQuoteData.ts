@@ -7,7 +7,7 @@ interface Quote {
   cost: number;
   mover: Mover;
   movingRequest: {
-    serviceType: number;
+    service: number;
   };
   confirmedQuote: { id: number } | null;
 }
@@ -48,7 +48,7 @@ const processQuotes = async (customerId: number, quote: Quote[] | Quote) => {
   const processQuotes = quotes.map((quote) => {
     const { mover, movingRequest, confirmedQuote, ...rest } = quote;
     return {
-      serviceType: movingRequest.serviceType,
+      service: movingRequest.service,
       isConfirmed: Boolean(confirmedQuote),
       mover: moverMap.get(mover.id), // O(1) 검색
       ...rest,
