@@ -19,7 +19,7 @@ const router = express.Router();
 //기사 목록 조회
 router.get(
   "/",
-  // passport.authenticate("jwt", { session: false }),
+  passport.authenticate("jwt-optional", { session: false }),
   asyncHandle(async (req, res, next) => {
     try {
       let customerId: number | null = null;
@@ -64,7 +64,7 @@ router.get(
 //기사 상세 조회
 router.get(
   "/:id",
-  //미들웨어
+  passport.authenticate("jwt-optional", { session: false }),
   asyncHandle(async (req, res, next) => {
     try {
       let customerId: number | null = null;
