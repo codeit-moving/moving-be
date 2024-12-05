@@ -2,16 +2,15 @@
 import jwt from "jsonwebtoken";
 import { JWT_SECRET, REFRESH_SECRET } from "../env";
 
-interface TokenUser {
+export interface Payload {
   id: number;
   customer?: { id: number } | null;
   mover?: { id: number } | null;
+  iat?: number;
+  exp?: number;
 }
 
-const createToken = (
-  user: TokenUser,
-  type: "access" | "refresh" = "access"
-) => {
+const createToken = (user: Payload, type: "access" | "refresh" = "access") => {
   const payload = {
     id: user.id,
     customerId: user.customer?.id || null,

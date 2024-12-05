@@ -2,14 +2,8 @@ import { Router } from "express";
 import { asyncHandle } from "../utils/asyncHandler";
 import passport from "passport";
 import userService from "../services/userService";
-
-interface Payload {
-  id: number;
-  customerId: number | null;
-  moverId: number | null;
-  iat: number;
-  exp: number;
-}
+import { Payload } from "../utils/token.utils";
+import authService from "../services/authService";
 
 const router = Router();
 
@@ -22,6 +16,20 @@ router.patch(
       const userData = req.body;
       await userService.updateUser(userId, userData);
       res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
+router.get(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  asyncHandle(async (req, res, next) => {
+    try {
+      const userId = (req.user as Payload).id;
+      const user = await authService.getUser(userId);
+      res.status(200).send({ user });
     } catch (error) {
       next(error);
     }

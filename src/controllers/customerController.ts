@@ -2,14 +2,7 @@ import customerService from "../services/customerService";
 import { Router } from "express";
 import { asyncHandle } from "../utils/asyncHandler";
 import passport from "passport";
-
-interface Payload {
-  id: number;
-  customerId: number | null;
-  moverId: number | null;
-  iat: number;
-  exp: number;
-}
+import { Payload } from "../utils/token.utils";
 
 const router = Router();
 
