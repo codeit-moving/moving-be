@@ -2,14 +2,9 @@ import { RequestHandler } from "express";
 import customError from "../../utils/interfaces/customError";
 
 const createMovingRequestValidation: RequestHandler = (req, res, next) => {
-  const { serviceType, movingDate, pickupAddress, dropOffAddress } = req.body;
+  const { service, movingDate, pickupAddress, dropOffAddress } = req.body;
 
-  if (
-    !serviceType ||
-    typeof serviceType !== "number" ||
-    serviceType < 1 ||
-    serviceType > 3
-  ) {
+  if (!service || typeof service !== "number" || service < 1 || service > 3) {
     const error: customError = new Error("Bad Request");
     error.status = 400;
     error.message = "Bad Request";
