@@ -13,6 +13,8 @@ import oauthRouter from "./controllers/oauthController";
 import passport from "./middlewares/passport";
 import session from "express-session";
 import cookieConfig from "./config/cookie.config";
+import customerRouter from "./controllers/customerController";
+import userRouter from "./controllers/userController";
 
 const app = express();
 
@@ -62,6 +64,8 @@ app.use("/quotes", quoteRouter);
 
 app.use("/auth", authRouter);
 app.use("/oauth", oauthRouter);
+app.use("/customers", customerRouter);
+app.use("/users", userRouter);
 
 app.use(errorHandler); //전체 에러 핸들링 미들웨어
 
