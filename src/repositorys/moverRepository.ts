@@ -101,10 +101,33 @@ const toggleFavorite = async (moverId: number, favorite: object) => {
   });
 };
 
+const getMoverByFavorite = (
+  customerId: number,
+  limit: number,
+  cursor: number
+) => {
+  return prismaClient.mover.findMany({
+    orderBy: { createAt: "desc" },
+    take: limit + 1,
+    skip: cursor ? 1 : 0,
+    cursor: cursor ? { id: cursor } : undefined,
+    where: { favorite: { some: { id: customerId } } },
+    select: {
+      ...defaultSelect,
+      favorite: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+};
+
 export default {
   getMoverCount,
   getMoverList,
   getRatingsByMoverIds,
   getMoverById,
   toggleFavorite,
+  getMoverByFavorite,
 };
