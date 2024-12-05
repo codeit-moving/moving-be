@@ -1,4 +1,4 @@
-import authRepository from "../repositorys/authRepository";
+import userRepository from "../repositorys/userRepository";
 import CustomError from "../utils/interfaces/customError";
 
 interface UpdateUser {
@@ -9,7 +9,7 @@ interface UpdateUser {
 }
 
 const updateUser = async (userId: number, updateData: UpdateUser) => {
-  const user = await authRepository.findById(userId);
+  const user = await userRepository.findById(userId);
   if (updateData.newPassword && updateData.currentPassword) {
     if (updateData.currentPassword === updateData.newPassword) {
       const error: CustomError = new Error("Conflict");
@@ -36,7 +36,7 @@ const updateUser = async (userId: number, updateData: UpdateUser) => {
     password: updateData.newPassword,
   };
 
-  return await authRepository.updateUser(userId, updateUserData);
+  return await userRepository.updateUser(userId, updateUserData);
 };
 
 export default { updateUser };

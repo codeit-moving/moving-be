@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import authRepository from "../repositorys/authRepository";
+import userRepository from "../repositorys/userRepository";
 import CustomError from "../utils/interfaces/customError";
 
 interface SignInData {
@@ -32,7 +32,7 @@ interface SignUpMover extends User {
 }
 
 const signIn = async ({ email, password }: SignInData) => {
-  const user = await authRepository.findByEmail(email);
+  const user = await userRepository.findByEmail(email);
   if (!user) {
     const error: CustomError = new Error("Not Found");
     error.status = 404;
@@ -65,7 +65,7 @@ const signUpCustomer = async (customer: SignUpCustomer) => {
   const { email, phoneNumber } = customer;
 
   try {
-    const existingUser = await authRepository.existingUser(email, phoneNumber);
+    const existingUser = await userRepository.existingUser(email, phoneNumber);
 
     if (existingUser) {
       const error: CustomError = new Error("Conflict");
@@ -85,7 +85,7 @@ const signUpCustomer = async (customer: SignUpCustomer) => {
       }
     }
 
-    const result = await authRepository.createCustomer(customer);
+    const result = await userRepository.createCustomer(customer);
 
     return result;
   } catch (error) {
@@ -97,7 +97,7 @@ const signUpMover = async (mover: SignUpMover) => {
   const { email, phoneNumber } = mover;
 
   try {
-    const existingUser = await authRepository.existingUser(email, phoneNumber);
+    const existingUser = await userRepository.existingUser(email, phoneNumber);
 
     if (existingUser) {
       const error: CustomError = new Error("Conflict");
@@ -117,7 +117,7 @@ const signUpMover = async (mover: SignUpMover) => {
       }
     }
 
-    const result = await authRepository.createMover(mover);
+    const result = await userRepository.createMover(mover);
 
     return result;
   } catch (error) {
@@ -126,11 +126,11 @@ const signUpMover = async (mover: SignUpMover) => {
 };
 
 const getUser = async (userId: number) => {
-  const userType = await authRepository.getUserType(userId);
+  const userType = await userRepository.getUserType(userId);
   if (userType === "customer") {
-    return await authRepository.getCustomer(userId);
+    return await userRepository.getCustomer(userId);
   } else if (userType === "mover") {
-    return await authRepository.getMover(userId);
+    return await userRepository.getMover(userId);
   } else {
     throw new Error("User not found");
   }
