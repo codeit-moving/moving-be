@@ -3,7 +3,6 @@ import { asyncHandle } from "../utils/asyncHandler";
 import passport from "passport";
 import userService from "../services/userService";
 import { Payload } from "../utils/token.utils";
-import authService from "../services/authService";
 
 const router = Router();
 
@@ -28,7 +27,7 @@ router.get(
   asyncHandle(async (req, res, next) => {
     try {
       const userId = (req.user as Payload).id;
-      const user = await authService.getUser(userId);
+      const user = await userService.getUser(userId);
       res.status(200).send({ user });
     } catch (error) {
       next(error);

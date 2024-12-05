@@ -39,4 +39,15 @@ const updateUser = async (userId: number, updateData: UpdateUser) => {
   return await userRepository.updateUser(userId, updateUserData);
 };
 
-export default { updateUser };
+const getUser = async (userId: number) => {
+  const userType = await userRepository.getUserType(userId);
+  if (userType === "customer") {
+    return await userRepository.getCustomer(userId);
+  } else if (userType === "mover") {
+    return await userRepository.getMover(userId);
+  } else {
+    throw new Error("User not found");
+  }
+};
+
+export default { updateUser, getUser };
