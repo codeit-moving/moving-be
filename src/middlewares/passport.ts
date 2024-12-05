@@ -1,5 +1,4 @@
 import passport from "passport";
-import { Strategy as JwtStrategy } from "passport-jwt";
 import { Strategy as NaverStrategy } from "passport-naver";
 import {
   NAVER_CLIENT_ID,
@@ -9,33 +8,35 @@ import {
 import { JWT_SECRET } from "../env";
 import oauthService from "../services/oauthService";
 import CustomError from "../utils/interfaces/customError";
-
-const cookieExtractor = (req: any) => {
-  let token = null;
-  if (req && req.cookies) {
-    token = req.cookies["accessToken"];
-  }
-  return token;
-};
-
-const opts = {
-  jwtFromRequest: cookieExtractor,
-  secretOrKey: JWT_SECRET,
-};
+import { Strategy } from "passport-custom";
+import jwt from "jsonwebtoken";
 
 passport.use(
   "jwt",
-  new JwtStrategy(opts, (jwtPayload, done) => {
+  new Strategy(async (req, done) => {
     try {
-      if (!jwtPayload) {
+      const token = req.cookies["accessToken"];
+
+      if (!token) {
+        const error: CustomError = new Error("Unauthorized");
+        error.status = 401;
+        error.data = {
+          message: "토큰이 존재하지 않습니다.",
+        };
+        return done(error, false);
+      }
+
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        return done(null, decoded);
+      } catch (jwtError) {
         const error: CustomError = new Error("Unauthorized");
         error.status = 401;
         error.data = {
           message: "유효하지 않은 토큰입니다.",
         };
-        throw error;
+        return done(error, false);
       }
-      return done(null, jwtPayload);
     } catch (error) {
       return done(error, false);
     }
@@ -44,9 +45,14 @@ passport.use(
 
 passport.use(
   "jwt-optional",
-  new JwtStrategy(opts, (jwtPayload, done) => {
+  new Strategy(async (req, done) => {
+    const token = req.cookies["accessToken"];
+    if (!token) {
+      return done(null, null);
+    }
     try {
-      return done(null, jwtPayload);
+      const decoded = jwt.verify(token, JWT_SECRET);
+      return done(null, decoded);
     } catch (error) {
       return done(null, null);
     }
