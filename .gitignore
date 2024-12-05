@@ -1,5 +1,12 @@
 node_modules
 # Keep environment variables out of version control
 .env
+<<<<<<< HEAD
 .authMiddleware.ts
 dist
+=======
+
+dist
+
+deploy.sh
+>>>>>>> 3ef809fbb3895b4df3fc7f72c579fd59f7f63414
