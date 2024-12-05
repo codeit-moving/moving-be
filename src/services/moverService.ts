@@ -112,6 +112,12 @@ const getMoverList = async (query: queryString, customerId: number | null) => {
   };
 };
 
+//찜한 기사 목록 조회
+const getMoverByFavorite = async (customerId: number) => {
+  const movers = await moverRepository.getMoverByFavorite(customerId);
+  return movers;
+};
+
 //기사 상세 조회
 const getMoverDetail = async (customerId: number | null, moverId: number) => {
   const mover = await moverRepository.getMoverById(customerId, moverId);
@@ -209,4 +215,5 @@ export default {
   getMoverList,
   getMoverDetail,
   toggleFavorite,
+  getMoverByFavorite,
 };

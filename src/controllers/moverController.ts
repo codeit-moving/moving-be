@@ -105,4 +105,19 @@ router.post(
   })
 );
 
+//찜한 기사 조회
+router.get(
+  "/favorite-list",
+  passport.authenticate("jwt", { session: false }),
+  asyncHandle(async (req, res, next) => {
+    try {
+      const { customerId } = req.user as { customerId: number };
+      const movers = await moverService.getMoverByFavorite(customerId);
+      return res.status(200).send(movers);
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
 export default router;
