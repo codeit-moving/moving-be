@@ -33,7 +33,7 @@ jobs:
         fi
 
         # GitHub Actions에서 전달된 .env 파일 내용 시크릿으로 가져오기
-        echo "${{ secrets.MY_ENV_FILE }}" > ~/moving-be/.env
+        echo "${{ secrets.ENV_FILE }}" > ~/moving-be/.env
 
         # 파일 내용 확인 (선택 사항)
         cat ~/moving-be/.env
