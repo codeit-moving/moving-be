@@ -58,6 +58,11 @@ const getMoverById = (customerId: number | null, moverId: number) => {
     where: { id: moverId },
     select: {
       ...defaultSelect,
+      user: {
+        select: {
+          name: true,
+        },
+      },
       ...(customerId
         ? {
             favorite: {

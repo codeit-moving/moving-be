@@ -1,5 +1,8 @@
+import moverRepository from "../repositorys/moverRepository";
 import userRepository from "../repositorys/userRepository";
 import CustomError from "../utils/interfaces/customError";
+import getRatingsByMoverIds from "../utils/mover/getRatingsByMover";
+import processMoversData from "../utils/mover/processMoverData";
 
 interface UpdateUser {
   name?: string;
@@ -50,4 +53,7 @@ const getUser = async (userId: number) => {
   }
 };
 
-export default { updateUser, getUser };
+export default {
+  updateUser,
+  getUser,
+};
