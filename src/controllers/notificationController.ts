@@ -36,10 +36,8 @@ router.post(
   asyncHandle(async (req, res, next) => {
     try {
       const notificationId = parseInt(req.params.id);
-      const notifications = await notificationService.isReadNotification(
-        notificationId
-      );
-      res.status(200).json(notifications);
+      await notificationService.isReadNotification(notificationId);
+      res.status(204).send();
     } catch (error) {
       next(error);
     }
