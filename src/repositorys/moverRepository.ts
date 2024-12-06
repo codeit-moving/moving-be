@@ -43,6 +43,11 @@ const getMoverList = (
     cursor: cursor ? { id: cursor } : undefined,
     select: {
       ...defaultSelect,
+      user: {
+        select: {
+          name: true,
+        },
+      },
       favorite: {
         select: {
           id: true,
@@ -119,6 +124,11 @@ const getMoverByFavorite = (
     where: { favorite: { some: { id: customerId } } },
     select: {
       ...defaultSelect,
+      user: {
+        select: {
+          name: true,
+        },
+      },
       favorite: {
         select: {
           id: true,
