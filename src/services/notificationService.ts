@@ -10,7 +10,7 @@ interface Notification {
 }
 
 interface Query {
-  isRead: boolean;
+  isRead: boolean | undefined;
   limit: number;
   lastCursorId: number | undefined;
 }

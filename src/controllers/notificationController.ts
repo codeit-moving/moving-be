@@ -14,7 +14,12 @@ router.get(
     try {
       const userId = (req.user as Payload).id;
       const query = {
-        isRead: req.query.isRead === "true",
+        isRead:
+          req.query.isRead === "true"
+            ? true
+            : req.query.isRead === "false"
+            ? false
+            : undefined,
         limit: parseInt(req.query.limit as string) || 10,
         lastCursorId: parseInt(req.query.lastCursorId as string) || undefined,
       };
