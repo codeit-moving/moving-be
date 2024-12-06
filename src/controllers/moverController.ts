@@ -127,4 +127,18 @@ router.get(
   })
 );
 
+router.get(
+  "/my-profile",
+  passport.authenticate("jwt", { session: false }),
+  asyncHandle(async (req, res, next) => {
+    try {
+      const { moverId } = req.user as { moverId: number };
+      const mover = await moverService.getMover(moverId);
+      res.status(200).send(mover);
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
 export default router;

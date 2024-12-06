@@ -197,6 +197,24 @@ const toggleFavorite = async (
   return { ...mover, isFavorite: favorite };
 };
 
+const getMover = async (moverId: number) => {
+  const mover = await moverRepository.getMoverById(null, moverId);
+
+  if (!mover) {
+    const error: CustomError = new Error("NotFound");
+    error.status = 404;
+    error.data = {
+      message: "존재하지 않는 기사입니다.",
+    };
+    throw error;
+  }
+
+  const ratingsByMover = await getRatingsByMoverIds(moverId);
+  const processedMover = await processMoversData(null, mover, ratingsByMover);
+
+  return processedMover[0];
+};
+
 //평점 조회
 const getRatingsByMoverIds = async (moverIds: number | number[]) => {
   const moverIdArray = Array.isArray(moverIds) ? moverIds : [moverIds];
@@ -242,4 +260,5 @@ export default {
   getMoverDetail,
   toggleFavorite,
   getMoverByFavorite,
+  getMover,
 };
