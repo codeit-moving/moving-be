@@ -112,6 +112,38 @@ const getMoverList = async (query: queryString, customerId: number | null) => {
   };
 };
 
+//찜한 기사 목록 조회
+const getMoverByFavorite = async (
+  customerId: number,
+  limit: number,
+  cursor: number
+) => {
+  const movers = await moverRepository.getMoverByFavorite(
+    customerId,
+    limit,
+    cursor
+  );
+
+  const moverIds = movers.map((mover) => mover.id);
+  const ratingsByMover = await getRatingsByMoverIds(moverIds);
+  const processMovers = await processMoversData(
+    customerId,
+    movers,
+    ratingsByMover
+  );
+
+  //커서 설정
+  const nextMover = movers.length > limit;
+  const nextCursor = nextMover ? movers[limit - 1].id : "";
+  const hasNext = Boolean(nextCursor);
+
+  return {
+    nextCursor,
+    hasNext,
+    list: processMovers.slice(0, limit),
+  };
+};
+
 //기사 상세 조회
 const getMoverDetail = async (customerId: number | null, moverId: number) => {
   const mover = await moverRepository.getMoverById(customerId, moverId);
@@ -165,6 +197,24 @@ const toggleFavorite = async (
   return { ...mover, isFavorite: favorite };
 };
 
+const getMover = async (moverId: number) => {
+  const mover = await moverRepository.getMoverById(null, moverId);
+
+  if (!mover) {
+    const error: CustomError = new Error("NotFound");
+    error.status = 404;
+    error.data = {
+      message: "존재하지 않는 기사입니다.",
+    };
+    throw error;
+  }
+
+  const ratingsByMover = await getRatingsByMoverIds(moverId);
+  const processedMover = await processMoversData(null, mover, ratingsByMover);
+
+  return processedMover[0];
+};
+
 //평점 조회
 const getRatingsByMoverIds = async (moverIds: number | number[]) => {
   const moverIdArray = Array.isArray(moverIds) ? moverIds : [moverIds];
@@ -209,4 +259,6 @@ export default {
   getMoverList,
   getMoverDetail,
   toggleFavorite,
+  getMoverByFavorite,
+  getMover,
 };

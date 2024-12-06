@@ -50,4 +50,7 @@ const getUser = async (userId: number) => {
   }
 };
 
-export default { updateUser, getUser };
+export default {
+  updateUser,
+  getUser,
+};
