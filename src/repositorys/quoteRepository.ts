@@ -49,6 +49,11 @@ const getQuoteByMovingRequestId = (
               confirmedQuote: true,
             },
           },
+          user: {
+            select: {
+              name: true,
+            },
+          },
           favorite: {
             select: {
               id: true,
@@ -90,6 +95,11 @@ const getQuoteById = (quoteId: number) => {
           nickname: true,
           imageUrl: true,
           career: true,
+          user: {
+            select: {
+              name: true,
+            },
+          },
           _count: {
             select: {
               review: true,
