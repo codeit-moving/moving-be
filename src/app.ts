@@ -15,6 +15,7 @@ import session from "express-session";
 import cookieConfig from "./config/cookie.config";
 import customerRouter from "./controllers/customerController";
 import userRouter from "./controllers/userController";
+import notificationRouter from "./controllers/notificationController";
 
 const app = express();
 
@@ -66,6 +67,7 @@ app.use("/auth", authRouter);
 app.use("/oauth", oauthRouter);
 app.use("/customers", customerRouter);
 app.use("/users", userRouter);
+app.use("/notifications", notificationRouter);
 
 app.use(errorHandler); //전체 에러 핸들링 미들웨어
 
