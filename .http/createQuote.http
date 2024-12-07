@@ -1,9 +1,0 @@
-### 견적서 생성
-POST http://localhost:3000/quotes
-Content-Type: application/json
-
-{
-    "id": 1,
-    "cost": 150000,
-  "comment": "이사 견적 제안드립니다."
-}
