@@ -3,7 +3,7 @@ import quoteService from "../services/quoteService";
 import { asyncHandle } from "../utils/asyncHandler";
 import passport from "passport";
 import customError from "../utils/interfaces/customError";
-import { validateCreateQuote } from "../middlewares/validations/quote";
+import quoteValidation from "../middlewares/validations/quote";
 
 const router = express.Router();
 
@@ -11,16 +11,16 @@ const router = express.Router();
 router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
-  validateCreateQuote, // 미들웨어로 유효성 검사
-  asyncHandle(async (req: Request, res: Response, next) => {
+  quoteValidation.createQuoteValidation,
+  asyncHandle(async (req: Request, res: Response) => {
     const { id: moverId } = req.user as { id: number };
     const { movingRequestId, cost, comment } = req.body;
 
     // 견적서를 생성하는 서비스를 호출
     const quote = await quoteService.createQuote(
-      parseInt(movingRequestId), // 이사 요청 아이디를 숫자로 변환해서 전달
-      moverId, // 기사님의 아이디를 전달
-      parseInt(cost), // 견적가를 숫자로 변환해서 전달
+      movingRequestId,
+      moverId,
+      cost,
       comment
     );
 
