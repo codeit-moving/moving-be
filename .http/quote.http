@@ -32,7 +32,7 @@ Content-Type: application/json
 ### 1. 견적서 보내기 (기사가 고객의 이사 요청에 대해 견적서 작성)
 POST {{baseUrl}}/quotes
 Content-Type: application/json
-Cookie: accessToken={{accessToken}}
+Cookie: accessToken={eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiY3VzdG9tZXJJZCI6MSwibW92ZXJJZCI6bnVsbCwiaWF0IjoxNzMzNTczNDQ0LCJleHAiOjE3MzM1NzcwNDR9.iIHpqGeDCoeLdu-Bn1N7OfKV3PXoAckSvw_B0Yk4eCk}
 
 {
     "movingRequestId": 1,
@@ -42,11 +42,11 @@ Cookie: accessToken={{accessToken}}
 
 ### 2. 기사님이 작성한 견적서 목록 조회
 GET {{baseUrl}}/quotes/mover
-Cookie: accessToken={{accessToken}}
+Cookie: accessToken={eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiY3VzdG9tZXJJZCI6MSwibW92ZXJJZCI6bnVsbCwiaWF0IjoxNzMzNTczNDQ0LCJleHAiOjE3MzM1NzcwNDR9.iIHpqGeDCoeLdu-Bn1N7OfKV3PXoAckSvw_B0Yk4eCk}
 
 ### 3. 기사님이 작성한 견적서 상세 조회
 GET {{baseUrl}}/quotes/mover/1?cost=150000
-Cookie: accessToken={{accessToken}}
+Cookie: accessToken={eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiY3VzdG9tZXJJZCI6MSwibW92ZXJJZCI6bnVsbCwiaWF0IjoxNzMzNTczNDQ0LCJleHAiOjE3MzM1NzcwNDR9.iIHpqGeDCoeLdu-Bn1N7OfKV3PXoAckSvw_B0Yk4eCk}
 
 ### 4. 로그인 테스트
 
