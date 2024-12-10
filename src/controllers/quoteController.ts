@@ -13,7 +13,7 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   quoteValidation.createQuoteValidation,
   asyncHandle(async (req: Request, res: Response) => {
-    const { id: moverId } = req.user as { id: number };
+    const { moverId } = req.user as { moverId: number };
     const { movingRequestId, cost, comment } = req.body;
 
     // 견적서를 생성하는 서비스를 호출
@@ -36,22 +36,31 @@ router.post(
 // 기사님이 작성한 견적서 목록을 조회하는 엔드포인트를 정의
 router.get(
   "/mover",
-  passport.authenticate("jwt", { session: false }), // 사용자가 로그인했는지 확인
-  asyncHandle(async (req: Request, res: Response, next) => {
-    try {
-      const { id: moverId } = req.user as { id: number }; // 로그인한 기사님의 아이디를 가져와요.
-      // 기사님이 작성한 견적서 목록을 가져와요.
-      const quotes = await quoteService.getQuoteList(moverId);
+  passport.authenticate("jwt", { session: false }),
+  asyncHandle(async (req, res, next) => {
+    // user 객체의 구조를 더 자세히 확인
+    const user = req.user as any; // 임시로 any 타입 사용
 
-      // 견적서 목록 조회 성공 응답을 보내요.
-      return res.status(200).json({
-        success: true,
-        message: "견적서 목록 조회 성공",
-        data: quotes, // 견적서 목록을 포함해요.
-      });
-    } catch (error) {
-      next(error); // 에러가 발생하면 에러 처리기로 넘겨요.
+    // user 객체에서 moverId를 찾는 방법 수정
+    const moverId = user.moverId; // user.id를 먼저 확인
+
+    if (!moverId) {
+      const error: customError = new Error("Unauthorized");
+      error.status = 401;
+      error.message = "Unauthorized";
+      error.data = {
+        message: "기사 정보를 찾을 수 없습니다.",
+      };
+      throw error;
     }
+
+    const quotes = await quoteService.getQuoteList(moverId);
+
+    return res.status(200).json({
+      success: true,
+      message: "견적서 목록 조회 성공",
+      data: quotes,
+    });
   })
 );
 
@@ -59,35 +68,40 @@ router.get(
 router.get(
   "/mover/:quoteId",
   passport.authenticate("jwt", { session: false }),
-  asyncHandle(async (req: Request, res: Response, next) => {
-    try {
-      const { id: moverId } = req.user as { id: number }; // 로그인한 기사님의 아이디를 가져옴
-      const quoteId = parseInt(req.params.quoteId); // URL에서 견적서 아이디를 가져와 숫자로 변환
-      const cost = parseInt(req.query.cost as string); // 쿼리에서 비용 정보를 가져와 숫자로 변환
+  asyncHandle(async (req, res, next) => {
+    const user = req.user as any;
+    const moverId = user.moverId;
 
-      // 견적서 아이디 혹은 비용이 숫자가 아니면 에러를 발생시킴.
-      if (isNaN(quoteId) || isNaN(cost)) {
-        const error: customError = new Error("Bad Request");
-        error.status = 400;
-        error.message = "Bad Request";
-        error.data = {
-          message: "올바르지 않은 파라미터입니다.",
-        };
-        throw error;
-      }
-
-      // 견적서 상세 정보를 가져오는 서비스를 호출
-      const quote = await quoteService.getQuoteDetail(moverId, quoteId, cost);
-
-      // 견적서 상세 조회 성공 응답을 보내요.
-      return res.status(200).json({
-        success: true,
-        message: "견적서 상세 조회 성공",
-        data: quote,
-      });
-    } catch (error) {
-      next(error); // 에러가 발생하면 에러 처리기로 넘겨요.
+    if (!moverId) {
+      const error: customError = new Error("Unauthorized");
+      error.status = 401;
+      error.message = "Unauthorized";
+      error.data = {
+        message: "기사 정보를 찾을 수 없습니다.",
+      };
+      throw error;
     }
+
+    const quoteId = parseInt(req.params.quoteId);
+    const cost = parseInt(req.query.cost as string);
+
+    if (isNaN(quoteId) || isNaN(cost)) {
+      const error: customError = new Error("Bad Request");
+      error.status = 400;
+      error.message = "Bad Request";
+      error.data = {
+        message: "올바르지 않은 파라미터입니다.",
+      };
+      throw error;
+    }
+
+    const quote = await quoteService.getQuoteDetail(moverId, quoteId, cost);
+
+    return res.status(200).json({
+      success: true,
+      message: "견적서 상세 조회 성공",
+      data: quote,
+    });
   })
 );
 

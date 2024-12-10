@@ -35,23 +35,21 @@ const createQuote = async (
   cost: number,
   comment: string
 ) => {
-  // 1. 유효성 검사 (입력된 값들이 올바른지 확인합니다.)
-  if (cost < 0) {
-    throw new Error("견적 금액은 0원 이상이어야 합니다.");
-  }
-  if (!comment.trim()) {
-    throw new Error("코멘트를 입력해주세요.");
-  }
-
-  // 2. 이사 요청이 존재하는지 확인합니다.
+  // 이사 요청이 존재하는지 확인
   const movingRequest = await movingRequestRepository.getMovingRequestById(
     movingRequestId
   );
   if (!movingRequest) {
-    throw new Error("존재하지 않는 이사 요청입니다.");
+    const error: customError = new Error("Not Found");
+    error.status = 404;
+    error.message = "Not Found";
+    error.data = {
+      message: "존재하지 않는 이사 요청입니다.",
+    };
+    throw error;
   }
 
-  // 3. 견적서를 생성합니다.
+  // 견적서 생성
   const quote = await quoteRepository.createQuoteByMovingRequestId(
     movingRequestId,
     moverId,
@@ -59,7 +57,6 @@ const createQuote = async (
     comment
   );
 
-  // 4. 응답 데이터를 가공하여 반환합니다.
   return {
     id: quote.id,
     cost: quote.cost,
@@ -74,35 +71,44 @@ const createQuote = async (
 
 // (기사님이 작성한) 견적서 목록을 조회하는 함수입니다.
 const getQuoteList = async (moverId: number) => {
-  // 1. 기사님이 존재하는지 확인합니다.
-  const mover = await moverRepository.getMoverById(null, moverId);
-  if (!mover) {
-    throw new Error("존재하지 않는 기사입니다.");
+  // moverId 유효성 검사
+  if (!moverId) {
+    const error: customError = new Error("Bad Request");
+    error.status = 400;
+    error.message = "Bad Request";
+    error.data = {
+      message: "기사 ID가 필요합니다.",
+    };
+    throw error;
   }
 
-  // 2. 견적서 목록을 조회합니다.
+  // 견적서 목록을 조회합니다.
   const quotes = await quoteRepository.getQuoteListByMoverId(moverId);
+
+  if (!quotes || quotes.length === 0) {
+    return []; // 빈 배열 반환
+  }
 
   // 3. 응답 데이터를 가공하여 반환합니다.
   return quotes.map((quote) => ({
-    id: quote.id, // 견적서 아이디
-    cost: quote.cost, // 견적 금액
-    comment: quote.comment, // 코멘트
-    service: quote.movingRequest.service, // 이사 서비스 종류
-    customerName: quote.movingRequest.customer.user.name, // 고객 이름
-    movingDate: quote.movingRequest.movingDate, // 이사 날짜
-    pickupAddress: quote.movingRequest.pickupAddress, // 출발지 주소
-    dropOffAddress: quote.movingRequest.dropOffAddress, // 도착지 주소
-    isDesignated: quote.movingRequest.isDesignated, // 지정 견적 여부
-    isConfirmed: !!quote.confirmedQuote, // 견적 확정 여부 (확정되었으면 true)
+    id: quote.id,
+    cost: quote.cost,
+    comment: quote.comment,
+    service: quote.movingRequest.service,
+    customerName: quote.movingRequest.customer.user.name,
+    movingDate: quote.movingRequest.movingDate,
+    pickupAddress: quote.movingRequest.pickupAddress,
+    dropOffAddress: quote.movingRequest.dropOffAddress,
+    isDesignated: quote.movingRequest.isDesignated,
+    isConfirmed: !!quote.confirmedQuote,
   }));
 };
 
 // (기사님이 작성한) 견적서 상세 정보를 조회하는 함수입니다.
 const getQuoteDetail = async (
-  moverId: number, // 기사님의 아이디
-  quoteId: number, // 견적서 아이디
-  cost: number // 견적 금액
+  moverId: number,
+  quoteId: number,
+  cost: number
 ) => {
   // 1. 견적서가 존재하는지 확인합니다.
   const quote = await quoteRepository.getQuoteDetailByMoverId(
@@ -110,8 +116,15 @@ const getQuoteDetail = async (
     quoteId,
     cost
   );
+
   if (!quote) {
-    throw new Error("견적서를 찾을 수 없습니다."); // 견적서를 찾지 못하면 에러를 발생시킵니다.
+    const error: customError = new Error("Not Found");
+    error.status = 404;
+    error.message = "Not Found";
+    error.data = {
+      message: "��적서를 찾을 수 없습니다.",
+    };
+    throw error;
   }
 
   // 2. 응답 데이터를 가공하여 반환합니다.

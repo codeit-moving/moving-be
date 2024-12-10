@@ -199,11 +199,14 @@ const getQuoteDetailByMoverId = (
   quoteId: number,
   cost: number
 ) => {
-  return prismaClient.quote.findUnique({
+  if (!moverId) {
+    throw new Error("기사 ID가 필요합니다.");
+  }
+
+  return prismaClient.quote.findFirst({
+    // findUnique 대신 findFirst 사용
     where: {
-      id: quoteId,
-      moverId,
-      cost,
+      AND: [{ id: quoteId }, { moverId }, { cost }],
     },
     select: {
       id: true,
