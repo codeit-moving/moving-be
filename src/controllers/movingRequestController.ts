@@ -35,6 +35,28 @@ router.get(
   })
 );
 
+//이사요청 목록 조회 (고객)
+router.get(
+  "/by-customer",
+  passport.authenticate("jwt", { session: false }),
+  asyncHandle(async (req, res, next) => {
+    try {
+      const { customerId } = req.user as { customerId: number };
+      const { pageSize = "10", pageNum = "1" } = req.query;
+      const parsePageSize = parseInt(pageSize as string);
+      const parsePageNum = parseInt(pageNum as string);
+      const movingRequestList =
+        await movingRequestService.getMovingRequestListByCustomer(customerId, {
+          pageSize: parsePageSize,
+          pageNum: parsePageNum,
+        });
+      return res.status(200).send(movingRequestList);
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
 //이사요청의 견적서 목록 조회
 router.get(
   "/:id/quotes",

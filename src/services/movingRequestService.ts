@@ -12,6 +12,11 @@ interface queryString {
   cursor: number | null;
 }
 
+interface OffsetQueryString {
+  pageSize: number;
+  pageNum: number;
+}
+
 //이사요청 목록 조회
 const getMovingRequestList = async (customerId: number, query: queryString) => {
   const { limit, isCompleted, cursor } = query;
@@ -54,6 +59,56 @@ const getMovingRequestList = async (customerId: number, query: queryString) => {
     nextCursor,
     hasNext,
     list: resMovingRequestList.slice(0, limit),
+  };
+};
+
+const getMovingRequestListByCustomer = async (
+  customerId: number,
+  query: OffsetQueryString
+) => {
+  const { pageSize, pageNum } = query;
+
+  const movingRequestListPromise =
+    movingRequestRepository.getMovingRequestListByCustomer(customerId, {
+      pageSize,
+      pageNum,
+    });
+  const totalCountPromise =
+    movingRequestRepository.getMovingRequestCountByCustomer(customerId);
+
+  const [movingRequestList, totalCount] = await Promise.all([
+    movingRequestListPromise,
+    totalCountPromise,
+  ]);
+
+  if (!movingRequestList.length) {
+    const error: CustomError = new Error("Not Found");
+    error.status = 404;
+    error.data = {
+      message: "조건의 맞는 이사요청 목록이 없습니다.",
+    };
+    throw error;
+  }
+
+  const resMovingRequestList = movingRequestList.map((movingRequest) => {
+    const { customer, createAt, confirmedQuote, ...rest } = movingRequest;
+
+    return {
+      ...rest,
+      name: customer.user.name,
+      requestDate: createAt,
+      isConfirmed: Boolean(confirmedQuote), //완료된 견적서와 관계가 있다면 true
+    };
+  });
+
+  const totalPage = Math.ceil(totalCount / pageSize);
+
+  return {
+    currentPage: pageNum,
+    pageSize,
+    totalPage,
+    totalCount,
+    list: resMovingRequestList,
   };
 };
 
@@ -187,4 +242,5 @@ export default {
   cancelDesignateMover,
   getQuoteByMovingRequestId,
   getPendingQuotes,
+  getMovingRequestListByCustomer,
 };
