@@ -42,6 +42,7 @@ const getQuoteByMovingRequestId = (
           nickname: true,
           imageUrl: true,
           career: true,
+          introduction: true,
           _count: {
             select: {
               review: true,
@@ -94,6 +95,7 @@ const getQuoteById = (quoteId: number) => {
           id: true,
           nickname: true,
           imageUrl: true,
+          introduction: true,
           career: true,
           user: {
             select: {

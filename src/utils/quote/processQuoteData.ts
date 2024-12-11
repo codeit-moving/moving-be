@@ -16,6 +16,7 @@ interface Mover {
   id: number;
   nickname: string;
   imageUrl: string | null;
+  introduction?: string;
   career: number;
   _count: {
     review: number;
