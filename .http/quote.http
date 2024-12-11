@@ -48,12 +48,20 @@ Cookie: accessToken={eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiY3VzdG9tZX
 GET {{baseUrl}}/quotes/mover/1?cost=150000
 Cookie: accessToken={eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiY3VzdG9tZXJJZCI6MSwibW92ZXJJZCI6bnVsbCwiaWF0IjoxNzMzNTczNDQ0LCJleHAiOjE3MzM1NzcwNDR9.iIHpqGeDCoeLdu-Bn1N7OfKV3PXoAckSvw_B0Yk4eCk}
 
-### 4. 로그인 테스트
-
+### 4. (고객님의)로그인 테스트
 POST http://localhost:3000/auth/signin
 Content-Type: application/json
 
 {
   "email": "john.doe@example.com",
+  "password": "$2b$10$7yMNhRgZ4jkVmtv5xlzvOeFQ5DiEGqB7r7JwKZtqt.1m9Avrz0Iie"
+}
+
+### 5. (기사님의)로그인 테스트
+POST http://localhost:3000/auth/signin
+Content-Type: application/json
+
+{
+  "email": "david.williams@example.com",
   "password": "$2b$10$7yMNhRgZ4jkVmtv5xlzvOeFQ5DiEGqB7r7JwKZtqt.1m9Avrz0Iie"
 }

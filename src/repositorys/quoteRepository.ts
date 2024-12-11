@@ -1,4 +1,10 @@
 import prismaClient from "../utils/prismaClient";
+import { QuoteQueryString } from "../utils/quote/types";
+
+interface PaginationOptions {
+  limit?: number;
+  cursor?: number | null;
+}
 
 const getQuoteCountByMovingRequestId = (movingRequestId: number) => {
   return prismaClient.quote.count({
@@ -154,12 +160,16 @@ const createQuoteByMovingRequestId = (
 };
 
 //(기사님이 작성한)견적서 목록 조회
-const getQuoteListByMoverId = (moverId: number) => {
+const getQuoteListByMoverId = (moverId: number, options: PaginationOptions) => {
   return prismaClient.quote.findMany({
     where: { moverId },
     orderBy: {
       createAt: "desc", // 최신 순 정렬
     },
+    // 페이지네이션 코드 추가
+    take: options.limit,
+    skip: options.cursor ? 1 : 0,
+    cursor: options.cursor ? { id: options.cursor } : undefined,
     select: {
       id: true,
       cost: true,

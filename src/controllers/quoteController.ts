@@ -54,7 +54,11 @@ router.get(
       throw error;
     }
 
-    const quotes = await quoteService.getQuoteList(moverId);
+    // 기본값 설정
+    const limit = Number(req.query.limit) || 10;
+    const cursor = req.query.cursor ? Number(req.query.cursor) : null;
+
+    const quotes = await quoteService.getQuoteList(moverId, { limit, cursor });
 
     return res.status(200).json({
       success: true,

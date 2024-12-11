@@ -9,3 +9,5 @@ deploy.sh
 .DS_Store
 
 .main.yml
+
+.http

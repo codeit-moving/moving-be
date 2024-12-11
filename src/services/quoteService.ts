@@ -4,6 +4,7 @@ import customError from "../utils/interfaces/customError";
 import processQuotes from "../utils/quote/processQuoteData";
 import movingRequestRepository from "../repositorys/movingRequestRepository";
 import moverRepository from "../repositorys/moverRepository";
+import { QuoteQueryString } from "../utils/quote/types";
 
 // 특정 견적서를 아이디로 가져오는 함수입니다.
 const getQuoteById = async (customerId: number, quoteId: number) => {
@@ -70,7 +71,7 @@ const createQuote = async (
 };
 
 // (기사님이 작성한) 견적서 목록을 조회하는 함수입니다.
-const getQuoteList = async (moverId: number) => {
+const getQuoteList = async (moverId: number, query: QuoteQueryString) => {
   // moverId 유효성 검사
   if (!moverId) {
     const error: customError = new Error("Bad Request");
@@ -82,26 +83,36 @@ const getQuoteList = async (moverId: number) => {
     throw error;
   }
 
-  // 견적서 목록을 조회합니다.
-  const quotes = await quoteRepository.getQuoteListByMoverId(moverId);
+  const { limit, cursor } = query;
 
-  if (!quotes || quotes.length === 0) {
-    return []; // 빈 배열 반환
-  }
+  // Repository 호출
+  const quotes = await quoteRepository.getQuoteListByMoverId(moverId, {
+    limit,
+    cursor,
+  });
 
-  // 3. 응답 데이터를 가공하여 반환합니다.
-  return quotes.map((quote) => ({
-    id: quote.id,
-    cost: quote.cost,
-    comment: quote.comment,
-    service: quote.movingRequest.service,
-    customerName: quote.movingRequest.customer.user.name,
-    movingDate: quote.movingRequest.movingDate,
-    pickupAddress: quote.movingRequest.pickupAddress,
-    dropOffAddress: quote.movingRequest.dropOffAddress,
-    isDesignated: quote.movingRequest.isDesignated,
-    isConfirmed: !!quote.confirmedQuote,
-  }));
+  const nextCursor =
+    quotes.length === limit ? quotes[quotes.length - 1].id : null;
+  const hasNext = quotes.length === limit;
+
+  // 다음 페이지 여부 체크
+  return {
+    nextCursor,
+    hasNext,
+    list: quotes.map((quote) => ({
+      // 데이터 가공
+      id: quote.id,
+      cost: quote.cost,
+      comment: quote.comment,
+      service: quote.movingRequest.service,
+      customerName: quote.movingRequest.customer.user.name,
+      movingDate: quote.movingRequest.movingDate,
+      pickupAddress: quote.movingRequest.pickupAddress,
+      dropOffAddress: quote.movingRequest.dropOffAddress,
+      isDesignated: quote.movingRequest.isDesignated,
+      isConfirmed: !!quote.confirmedQuote,
+    })),
+  };
 };
 
 // (기사님이 작성한) 견적서 상세 정보를 조회하는 함수입니다.
@@ -122,7 +133,7 @@ const getQuoteDetail = async (
     error.status = 404;
     error.message = "Not Found";
     error.data = {
-      message: "��적서를 찾을 수 없습니다.",
+      message: "견적서를 찾을 수 없습니다.",
     };
     throw error;
   }
