@@ -8,6 +8,10 @@ interface Quote {
   mover: Mover;
   movingRequest: {
     service: number;
+    createAt?: Date;
+    movingDate?: Date;
+    pickupAddress?: string;
+    dropOffAddress?: string;
   };
   confirmedQuote: { id: number } | null;
 }
@@ -17,6 +21,7 @@ interface Mover {
   nickname: string;
   imageUrl: string | null;
   introduction?: string;
+  services: number[];
   career: number;
   _count: {
     review: number;
@@ -51,11 +56,12 @@ const processQuotes = async (customerId: number, quote: Quote[] | Quote) => {
 
   const processQuotes = quotes.map((quote) => {
     const { mover, movingRequest, confirmedQuote, ...rest } = quote;
+    const { createAt, ...restMovingRequest } = movingRequest;
     return {
-      service: movingRequest.service,
-      isConfirmed: Boolean(confirmedQuote),
-      mover: moverMap.get(mover.id), // O(1) 검색
       ...rest,
+      isConfirmed: Boolean(confirmedQuote),
+      movingRequest: restMovingRequest,
+      mover: moverMap.get(mover.id), // O(1) 검색
     };
   });
 

@@ -43,6 +43,7 @@ const getQuoteByMovingRequestId = (
           imageUrl: true,
           career: true,
           introduction: true,
+          services: true,
           _count: {
             select: {
               review: true,
@@ -83,6 +84,10 @@ const getQuoteById = (quoteId: number) => {
       movingRequest: {
         select: {
           service: true,
+          createAt: true,
+          movingDate: true,
+          pickupAddress: true,
+          dropOffAddress: true,
         },
       },
       confirmedQuote: {
@@ -96,6 +101,8 @@ const getQuoteById = (quoteId: number) => {
           nickname: true,
           imageUrl: true,
           introduction: true,
+          services: true,
+          review: true,
           career: true,
           user: {
             select: {
