@@ -5,3 +5,9 @@ node_modules
 dist
 
 deploy.sh
+
+.DS_Store
+
+.main.yml
+
+.http
