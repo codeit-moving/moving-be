@@ -192,11 +192,31 @@ const createMovingRequest = async (
 };
 
 //이사요청 지정
-const designateMover = async (movingRequestId: number, moverId: number) => {
+const designateMover = async (
+  movingRequestId: number,
+  moverId: number,
+  customerId: number
+) => {
   //지정 가능 인원 조회
-  const result = await movingRequestRepository.getDesignateCount(
-    movingRequestId
-  );
+  const designateCountPromise =
+    movingRequestRepository.getDesignateCount(movingRequestId);
+
+  const activeRequestPromise =
+    movingRequestRepository.getActiveRequest(customerId);
+
+  const [result, activeRequest] = await Promise.all([
+    designateCountPromise,
+    activeRequestPromise,
+  ]);
+
+  if (activeRequest) {
+    const error: CustomError = new Error("Bad Request");
+    error.status = 400;
+    error.data = {
+      message: "일반 견적 요청을 먼저 진행해 주세요.",
+    };
+    throw error;
+  }
 
   //지정 가능 인원 초과 체크
   if (!result || result._count.mover >= 3) {

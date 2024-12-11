@@ -130,9 +130,11 @@ router.post(
     try {
       const { id: movingRequestId } = req.params;
       const { moverId } = req.query;
+      const { customerId } = req.user as { customerId: number };
       const remainingCount = await movingRequestService.designateMover(
         parseInt(movingRequestId),
-        parseInt(moverId as string)
+        parseInt(moverId as string),
+        customerId
       );
       return res.status(200).send({
         message: "지정 요청 완료",
