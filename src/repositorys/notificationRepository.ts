@@ -13,19 +13,19 @@ interface Query {
 }
 
 const findNotifications = async (userId: number, query: Query) => {
+  const { isRead, limit, lastCursorId: cursor } = query;
   return await prismaClient.notification.findMany({
     where: {
-      userId, //userId에 해당하는 알림
-      ...(query.isRead !== undefined && { isRead: query.isRead }), // isRead가 undefined면 둘다 조회
+      userId,
+      ...(isRead !== undefined && { isRead }),
     },
-    take: query.limit,
-    ...(query.lastCursorId && { cursor: { id: query.lastCursorId } }),
-    skip: query.lastCursorId ? 1 : 0, //마지막 cursorId가 존재하면 1개 건너뛰기
+    take: limit,
+    ...(cursor && { cursor: { id: cursor }, skip: 1 }),
     orderBy: {
       createAt: "desc",
     },
   });
-}; //userId에 해당하는 알림 중 읽지 않은 알림 찾기
+};
 
 const createNotification = async (notification: Notification) => {
   return await prismaClient.notification.create({
