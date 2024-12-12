@@ -33,7 +33,9 @@ const getRatingsByMoverIds = async (moverIds: number | number[]) => {
   // 평균 계산 및 totalSum 제거
   Object.values(ratingsByMover).forEach((rating) => {
     rating.average =
-      Math.round((rating.totalSum / rating.totalCount) * 10) / 10;
+      rating.totalCount > 0
+        ? Math.round((rating.totalSum / rating.totalCount) * 10) / 10
+        : 0;
     const { totalSum, ...returnResult } = rating;
     return returnResult;
   });

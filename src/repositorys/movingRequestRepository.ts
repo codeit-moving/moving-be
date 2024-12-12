@@ -3,7 +3,7 @@ import { MovingRequestData } from "../utils/interfaces/movingRequest/movingReque
 
 interface CursorQueryString {
   limit: number;
-  isCompleted: boolean;
+  isCompleted: boolean | undefined;
   cursor: number | null;
 }
 

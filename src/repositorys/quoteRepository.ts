@@ -88,6 +88,11 @@ const getQuoteById = (quoteId: number) => {
           movingDate: true,
           pickupAddress: true,
           dropOffAddress: true,
+          confirmedQuote: {
+            select: {
+              id: true,
+            },
+          },
         },
       },
       confirmedQuote: {
@@ -102,7 +107,8 @@ const getQuoteById = (quoteId: number) => {
           imageUrl: true,
           introduction: true,
           services: true,
-          review: true,
+          regions: true,
+          // review: true,
           career: true,
           user: {
             select: {

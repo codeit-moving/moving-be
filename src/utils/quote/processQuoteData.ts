@@ -12,6 +12,7 @@ interface Quote {
     movingDate?: Date;
     pickupAddress?: string;
     dropOffAddress?: string;
+    confirmedQuote?: { id: number } | null;
   };
   confirmedQuote: { id: number } | null;
 }
@@ -55,12 +56,16 @@ const processQuotes = async (customerId: number, quote: Quote[] | Quote) => {
   const moverMap = new Map(processMovers.map((mover) => [mover.id, mover]));
 
   const processQuotes = quotes.map((quote) => {
-    const { mover, movingRequest, confirmedQuote, ...rest } = quote;
-    const { createAt, ...restMovingRequest } = movingRequest;
+    const { mover, movingRequest, ...rest } = quote;
+    const { createAt, confirmedQuote, ...restMovingRequest } = movingRequest;
     return {
       ...rest,
-      isConfirmed: Boolean(confirmedQuote),
-      movingRequest: restMovingRequest,
+
+      movingRequest: {
+        ...restMovingRequest,
+        requestDate: createAt,
+        isConfirmed: Boolean(confirmedQuote),
+      },
       mover: moverMap.get(mover.id), // O(1) 검색
     };
   });

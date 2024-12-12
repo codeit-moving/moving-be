@@ -8,7 +8,7 @@ import processQuotes from "../utils/quote/processQuoteData";
 
 interface queryString {
   limit: number;
-  isCompleted: boolean;
+  isCompleted: boolean | undefined;
   cursor: number | null;
 }
 
@@ -116,7 +116,7 @@ const getMovingRequestListByCustomer = async (
 const getQuoteByMovingRequestId = async (
   customerId: number,
   movingRequestId: number,
-  isCompleted: boolean
+  isCompleted: boolean | undefined
 ) => {
   const quotes = await quoteRepository.getQuoteByMovingRequestId(
     movingRequestId,
