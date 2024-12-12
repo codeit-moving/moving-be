@@ -1,5 +1,9 @@
-const parseBooleanString = (value: string): boolean => {
+const parseBooleanString = (value: string): boolean | undefined => {
+  if (!value) {
+    return undefined;
+  }
   const parsedValue = value.toLowerCase();
+
   switch (parsedValue) {
     case "true":
       return true;
