@@ -152,10 +152,86 @@ const getQuoteDetail = async (
   };
 };
 
+// (기사님의) 지정이사 요청 반려
+const rejectRequest = async (moverId: number, movingRequestId: number) => {
+  // 1. 이사 요청이 존재하는지 확인
+  const movingRequest = await movingRequestRepository.getMovingRequestById(
+    movingRequestId
+  );
+  if (!movingRequest) {
+    const error: customError = new Error("Not Found");
+    error.status = 404;
+    error.message = "Not Found";
+    error.data = {
+      message: "존재하지 않는 이사 요청입니다.",
+    };
+    throw error;
+  }
+
+  // 2. 반려 처리
+  const rejectedRequest = await quoteRepository.rejectMovingRequest(
+    moverId,
+    movingRequestId
+  );
+
+  // 3. API 명세에 맞는 응답 데이터 반환
+  return {
+    id: movingRequestId,
+    comment: "죄송합니다. 그날 예약이 되어 있습니다", // 실제 데이터에서 가져오거나 설정된 메시지
+  };
+};
+
+// (기사님이) 반려한 이사 요청 목록 조회
+const getRejectedRequestList = async (
+  moverId: number,
+  query: QuoteQueryString
+) => {
+  // moverId 유효성 검사
+  if (!moverId) {
+    const error: customError = new Error("Bad Request");
+    error.status = 400;
+    error.message = "Bad Request";
+    error.data = {
+      message: "기사 ID가 필요합니다.",
+    };
+    throw error;
+  }
+
+  const { limit, cursor } = query;
+
+  // Repository 호출
+  const rejectedMovingRequests =
+    await quoteRepository.getRejectedMovingRequests(moverId, {
+      limit,
+      cursor,
+    });
+
+  const nextCursor =
+    rejectedMovingRequests.length === limit
+      ? rejectedMovingRequests[rejectedMovingRequests.length - 1].id
+      : null;
+  const hasNext = rejectedMovingRequests.length === limit;
+
+  // API 명세에 맞는 응답 데이터 반환
+  return {
+    nextCursor,
+    hasNext,
+    list: rejectedMovingRequests.map((movingRequest) => ({
+      id: movingRequest.id,
+      service: movingRequest.service,
+      name: movingRequest.customer.user.name,
+      movingDate: movingRequest.movingDate,
+      pickupAddress: movingRequest.pickupAddress,
+      dropOffAddress: movingRequest.dropOffAddress,
+    })),
+  };
+};
 // 이 모듈에서 제공하는 함수들을 내보냅니다.
 export default {
   getQuoteById, // 견적서 아이디로 견적서를 가져오는 함수
   createQuote, // 견적서를 생성하는 함수
   getQuoteList, // 견적서 목록을 가져오는 함수
   getQuoteDetail, // 견적서 상세 정보를 가져오는 함수
+  rejectRequest, // 이사 요청 반려
+  getRejectedRequestList, // 반려한 이사 요청 목록 조회
 };

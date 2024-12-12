@@ -244,6 +244,56 @@ const getQuoteDetailByMoverId = (
   });
 };
 
+// (기사님의) 지정이사 요청 반려
+const rejectMovingRequest = (moverId: number, movingRequestId: number) => {
+  return prismaClient.movingRequest.update({
+    where: { id: movingRequestId },
+    data: {
+      isRejected: {
+        connect: { id: moverId },
+      },
+      designateCount: {
+        decrement: 1, // 지정 횟수 감소
+      },
+      isDesignated: false, // 지정 상태 해제
+    },
+  });
+};
+
+// (기사님이) 반려한 이사 요청 목록 조회
+const getRejectedMovingRequests = (
+  moverId: number,
+  options: PaginationOptions
+) => {
+  return prismaClient.movingRequest.findMany({
+    where: {
+      isRejected: {
+        some: { id: moverId },
+      },
+    },
+    take: options.limit,
+    skip: options.cursor ? 1 : 0,
+    cursor: options.cursor ? { id: options.cursor } : undefined,
+    select: {
+      id: true,
+      service: true,
+      movingDate: true,
+      pickupAddress: true,
+      dropOffAddress: true,
+      createAt: true,
+      customer: {
+        select: {
+          user: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  });
+};
+
 export default {
   getQuoteByMovingRequestId,
   getQuoteById,
@@ -251,4 +301,6 @@ export default {
   createQuoteByMovingRequestId,
   getQuoteListByMoverId,
   getQuoteDetailByMoverId,
+  rejectMovingRequest,
+  getRejectedMovingRequests,
 };
