@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import userRepository from "../repositorys/userRepository";
 import CustomError from "../utils/interfaces/customError";
+import { uploadFile } from "../utils/s3.utils";
 
 interface SignInData {
   email: string;
@@ -16,7 +17,7 @@ interface User {
 }
 
 interface SignUpCustomer extends User {
-  imageUrl: string;
+  imageUrl: Express.Multer.File;
   services: number[];
   regions: number[];
 }
@@ -26,7 +27,7 @@ interface SignUpMover extends User {
   career: number;
   introduction: string;
   description: string;
-  imageUrl: string;
+  imageUrl: Express.Multer.File;
   services: number[];
   regions: number[];
 }
@@ -63,6 +64,7 @@ const signIn = async ({ email, password }: SignInData) => {
 
 const signUpCustomer = async (customer: SignUpCustomer) => {
   const { email, phoneNumber } = customer;
+  const imageUrl = await uploadFile(customer.imageUrl);
 
   try {
     const existingUser = await userRepository.existingUser(email, phoneNumber);
@@ -85,7 +87,12 @@ const signUpCustomer = async (customer: SignUpCustomer) => {
       }
     }
 
-    const result = await userRepository.createCustomer(customer);
+    const customerData = {
+      ...customer,
+      imageUrl,
+    };
+
+    const result = await userRepository.createCustomer(customerData);
 
     return result;
   } catch (error) {
@@ -95,6 +102,7 @@ const signUpCustomer = async (customer: SignUpCustomer) => {
 
 const signUpMover = async (mover: SignUpMover) => {
   const { email, phoneNumber } = mover;
+  const imageUrl = await uploadFile(mover.imageUrl);
 
   try {
     const existingUser = await userRepository.existingUser(email, phoneNumber);
@@ -117,7 +125,11 @@ const signUpMover = async (mover: SignUpMover) => {
       }
     }
 
-    const result = await userRepository.createMover(mover);
+    const moverData = {
+      ...mover,
+      imageUrl,
+    };
+    const result = await userRepository.createMover(moverData);
 
     return result;
   } catch (error) {

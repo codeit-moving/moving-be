@@ -3,13 +3,13 @@ import prismaClient from "../utils/prismaClient";
 interface User {
   name: string;
   email: string;
-  password: string | null;
-  phoneNumber: string;
+  password?: string | null;
+  phoneNumber?: string;
   isOAuth: boolean;
 }
 
 interface Customer extends User {
-  imageUrl: string | null;
+  imageUrl: string;
   services: number[];
   regions: number[];
 }
@@ -19,7 +19,7 @@ interface Mover extends User {
   career: number;
   introduction: string;
   description: string;
-  imageUrl: string | null;
+  imageUrl: string;
   services: number[];
   regions: number[];
 }
@@ -91,7 +91,6 @@ const createCustomer = (customer: Customer) => {
   };
 
   const customerData = {
-    imageUrl,
     services,
     regions,
   };
@@ -100,7 +99,10 @@ const createCustomer = (customer: Customer) => {
     data: {
       ...userData,
       customer: {
-        create: customerData,
+        create: {
+          ...customerData,
+          imageUrl: { create: { imageUrl: imageUrl } },
+        },
       },
     },
   });
@@ -135,7 +137,6 @@ const createMover = (mover: Mover) => {
     career,
     introduction,
     description,
-    imageUrl,
     services,
     regions,
   };
@@ -144,7 +145,7 @@ const createMover = (mover: Mover) => {
     data: {
       ...userData,
       mover: {
-        create: moverData,
+        create: { ...moverData, imageUrl: { create: { imageUrl: imageUrl } } },
       },
     },
   });
@@ -162,14 +163,21 @@ const getCustomer = (userId: number) => {
       customer: {
         select: {
           id: true,
-          imageUrl: true,
+          imageUrl: {
+            where: {
+              status: true,
+            },
+            select: {
+              imageUrl: true,
+            },
+          },
           services: true,
           regions: true,
         },
       },
     },
   });
-};
+}; //orderBy 추가
 
 const getMover = (userId: number) => {
   return prismaClient.user.findUnique({
@@ -187,7 +195,14 @@ const getMover = (userId: number) => {
           career: true,
           introduction: true,
           description: true,
-          imageUrl: true,
+          imageUrl: {
+            where: {
+              status: true,
+            },
+            select: {
+              imageUrl: true,
+            },
+          },
           services: true,
           regions: true,
         },

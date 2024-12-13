@@ -6,7 +6,7 @@ interface Mover {
   user: {
     name: string;
   };
-  imageUrl: string | null;
+  imageUrl: { imageUrl: string }[];
   nickname: string;
   career: number;
   introduction?: string;

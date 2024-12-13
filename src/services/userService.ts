@@ -8,6 +8,28 @@ interface UpdateUser {
   newPassword?: string;
 }
 
+interface CustomerResponse {
+  customer: {
+    id: number;
+    imageUrl: string | { imageUrl: string }[];
+    services: number[];
+    regions: number[];
+  };
+}
+
+interface MoverResponse {
+  mover: {
+    id: number;
+    imageUrl: string | { imageUrl: string }[];
+    services: number[];
+    regions: number[];
+    nickname: string;
+    career: number;
+    introduction: string;
+    description: string;
+  };
+}
+
 const updateUser = async (userId: number, updateData: UpdateUser) => {
   const user = await userRepository.findById(userId);
   if (updateData.newPassword && updateData.currentPassword) {
@@ -42,13 +64,26 @@ const updateUser = async (userId: number, updateData: UpdateUser) => {
 const getUser = async (userId: number) => {
   const userType = await userRepository.getUserType(userId);
   if (userType === "customer") {
-    return await userRepository.getCustomer(userId);
+    const response = (await userRepository.getCustomer(
+      userId
+    )) as CustomerResponse;
+    if (
+      response?.customer?.imageUrl &&
+      Array.isArray(response.customer.imageUrl)
+    ) {
+      response.customer.imageUrl = response.customer.imageUrl[0].imageUrl;
+    }
+    return response;
   } else if (userType === "mover") {
-    return await userRepository.getMover(userId);
+    const response = (await userRepository.getMover(userId)) as MoverResponse;
+    if (response?.mover?.imageUrl && Array.isArray(response.mover.imageUrl)) {
+      response.mover.imageUrl = response.mover.imageUrl[0].imageUrl;
+    }
+    return response;
   } else {
     throw new Error("User not found");
   }
-};
+}; //imageUrl: object 타입으로 반환하지 않고 string 타입으로 1개 반환
 
 export default {
   updateUser,
