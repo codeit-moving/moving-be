@@ -182,6 +182,20 @@ const updateDesignated = (movingRequestId: number, moverId: number) => {
           mover: true,
         },
       },
+      mover: {
+        where: {
+          id: moverId,
+        },
+        select: {
+          id: true,
+          nickname: true,
+          user: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      },
     },
   });
 };

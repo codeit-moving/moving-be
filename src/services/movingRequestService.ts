@@ -5,6 +5,7 @@ import quoteRepository from "../repositorys/quoteRepository";
 import getRatingsByMoverIds from "../utils/mover/getRatingsByMover";
 import processMoverData from "../utils/mover/processMoverData";
 import processQuotes from "../utils/quote/processQuoteData";
+import notificationRepository from "../repositorys/notificationRepository";
 
 interface queryString {
   limit: number;
@@ -233,6 +234,13 @@ const designateMover = async (
     movingRequestId,
     moverId
   );
+
+  //알림 생성 기사에게
+  notificationRepository.createNotification({
+    userId: movingRequest.mover[0].user.id,
+    content: `${movingRequest.mover[0].nickname}기사님 새로운 지정 요청이 있습니다.`,
+    isRead: false,
+  });
 
   //남은 지정요청 수 조회
   const designateRemain = 3 - movingRequest._count.mover;

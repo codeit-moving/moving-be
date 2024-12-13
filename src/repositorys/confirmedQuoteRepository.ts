@@ -42,6 +42,12 @@ const CreateConfirmedQuote = (confirmedQuote: ConfirmedQuote) => {
       customer: {
         select: {
           id: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
       },
     },
