@@ -15,7 +15,7 @@ interface Quote {
 interface Mover {
   id: number;
   nickname: string;
-  imageUrl: string | null;
+  imageUrl: { imageUrl: string }[];
   career: number;
   _count: {
     review: number;

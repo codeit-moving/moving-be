@@ -3,7 +3,7 @@ import RatingResult from "../interfaces/mover/ratingResult";
 
 interface Mover {
   id: number;
-  imageUrl: string | null;
+  imageUrl: { imageUrl: string }[];
   nickname: string;
   career: number;
   introduction?: string;
