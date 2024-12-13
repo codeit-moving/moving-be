@@ -24,7 +24,7 @@ const createConfirmedQuote = async (confirmedQuoteData: ConfirmedQuote) => {
     const error: customError = new Error("Not Found");
     error.status = 404;
     error.data = {
-      message: "활동중인 이사요청이 없습니다.",
+      message: "활성중인 이사요청이 없습니다.",
     };
     throw error;
   }

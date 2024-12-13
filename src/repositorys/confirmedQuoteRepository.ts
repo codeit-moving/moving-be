@@ -37,13 +37,6 @@ const CreateConfirmedQuote = (confirmedQuote: ConfirmedQuote) => {
           career: true,
           regions: true,
           introduction: true,
-          _count: {
-            select: {
-              review: true,
-              favorite: true,
-              confirmedQuote: true,
-            },
-          },
         },
       },
       customer: {
