@@ -85,4 +85,7 @@ const getUser = async (userId: number) => {
   }
 }; //imageUrl: object 타입으로 반환하지 않고 string 타입으로 1개 반환
 
-export default { updateUser, getUser };
+export default {
+  updateUser,
+  getUser,
+};

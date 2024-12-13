@@ -22,6 +22,9 @@ interface Mover {
     favorite: number;
     confirmedQuote: number;
   };
+  user: {
+    name: string;
+  };
   favorite: { id: number }[];
 }
 
