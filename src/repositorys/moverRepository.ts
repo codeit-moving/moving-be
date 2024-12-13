@@ -15,6 +15,7 @@ const defaultSelect = {
   career: true,
   regions: true,
   introduction: true,
+  description: true,
   _count: {
     select: {
       review: true,

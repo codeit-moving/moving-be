@@ -171,7 +171,7 @@ const getMoverDetail = async (customerId: number | null, moverId: number) => {
 const toggleFavorite = async (
   customerId: number,
   moverId: number,
-  favorite: boolean
+  favorite: boolean | undefined
 ) => {
   const favoriteData: FavoriteData = {};
   if (favorite) {

@@ -1,14 +1,27 @@
 import prismaClient from "../utils/prismaClient";
 import { MovingRequestData } from "../utils/interfaces/movingRequest/movingRequest";
 
-interface queryString {
+interface CursorQueryString {
   limit: number;
-  isCompleted: boolean;
+  isCompleted: boolean | undefined;
   cursor: number | null;
 }
 
+interface OffsetQueryString {
+  pageSize: number;
+  pageNum: number;
+}
+
+const getMovingRequestCountByCustomer = (customerId: number) => {
+  return prismaClient.movingRequest.count({
+    where: {
+      customerId,
+    },
+  });
+};
+
 //이사요청 목록 조회
-const getMovingRequestList = (customerId: number, query: queryString) => {
+const getMovingRequestList = (customerId: number, query: CursorQueryString) => {
   const { limit, isCompleted, cursor } = query;
 
   return prismaClient.movingRequest.findMany({
@@ -38,6 +51,45 @@ const getMovingRequestList = (customerId: number, query: queryString) => {
           mover: true,
         },
       },
+      confirmedQuote: {
+        select: {
+          id: true,
+        },
+      },
+      customer: {
+        select: {
+          user: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  });
+};
+
+//이사요청 목록 조회 (고객)
+const getMovingRequestListByCustomer = (
+  customerId: number,
+  query: OffsetQueryString
+) => {
+  const { pageSize, pageNum } = query;
+
+  return prismaClient.movingRequest.findMany({
+    where: {
+      customerId,
+    },
+    orderBy: { createAt: "desc" },
+    take: pageSize,
+    skip: (pageNum - 1) * pageSize, //페이지 번호 계산 2가 오면 기존의 1페이지의 수를 스킵
+    select: {
+      id: true,
+      service: true,
+      movingDate: true,
+      pickupAddress: true,
+      dropOffAddress: true,
+      createAt: true,
       confirmedQuote: {
         select: {
           id: true,
@@ -200,4 +252,6 @@ export default {
   getDesignateCount,
   getActiveRequest,
   getMovingRequestById,
+  getMovingRequestListByCustomer,
+  getMovingRequestCountByCustomer,
 };

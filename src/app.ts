@@ -17,6 +17,7 @@ import customerRouter from "./controllers/customerController";
 import userRouter from "./controllers/userController";
 import notificationRouter from "./controllers/notificationController";
 
+import confirmedQuoteRouter from "./controllers/confirmedQuoteController";
 const app = express();
 
 //CORS 설정
@@ -62,6 +63,7 @@ app.use("/regions", regionRouter);
 app.use("/movers", moverRouter);
 app.use("/moving-requests", movingRequestRouter);
 app.use("/quotes", quoteRouter);
+app.use("/confirmed-quotes", confirmedQuoteRouter);
 
 app.use("/auth", authRouter);
 app.use("/oauth", oauthRouter);
