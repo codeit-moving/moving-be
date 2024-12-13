@@ -43,6 +43,7 @@ const processMoversData = async (
 
     return {
       ...rest,
+      imageUrl: rest.imageUrl[0].imageUrl,
       name: user.name,
       isDesignated,
       isFavorite,

@@ -35,6 +35,8 @@ const getQuoteByMovingRequestId = (
       movingRequest: {
         select: {
           service: true,
+          movingDate: true,
+          createAt: true,
         },
       },
       confirmedQuote: {

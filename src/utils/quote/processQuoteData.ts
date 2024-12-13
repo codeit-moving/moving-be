@@ -8,8 +8,8 @@ interface Quote {
   mover: Mover;
   movingRequest: {
     service: number;
-    createAt?: Date;
-    movingDate?: Date;
+    createAt: Date;
+    movingDate: Date;
     pickupAddress?: string;
     dropOffAddress?: string;
     confirmedQuote?: { id: number } | null;
@@ -58,13 +58,21 @@ const processQuotes = async (customerId: number, quote: Quote[] | Quote) => {
   const processQuotes = quotes.map((quote) => {
     const { mover, movingRequest, ...rest } = quote;
     const { createAt, confirmedQuote, ...restMovingRequest } = movingRequest;
+    let status: string = "pending";
+    if (confirmedQuote && movingRequest.movingDate < new Date()) {
+      status = "completed";
+    } else if (confirmedQuote && movingRequest.movingDate > new Date()) {
+      status = "confirmed";
+    } else if (!confirmedQuote && movingRequest.movingDate < new Date()) {
+      status = "expired";
+    }
     return {
       ...rest,
 
       movingRequest: {
         ...restMovingRequest,
         requestDate: createAt,
-        isConfirmed: Boolean(confirmedQuote),
+        status,
       },
       mover: moverMap.get(mover.id), // O(1) 검색
     };
