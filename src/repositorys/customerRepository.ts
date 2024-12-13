@@ -8,21 +8,26 @@ interface Profile {
 }
 
 interface UpdateProfile {
-  imageUrl?: string;
   services?: number[];
   regions?: number[];
 }
 
 const createCustomerProfile = (profile: Profile) => {
   return prismaClient.customer.create({
-    data: profile,
+    data: { ...profile, imageUrl: { create: { imageUrl: profile.imageUrl } } },
   });
 };
 
-const updateCustomerProfile = (userId: number, profile: UpdateProfile) => {
+const updateCustomerProfile = async (
+  userId: number,
+  profile: UpdateProfile
+) => {
   return prismaClient.customer.update({
     where: { userId: userId },
-    data: profile,
+    data: {
+      services: profile.services,
+      regions: profile.regions,
+    },
   });
 };
 

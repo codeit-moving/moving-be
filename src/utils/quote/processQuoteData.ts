@@ -20,7 +20,7 @@ interface Quote {
 interface Mover {
   id: number;
   nickname: string;
-  imageUrl: string | null;
+  imageUrl: { imageUrl: string }[];
   introduction?: string;
   services: number[];
   career: number;
