@@ -176,13 +176,16 @@ router.get(
 //견적서 상세 조회
 router.get(
   "/:id",
-  // passport.authenticate("jwt", { session: false }),
+  passport.authenticate("jwt", { session: false }),
   asyncHandle(async (req, res, next) => {
     try {
-      // const { customerId } = req.user as { customerId: number };
+      const { customerId } = req.user as { customerId: number };
       const { id: quoteId } = req.params;
-      const quote = await quoteService.getQuoteById(1, parseInt(quoteId));
-      return res.status(200).json(quote);
+      const quote = await quoteService.getQuoteById(
+        customerId,
+        parseInt(quoteId)
+      );
+      return res.status(200).send(quote);
     } catch (error) {
       next(error);
     }

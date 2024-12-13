@@ -56,14 +56,18 @@ const processQuotes = async (customerId: number, quote: Quote[] | Quote) => {
   const moverMap = new Map(processMovers.map((mover) => [mover.id, mover]));
 
   const processQuotes = quotes.map((quote) => {
-    const { mover, movingRequest, ...rest } = quote;
-    const { createAt, confirmedQuote, ...restMovingRequest } = movingRequest;
+    const { mover, movingRequest, confirmedQuote, ...rest } = quote;
+    const {
+      createAt,
+      confirmedQuote: confirmedQuoteReq,
+      ...restMovingRequest
+    } = movingRequest;
     let status: string = "pending";
-    if (confirmedQuote && movingRequest.movingDate < new Date()) {
+    if (confirmedQuoteReq && movingRequest.movingDate < new Date()) {
       status = "completed";
-    } else if (confirmedQuote && movingRequest.movingDate > new Date()) {
+    } else if (confirmedQuoteReq && movingRequest.movingDate > new Date()) {
       status = "confirmed";
-    } else if (!confirmedQuote && movingRequest.movingDate < new Date()) {
+    } else if (!confirmedQuoteReq && movingRequest.movingDate < new Date()) {
       status = "expired";
     }
     return {
@@ -72,7 +76,7 @@ const processQuotes = async (customerId: number, quote: Quote[] | Quote) => {
       movingRequest: {
         ...restMovingRequest,
         requestDate: createAt,
-        status,
+        status: status.toUpperCase(),
       },
       mover: moverMap.get(mover.id), // O(1) 검색
     };
