@@ -22,6 +22,7 @@ interface Mover {
   nickname: string;
   imageUrl: { imageUrl: string }[];
   introduction?: string;
+  movingRequest?: object;
   services: number[];
   career: number;
   _count: {
@@ -56,26 +57,28 @@ const processQuotes = async (customerId: number, quote: Quote[] | Quote) => {
   const moverMap = new Map(processMovers.map((mover) => [mover.id, mover]));
 
   const processQuotes = quotes.map((quote) => {
-    const { mover, movingRequest, confirmedQuote, ...rest } = quote;
+    const { mover, confirmedQuote, movingRequest, ...rest } = quote;
     const {
       createAt,
-      confirmedQuote: confirmedQuoteReq,
+      confirmedQuote: confirmedQuoteRes,
       ...restMovingRequest
     } = movingRequest;
     let status: string = "pending";
-    if (confirmedQuoteReq && movingRequest.movingDate < new Date()) {
+    if (confirmedQuote && movingRequest.movingDate < new Date()) {
       status = "completed";
-    } else if (confirmedQuoteReq && movingRequest.movingDate > new Date()) {
+    } else if (confirmedQuote && movingRequest.movingDate > new Date()) {
       status = "confirmed";
-    } else if (!confirmedQuoteReq && movingRequest.movingDate < new Date()) {
+    } else if (!confirmedQuote && movingRequest.movingDate < new Date()) {
       status = "expired";
     }
+
     return {
       ...rest,
-
+      isConfirmed: Boolean(confirmedQuote),
       movingRequest: {
         ...restMovingRequest,
         requestDate: createAt,
+        isConfirmed: Boolean(confirmedQuoteRes),
         status: status.toUpperCase(),
       },
       mover: moverMap.get(mover.id), // O(1) 검색

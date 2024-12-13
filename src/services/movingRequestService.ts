@@ -147,21 +147,22 @@ const getPendingQuotes = async (customerId: number) => {
     throw error;
   }
 
-  const quoteCount = await quoteRepository.getQuoteCountByMovingRequestId(
+  const quoteCountPromise =
+    await quoteRepository.getQuoteCountByMovingRequestId(activeRequest.id);
+
+  const quotesPromise = quoteRepository.getQuoteByMovingRequestId(
     activeRequest.id
   );
 
-  const quotes = quoteRepository.getQuoteByMovingRequestId(activeRequest.id);
-
-  const [promiseQuotes, promiseQuoteCount] = await Promise.all([
-    quotes,
-    quoteCount,
+  const [quotes, quoteCount] = await Promise.all([
+    quotesPromise,
+    quoteCountPromise,
   ]);
 
-  const processedQuotes = await processQuotes(customerId, promiseQuotes);
+  const processedQuotes = await processQuotes(customerId, quotes);
 
   return {
-    totalCount: promiseQuoteCount,
+    totalCount: quoteCount,
     list: processedQuotes,
   };
 };

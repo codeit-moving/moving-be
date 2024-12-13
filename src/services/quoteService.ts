@@ -25,7 +25,6 @@ const getQuoteById = async (customerId: number, quoteId: number) => {
   // 견적서 데이터를 가공합니다.
   const processedQuote = await processQuotes(customerId, quote);
 
-  // 가공된 견적서를 반환합니다.
   return processedQuote;
 };
 

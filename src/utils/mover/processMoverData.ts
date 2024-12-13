@@ -6,6 +6,7 @@ interface Mover {
   user: {
     name: string;
   };
+  movingRequest?: object;
   imageUrl: { imageUrl: string }[];
   nickname: string;
   career: number;
@@ -28,7 +29,7 @@ const processMoversData = async (
     activeRequest = await movingRequestRepository.getActiveRequest(customerId);
   }
   return movers.map((mover) => {
-    const { _count, favorite, user, ...rest } = mover;
+    const { _count, favorite, user, movingRequest, ...rest } = mover;
 
     let isFavorite = false;
     let isDesignated = false;

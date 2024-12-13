@@ -37,6 +37,8 @@ const getQuoteByMovingRequestId = (
           service: true,
           movingDate: true,
           createAt: true,
+          pickupAddress: true,
+          dropOffAddress: true,
         },
       },
       confirmedQuote: {
