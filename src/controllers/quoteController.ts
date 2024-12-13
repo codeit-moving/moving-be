@@ -145,7 +145,7 @@ router.get(
     const user = req.user as any;
     const moverId = user.moverId;
 
-    // moverId 검증
+    // moverId 유효성 검사
     if (!moverId) {
       const error: customError = new Error("Bad Request");
       error.status = 400;
