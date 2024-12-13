@@ -43,7 +43,7 @@ const processMoversData = async (
 
     return {
       ...rest,
-      imageUrl: rest.imageUrl[0].imageUrl,
+      imageUrl: rest.imageUrl.length > 0 ? rest.imageUrl[0].imageUrl : null,
       name: user.name,
       isDesignated,
       isFavorite,

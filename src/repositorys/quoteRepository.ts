@@ -114,7 +114,17 @@ const getQuoteById = (quoteId: number) => {
         select: {
           id: true,
           nickname: true,
-          imageUrl: true,
+          imageUrl: {
+            where: {
+              status: true,
+            },
+            orderBy: {
+              createAt: "desc",
+            },
+            select: {
+              imageUrl: true,
+            },
+          },
           introduction: true,
           services: true,
           regions: true,

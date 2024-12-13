@@ -173,4 +173,20 @@ router.get(
   })
 );
 
+//견적서 상세 조회
+router.get(
+  "/:id",
+  // passport.authenticate("jwt", { session: false }),
+  asyncHandle(async (req, res, next) => {
+    try {
+      // const { customerId } = req.user as { customerId: number };
+      const { id: quoteId } = req.params;
+      const quote = await quoteService.getQuoteById(1, parseInt(quoteId));
+      return res.status(200).json(quote);
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
 export default router; // 설정한 라우터를 내보내서 다른 파일에서 사용할 수 있게 해요.
