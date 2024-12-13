@@ -44,10 +44,11 @@ export const optionalJwtAuth = (
 
       // 토큰이 유효하지 않은 경우에만 에러 반환
       if (err) {
-        return res.status(401).json({
-          success: false,
-          message: err.data?.message || "인증 실패",
-        });
+        err.status = 401;
+        err.data = {
+          message: "유효하지 않는 토큰입니다.",
+        };
+        return next(err);
       }
     }
   )(req, res, next);
