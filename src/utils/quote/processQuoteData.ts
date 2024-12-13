@@ -60,7 +60,7 @@ const processQuotes = async (customerId: number, quote: Quote[] | Quote) => {
     const { mover, confirmedQuote, movingRequest, ...rest } = quote;
     const {
       createAt,
-      confirmedQuote: confirmedQuoteRes,
+      confirmedQuote: confirmedQuoteReq,
       ...restMovingRequest
     } = movingRequest;
     let status: string = "pending";
@@ -78,7 +78,7 @@ const processQuotes = async (customerId: number, quote: Quote[] | Quote) => {
       movingRequest: {
         ...restMovingRequest,
         requestDate: createAt,
-        isConfirmed: Boolean(confirmedQuoteRes),
+        isConfirmed: Boolean(confirmedQuoteReq),
         status: status.toUpperCase(),
       },
       mover: moverMap.get(mover.id), // O(1) 검색
