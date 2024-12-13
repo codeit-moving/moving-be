@@ -10,22 +10,39 @@ const router = express.Router();
 //이사요청 목록 조회
 router.get(
   "/",
-  passport.authenticate("jwt", { session: false }),
+  // passport.authenticate("jwt", { session: false }),
   asyncHandle(async (req, res, next) => {
     try {
-      const { customerId } = req.user as { customerId: number };
+      // const { customerId } = req.user as { customerId: number };
 
-      const { limit = "10", isCompleted = "", cursor = "0" } = req.query;
+      const {
+        limit = "10",
+        isDesignated = "",
+        cursor = "0",
+        keyword = "",
+        smallMove = "false",
+        houseMove = "false",
+        officeMove = "false",
+        orderBy = "resent",
+      } = req.query;
       const parseLimit = parseInt(limit as string);
       const parseCursor = parseInt(cursor as string);
-      const parseIsCompleted = checkBoolean(isCompleted as string);
+      const parseIsDesignated = checkBoolean(isDesignated as string);
+      const parseSmallMove = checkBoolean(smallMove as string);
+      const parseHouseMove = checkBoolean(houseMove as string);
+      const parseOfficeMove = checkBoolean(officeMove as string);
 
       const movingRequestList = await movingRequestService.getMovingRequestList(
-        customerId,
+        1,
         {
           limit: parseLimit,
-          isCompleted: parseIsCompleted,
+          isDesignated: parseIsDesignated,
           cursor: parseCursor,
+          keyword: keyword as string,
+          smallMove: parseSmallMove || false,
+          houseMove: parseHouseMove || false,
+          officeMove: parseOfficeMove || false,
+          orderBy: orderBy as string,
         }
       );
       return res.status(200).send(movingRequestList);
@@ -125,16 +142,16 @@ router.post(
 //이사요청 기사 지정하기
 router.post(
   "/:id/designated",
-  passport.authenticate("jwt", { session: false }),
+  // passport.authenticate("jwt", { session: false }),
   asyncHandle(async (req, res, next) => {
     try {
       const { id: movingRequestId } = req.params;
       const { moverId } = req.query;
-      const { customerId } = req.user as { customerId: number };
+      // const { customerId } = req.user as { customerId: number };
       const remainingCount = await movingRequestService.designateMover(
         parseInt(movingRequestId),
         parseInt(moverId as string),
-        customerId
+        1
       );
       return res.status(200).send({
         message: "지정 요청 완료",

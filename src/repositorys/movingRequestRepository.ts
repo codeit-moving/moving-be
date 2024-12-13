@@ -3,8 +3,14 @@ import { MovingRequestData } from "../utils/interfaces/movingRequest/movingReque
 
 interface CursorQueryString {
   limit: number;
-  isCompleted: boolean | undefined;
   cursor: number | null;
+  orderBy: { [key: string]: "asc" | "desc" };
+}
+
+interface WhereCondition {
+  keyword?: string;
+  OR?: object[];
+  services?: object;
 }
 
 interface OffsetQueryString {
@@ -21,21 +27,19 @@ const getMovingRequestCountByCustomer = (customerId: number) => {
 };
 
 //이사요청 목록 조회
-const getMovingRequestList = (customerId: number, query: CursorQueryString) => {
-  const { limit, isCompleted, cursor } = query;
+const getMovingRequestList = (
+  customerId: number,
+  query: CursorQueryString,
+  where: WhereCondition
+) => {
+  const { limit, cursor, orderBy } = query;
 
   return prismaClient.movingRequest.findMany({
     where: {
       customerId,
-      ...(isCompleted
-        ? {
-            confirmedQuote: {
-              isNot: null, //환정견적과의 관계가 null이 아닌 경우
-            },
-          }
-        : {}),
+      ...where,
     },
-    orderBy: { createAt: "desc" },
+    orderBy,
     take: limit,
     skip: cursor ? 1 : 0, //커서 자신을 스킵하기 위함
     cursor: cursor ? { id: cursor } : undefined,
