@@ -8,8 +8,8 @@ interface Quote {
   mover: Mover;
   movingRequest: {
     service: number;
-    createAt?: Date;
-    movingDate?: Date;
+    createAt: Date;
+    movingDate: Date;
     pickupAddress?: string;
     dropOffAddress?: string;
     confirmedQuote?: { id: number } | null;
@@ -22,6 +22,7 @@ interface Mover {
   nickname: string;
   imageUrl: { imageUrl: string }[];
   introduction?: string;
+  movingRequest?: object;
   services: number[];
   career: number;
   _count: {
@@ -56,15 +57,29 @@ const processQuotes = async (customerId: number, quote: Quote[] | Quote) => {
   const moverMap = new Map(processMovers.map((mover) => [mover.id, mover]));
 
   const processQuotes = quotes.map((quote) => {
-    const { mover, movingRequest, ...rest } = quote;
-    const { createAt, confirmedQuote, ...restMovingRequest } = movingRequest;
+    const { mover, confirmedQuote, movingRequest, ...rest } = quote;
+    const {
+      createAt,
+      confirmedQuote: confirmedQuoteReq,
+      ...restMovingRequest
+    } = movingRequest;
+    let status: string = "pending";
+    if (confirmedQuote && movingRequest.movingDate < new Date()) {
+      status = "completed";
+    } else if (confirmedQuote && movingRequest.movingDate > new Date()) {
+      status = "confirmed";
+    } else if (!confirmedQuote && movingRequest.movingDate < new Date()) {
+      status = "expired";
+    }
+
     return {
       ...rest,
-
+      isConfirmed: Boolean(confirmedQuote),
       movingRequest: {
         ...restMovingRequest,
         requestDate: createAt,
-        isConfirmed: Boolean(confirmedQuote),
+        isConfirmed: Boolean(confirmedQuoteReq),
+        status: status.toUpperCase(),
       },
       mover: moverMap.get(mover.id), // O(1) 검색
     };
