@@ -30,12 +30,12 @@ interface ConfirmedQuote {
 const setMessage = async (confirmedQuote: ConfirmedQuote) => {
   return [
     {
-      content: `내일은 ${confirmedQuote.movingRequest.pickupAddress} -> ${confirmedQuote.movingRequest.dropOffAddress} 이사 예정일이에요.`,
+      content: `내일은 ,${confirmedQuote.movingRequest.pickupAddress} -> ${confirmedQuote.movingRequest.dropOffAddress} 이사 예정일,이에요.`,
       isRead: false,
       userId: confirmedQuote.mover.user.id,
     },
     {
-      content: `내일은 ${confirmedQuote.movingRequest.pickupAddress} -> ${confirmedQuote.movingRequest.dropOffAddress} 이사 예정일이에요.`,
+      content: `내일은 ,${confirmedQuote.movingRequest.pickupAddress} -> ${confirmedQuote.movingRequest.dropOffAddress} 이사 예정일,이에요.`,
       isRead: false,
       userId: confirmedQuote.customer.user.id,
     },
