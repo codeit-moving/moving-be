@@ -9,7 +9,6 @@ interface whereConditions {
 
 const defaultSelect = {
   id: true,
-  imageUrl: true,
   services: true,
   nickname: true,
   career: true,
@@ -44,6 +43,17 @@ const getMoverList = (
     cursor: cursor ? { id: cursor } : undefined,
     select: {
       ...defaultSelect,
+      imageUrl: {
+        where: {
+          status: true,
+        },
+        orderBy: {
+          createAt: "desc",
+        },
+        select: {
+          imageUrl: true,
+        },
+      },
       user: {
         select: {
           name: true,
@@ -64,6 +74,17 @@ const getMoverById = (customerId: number | null, moverId: number) => {
     where: { id: moverId },
     select: {
       ...defaultSelect,
+      imageUrl: {
+        where: {
+          status: true,
+        },
+        orderBy: {
+          createAt: "desc",
+        },
+        select: {
+          imageUrl: true,
+        },
+      },
       user: {
         select: {
           name: true,
@@ -125,6 +146,17 @@ const getMoverByFavorite = (
     where: { favorite: { some: { id: customerId } } },
     select: {
       ...defaultSelect,
+      imageUrl: {
+        where: {
+          status: true,
+        },
+        orderBy: {
+          createAt: "desc",
+        },
+        select: {
+          imageUrl: true,
+        },
+      },
       user: {
         select: {
           name: true,

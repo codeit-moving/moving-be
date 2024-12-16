@@ -16,7 +16,18 @@ router.post(
         quoteId: parseInt(id),
         customerId,
       });
-      res.status(201).json(confirmedQuote);
+
+      const resData = {
+        message: "견적서 확정 완료",
+        data: {
+          id: confirmedQuote.id,
+          movingRequestId: confirmedQuote.movingRequest.id,
+          quoteId: confirmedQuote.quote.id,
+          moverId: confirmedQuote.mover.id,
+        },
+      };
+
+      res.status(201).send(resData);
     } catch (error) {
       next(error);
     }

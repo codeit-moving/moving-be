@@ -42,10 +42,62 @@ const CreateConfirmedQuote = (confirmedQuote: ConfirmedQuote) => {
       customer: {
         select: {
           id: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
       },
     },
   });
 };
 
-export default { CreateConfirmedQuote };
+const findAllByDay = (day: Date) => {
+  return prismaClient.confirmedQuote.findMany({
+    where: {
+      movingRequest: {
+        movingDate: day,
+      },
+    },
+    select: {
+      id: true,
+      movingRequest: {
+        select: {
+          service: true,
+          movingDate: true,
+          pickupAddress: true,
+          dropOffAddress: true,
+        },
+      },
+      customer: {
+        select: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+      quote: {
+        select: {
+          id: true,
+        },
+      },
+      mover: {
+        select: {
+          user: {
+            select: {
+              id: true,
+            },
+          },
+          nickname: true,
+        },
+      },
+    },
+  });
+};
+
+export default { CreateConfirmedQuote, findAllByDay };

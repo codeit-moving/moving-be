@@ -18,7 +18,6 @@ erDiagram
 }
 "Customer" {
   Int id PK
-  String imageUrl "nullable"
   Int services
   Int regions
   DateTime createAt
@@ -28,7 +27,6 @@ erDiagram
 "Mover" {
   Int id PK
   String nickname
-  String imageUrl "nullable"
   Int services
   Int regions
   Int career
@@ -112,6 +110,15 @@ erDiagram
   Int reviewId FK
   Int moverId FK
 }
+"ProfileImage" {
+  Int id PK
+  String imageUrl
+  Boolean status
+  DateTime createAt
+  DateTime updateAt
+  Int customerId FK "nullable"
+  Int moverId FK "nullable"
+}
 "_CustomerToMover" {
   String A FK
   String B FK
@@ -135,6 +142,8 @@ erDiagram
 "notification" }o--|| "User" : user
 "ReviewComment" }o--|| "Review" : review
 "ReviewComment" }o--|| "Mover" : mover
+"ProfileImage" }o--o| "Customer" : customer
+"ProfileImage" }o--o| "Mover" : mover
 "_CustomerToMover" }o--|| "Customer" : Customer
 "_CustomerToMover" }o--|| "Mover" : Mover
 "_MoverToMovingRequest" }o--|| "Mover" : Mover
@@ -157,7 +166,6 @@ erDiagram
 
 **Properties**
   - `id`: 
-  - `imageUrl`: 
   - `services`: 
   - `regions`: 
   - `createAt`: 
@@ -169,7 +177,6 @@ erDiagram
 **Properties**
   - `id`: 
   - `nickname`: 
-  - `imageUrl`: 
   - `services`: 
   - `regions`: 
   - `career`: 
@@ -267,6 +274,17 @@ erDiagram
   - `createAt`: 
   - `updateAt`: 
   - `reviewId`: 
+  - `moverId`: 
+
+### `ProfileImage`
+
+**Properties**
+  - `id`: 
+  - `imageUrl`: 
+  - `status`: 
+  - `createAt`: 
+  - `updateAt`: 
+  - `customerId`: 
   - `moverId`: 
 
 ### `_CustomerToMover`

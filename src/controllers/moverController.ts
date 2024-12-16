@@ -3,6 +3,7 @@ import { asyncHandle } from "../utils/asyncHandler";
 import express from "express";
 import checkBoolean from "../utils/checkBoolean";
 import passport from "passport";
+import { optionalJwtAuth } from "../middlewares/authMiddleware";
 
 interface queryString {
   nextCursorId: string;
@@ -19,7 +20,7 @@ const router = express.Router();
 //기사 목록 조회
 router.get(
   "/",
-  passport.authenticate("jwt-optional", { session: false }),
+  optionalJwtAuth,
   asyncHandle(async (req, res, next) => {
     try {
       let customerId: number | null = null;
@@ -64,7 +65,7 @@ router.get(
 //기사 상세 조회
 router.get(
   "/:id",
-  passport.authenticate("jwt-optional", { session: false }),
+  optionalJwtAuth,
   asyncHandle(async (req, res, next) => {
     try {
       let customerId: number | null = null;
