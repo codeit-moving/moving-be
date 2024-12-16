@@ -27,7 +27,6 @@ jobs:
           touch ~/moving-be/.env
         fi
         echo "${{ secrets.ENV_FILE }}" > ~/moving-be/.env
-        cat ~/moving-be/.env
         EOF
 
     - name: Deploy to EC2
@@ -40,14 +39,9 @@ jobs:
           npm audit fix --force
           npm run build
           
-          # 클러스터 모드로 앱이 실행되어 있지 않다면 처음 실행
           if ! pm2 list | grep -q "my-app"; then
             pm2 start dist/app.js --name my-app -i max
           else
-            # 무중단 배포를 위한 reload
             pm2 reload my-app --update-env
           fi
-          
-          # 로그 확인
-          pm2 logs my-app --lines 10
         EOF
