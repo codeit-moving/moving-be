@@ -44,9 +44,7 @@ const signIn = async ({ email, password }: SignInData) => {
     throw error;
   }
 
-  // const isPasswordValid = await bcrypt.compare(password, user.password!);
-
-  const isPasswordValid = password === user.password;
+  const isPasswordValid = await bcrypt.compare(password, user.password!); //패스워드 검증
 
   if (!isPasswordValid) {
     const error: CustomError = new Error("Unauthorized");
@@ -87,9 +85,12 @@ const signUpCustomer = async (customer: SignUpCustomer) => {
       }
     }
 
+    const hashedPassword = await bcrypt.hash(customer.password, 10);
+
     const customerData = {
       ...customer,
       imageUrl,
+      password: hashedPassword,
     };
 
     const result = await userRepository.createCustomer(customerData);
@@ -125,9 +126,12 @@ const signUpMover = async (mover: SignUpMover) => {
       }
     }
 
+    const hashedPassword = await bcrypt.hash(mover.password, 10);
+
     const moverData = {
       ...mover,
       imageUrl,
+      password: hashedPassword,
     };
     const result = await userRepository.createMover(moverData);
 
