@@ -3,13 +3,13 @@ import prismaClient from "../utils/prismaClient";
 interface User {
   name: string;
   email: string;
-  password: string | null;
-  phoneNumber: string;
+  password?: string | null;
+  phoneNumber?: string;
   isOAuth: boolean;
 }
 
 interface Customer extends User {
-  imageUrl: string | null;
+  imageUrl: string;
   services: number[];
   regions: number[];
 }
@@ -19,9 +19,16 @@ interface Mover extends User {
   career: number;
   introduction: string;
   description: string;
-  imageUrl: string | null;
+  imageUrl: string;
   services: number[];
   regions: number[];
+}
+
+interface UpdateUser {
+  name?: string;
+  email?: string;
+  password?: string;
+  phoneNumber?: string;
 }
 
 const findByEmail = (email: string) => {
@@ -36,6 +43,17 @@ const findByEmail = (email: string) => {
       mover: {
         select: { id: true },
       },
+    },
+  });
+};
+
+const findById = (userId: number) => {
+  return prismaClient.user.findUnique({
+    where: { id: userId },
+    select: {
+      name: true,
+      phoneNumber: true,
+      password: true,
     },
   });
 };
@@ -73,7 +91,6 @@ const createCustomer = (customer: Customer) => {
   };
 
   const customerData = {
-    imageUrl,
     services,
     regions,
   };
@@ -82,7 +99,10 @@ const createCustomer = (customer: Customer) => {
     data: {
       ...userData,
       customer: {
-        create: customerData,
+        create: {
+          ...customerData,
+          imageUrl: { create: { imageUrl: imageUrl } },
+        },
       },
     },
   });
@@ -117,7 +137,6 @@ const createMover = (mover: Mover) => {
     career,
     introduction,
     description,
-    imageUrl,
     services,
     regions,
   };
@@ -126,7 +145,7 @@ const createMover = (mover: Mover) => {
     data: {
       ...userData,
       mover: {
-        create: moverData,
+        create: { ...moverData, imageUrl: { create: { imageUrl: imageUrl } } },
       },
     },
   });
@@ -144,14 +163,21 @@ const getCustomer = (userId: number) => {
       customer: {
         select: {
           id: true,
-          imageUrl: true,
+          imageUrl: {
+            where: {
+              status: true,
+            },
+            select: {
+              imageUrl: true,
+            },
+          },
           services: true,
           regions: true,
         },
       },
     },
   });
-};
+}; //orderBy 추가
 
 const getMover = (userId: number) => {
   return prismaClient.user.findUnique({
@@ -169,7 +195,14 @@ const getMover = (userId: number) => {
           career: true,
           introduction: true,
           description: true,
-          imageUrl: true,
+          imageUrl: {
+            where: {
+              status: true,
+            },
+            select: {
+              imageUrl: true,
+            },
+          },
           services: true,
           regions: true,
         },
@@ -191,7 +224,6 @@ const getUserType = async (userId: number) => {
       },
     },
   });
-
   if (user?.customer) {
     return "customer";
   } else if (user?.mover) {
@@ -199,6 +231,13 @@ const getUserType = async (userId: number) => {
   } else {
     return null;
   }
+};
+
+const updateUser = async (userId: number, data: UpdateUser) => {
+  return prismaClient.user.update({
+    where: { id: userId },
+    data,
+  });
 };
 
 export default {
@@ -210,4 +249,6 @@ export default {
   getUserType,
   getCustomer,
   getMover,
+  updateUser,
+  findById,
 };

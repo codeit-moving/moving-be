@@ -37,7 +37,7 @@ model User {
 // 일반 고객 프로필
 model Customer {
   id             Int              @id @unique @default(autoincrement()) // 자동 증가
-  imageUrl       String?
+  imageUrl       ProfileImage[]
   services       Int[] // [1, 2]
   regions        Int[] // 리전으로 변경 // 지역
   createAt       DateTime         @default(now())
@@ -54,7 +54,7 @@ model Customer {
 model Mover {
   id             Int              @id @unique @default(autoincrement()) //자동증가
   nickname       String // 별명 //이름 1~12 한글만
-  imageUrl       String? // 프로필 이미지
+  imageUrl       ProfileImage[]
   services       Int[] // [1, 2] 
   regions        Int[] // 지역코드 배열 -> 리전으로 변경 예 ) 경기 82031, 8202
   career         Int // 경력
@@ -96,7 +96,7 @@ model Region {
 // 이사정보 -> 고객이 등록 Requset
 model MovingRequest {
   id             Int             @id @unique @default(autoincrement()) //자동증가
-  serviceType    Int //서비스 테이블의 코드값 예 ) 1
+  service        Int //서비스 테이블의 코드값 예 ) 1
   movingDate     DateTime //이사하는 날
   pickupAddress  String //출발지 pickupAddress
   dropOffAddress String //도착지 dropoffAddress
@@ -181,4 +181,16 @@ model ReviewComment {
   reviewId Int //해당 리뷰
   mover    Mover    @relation(fields: [moverId], references: [id])
   moverId  Int //댓글 작성자
+}
+
+model ProfileImage {
+  id         Int       @id @unique @default(autoincrement()) //자동증가
+  imageUrl   String
+  status     Boolean   @default(true) //사용여부
+  createAt   DateTime  @default(now())
+  updateAt   DateTime  @updatedAt
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  customerId Int?
+  mover      Mover?    @relation(fields: [moverId], references: [id])
+  moverId    Int?
 }

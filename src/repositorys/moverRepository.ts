@@ -15,6 +15,7 @@ const defaultSelect = {
   career: true,
   regions: true,
   introduction: true,
+  description: true,
   _count: {
     select: {
       review: true,
@@ -43,6 +44,11 @@ const getMoverList = (
     cursor: cursor ? { id: cursor } : undefined,
     select: {
       ...defaultSelect,
+      user: {
+        select: {
+          name: true,
+        },
+      },
       favorite: {
         select: {
           id: true,
@@ -58,6 +64,11 @@ const getMoverById = (customerId: number | null, moverId: number) => {
     where: { id: moverId },
     select: {
       ...defaultSelect,
+      user: {
+        select: {
+          name: true,
+        },
+      },
       ...(customerId
         ? {
             favorite: {
@@ -101,10 +112,38 @@ const toggleFavorite = async (moverId: number, favorite: object) => {
   });
 };
 
+const getMoverByFavorite = (
+  customerId: number,
+  limit: number,
+  cursor: number
+) => {
+  return prismaClient.mover.findMany({
+    orderBy: { createAt: "desc" },
+    take: limit + 1,
+    skip: cursor ? 1 : 0,
+    cursor: cursor ? { id: cursor } : undefined,
+    where: { favorite: { some: { id: customerId } } },
+    select: {
+      ...defaultSelect,
+      user: {
+        select: {
+          name: true,
+        },
+      },
+      favorite: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+};
+
 export default {
   getMoverCount,
   getMoverList,
   getRatingsByMoverIds,
   getMoverById,
   toggleFavorite,
+  getMoverByFavorite,
 };

@@ -8,8 +8,13 @@ import processQuotes from "../utils/quote/processQuoteData";
 
 interface queryString {
   limit: number;
-  isCompleted: boolean;
+  isCompleted: boolean | undefined;
   cursor: number | null;
+}
+
+interface OffsetQueryString {
+  pageSize: number;
+  pageNum: number;
 }
 
 //이사요청 목록 조회
@@ -57,11 +62,61 @@ const getMovingRequestList = async (customerId: number, query: queryString) => {
   };
 };
 
+const getMovingRequestListByCustomer = async (
+  customerId: number,
+  query: OffsetQueryString
+) => {
+  const { pageSize, pageNum } = query;
+
+  const movingRequestListPromise =
+    movingRequestRepository.getMovingRequestListByCustomer(customerId, {
+      pageSize,
+      pageNum,
+    });
+  const totalCountPromise =
+    movingRequestRepository.getMovingRequestCountByCustomer(customerId);
+
+  const [movingRequestList, totalCount] = await Promise.all([
+    movingRequestListPromise,
+    totalCountPromise,
+  ]);
+
+  if (!movingRequestList.length) {
+    const error: CustomError = new Error("Not Found");
+    error.status = 404;
+    error.data = {
+      message: "조건의 맞는 이사요청 목록이 없습니다.",
+    };
+    throw error;
+  }
+
+  const resMovingRequestList = movingRequestList.map((movingRequest) => {
+    const { customer, createAt, confirmedQuote, ...rest } = movingRequest;
+
+    return {
+      ...rest,
+      name: customer.user.name,
+      requestDate: createAt,
+      isConfirmed: Boolean(confirmedQuote), //완료된 견적서와 관계가 있다면 true
+    };
+  });
+
+  const totalPage = Math.ceil(totalCount / pageSize);
+
+  return {
+    currentPage: pageNum,
+    pageSize,
+    totalPage,
+    totalCount,
+    list: resMovingRequestList,
+  };
+};
+
 //이사요청의 견적서 조회
 const getQuoteByMovingRequestId = async (
   customerId: number,
   movingRequestId: number,
-  isCompleted: boolean
+  isCompleted: boolean | undefined
 ) => {
   const quotes = await quoteRepository.getQuoteByMovingRequestId(
     movingRequestId,
@@ -137,11 +192,31 @@ const createMovingRequest = async (
 };
 
 //이사요청 지정
-const designateMover = async (movingRequestId: number, moverId: number) => {
+const designateMover = async (
+  movingRequestId: number,
+  moverId: number,
+  customerId: number
+) => {
   //지정 가능 인원 조회
-  const result = await movingRequestRepository.getDesignateCount(
-    movingRequestId
-  );
+  const designateCountPromise =
+    movingRequestRepository.getDesignateCount(movingRequestId);
+
+  const activeRequestPromise =
+    movingRequestRepository.getActiveRequest(customerId);
+
+  const [result, activeRequest] = await Promise.all([
+    designateCountPromise,
+    activeRequestPromise,
+  ]);
+
+  if (activeRequest) {
+    const error: CustomError = new Error("Bad Request");
+    error.status = 400;
+    error.data = {
+      message: "일반 견적 요청을 먼저 진행해 주세요.",
+    };
+    throw error;
+  }
 
   //지정 가능 인원 초과 체크
   if (!result || result._count.mover >= 3) {
@@ -187,4 +262,5 @@ export default {
   cancelDesignateMover,
   getQuoteByMovingRequestId,
   getPendingQuotes,
+  getMovingRequestListByCustomer,
 };

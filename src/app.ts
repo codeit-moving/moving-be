@@ -13,7 +13,11 @@ import oauthRouter from "./controllers/oauthController";
 import passport from "./middlewares/passport";
 import session from "express-session";
 import cookieConfig from "./config/cookie.config";
+import customerRouter from "./controllers/customerController";
+import userRouter from "./controllers/userController";
+import notificationRouter from "./controllers/notificationController";
 
+import confirmedQuoteRouter from "./controllers/confirmedQuoteController";
 const app = express();
 
 //CORS 설정
@@ -59,9 +63,13 @@ app.use("/regions", regionRouter);
 app.use("/movers", moverRouter);
 app.use("/moving-requests", movingRequestRouter);
 app.use("/quotes", quoteRouter);
+app.use("/confirmed-quotes", confirmedQuoteRouter);
 
 app.use("/auth", authRouter);
 app.use("/oauth", oauthRouter);
+app.use("/customers", customerRouter);
+app.use("/users", userRouter);
+app.use("/notifications", notificationRouter);
 
 app.use(errorHandler); //전체 에러 핸들링 미들웨어
 

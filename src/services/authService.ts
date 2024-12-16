@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
-import authRepository from "../repositorys/authRepository";
+import userRepository from "../repositorys/userRepository";
 import CustomError from "../utils/interfaces/customError";
+import { uploadFile } from "../utils/s3.utils";
 
 interface SignInData {
   email: string;
@@ -16,7 +17,7 @@ interface User {
 }
 
 interface SignUpCustomer extends User {
-  imageUrl: string;
+  imageUrl: Express.Multer.File;
   services: number[];
   regions: number[];
 }
@@ -26,13 +27,13 @@ interface SignUpMover extends User {
   career: number;
   introduction: string;
   description: string;
-  imageUrl: string;
+  imageUrl: Express.Multer.File;
   services: number[];
   regions: number[];
 }
 
 const signIn = async ({ email, password }: SignInData) => {
-  const user = await authRepository.findByEmail(email);
+  const user = await userRepository.findByEmail(email);
   if (!user) {
     const error: CustomError = new Error("Not Found");
     error.status = 404;
@@ -63,9 +64,10 @@ const signIn = async ({ email, password }: SignInData) => {
 
 const signUpCustomer = async (customer: SignUpCustomer) => {
   const { email, phoneNumber } = customer;
+  const imageUrl = await uploadFile(customer.imageUrl);
 
   try {
-    const existingUser = await authRepository.existingUser(email, phoneNumber);
+    const existingUser = await userRepository.existingUser(email, phoneNumber);
 
     if (existingUser) {
       const error: CustomError = new Error("Conflict");
@@ -85,7 +87,12 @@ const signUpCustomer = async (customer: SignUpCustomer) => {
       }
     }
 
-    const result = await authRepository.createCustomer(customer);
+    const customerData = {
+      ...customer,
+      imageUrl,
+    };
+
+    const result = await userRepository.createCustomer(customerData);
 
     return result;
   } catch (error) {
@@ -95,9 +102,10 @@ const signUpCustomer = async (customer: SignUpCustomer) => {
 
 const signUpMover = async (mover: SignUpMover) => {
   const { email, phoneNumber } = mover;
+  const imageUrl = await uploadFile(mover.imageUrl);
 
   try {
-    const existingUser = await authRepository.existingUser(email, phoneNumber);
+    const existingUser = await userRepository.existingUser(email, phoneNumber);
 
     if (existingUser) {
       const error: CustomError = new Error("Conflict");
@@ -117,7 +125,11 @@ const signUpMover = async (mover: SignUpMover) => {
       }
     }
 
-    const result = await authRepository.createMover(mover);
+    const moverData = {
+      ...mover,
+      imageUrl,
+    };
+    const result = await userRepository.createMover(moverData);
 
     return result;
   } catch (error) {
@@ -125,15 +137,4 @@ const signUpMover = async (mover: SignUpMover) => {
   }
 };
 
-const getUser = async (userId: number) => {
-  const userType = await authRepository.getUserType(userId);
-  if (userType === "customer") {
-    return await authRepository.getCustomer(userId);
-  } else if (userType === "mover") {
-    return await authRepository.getMover(userId);
-  } else {
-    throw new Error("User not found");
-  }
-};
-
-export default { signIn, signUpCustomer, signUpMover, getUser };
+export default { signIn, signUpCustomer, signUpMover };

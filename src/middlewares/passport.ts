@@ -1,5 +1,4 @@
 import passport from "passport";
-import { Strategy as JwtStrategy } from "passport-jwt";
 import { Strategy as NaverStrategy } from "passport-naver";
 import {
   NAVER_CLIENT_ID,
@@ -8,26 +7,51 @@ import {
 } from "../env";
 import { JWT_SECRET } from "../env";
 import oauthService from "../services/oauthService";
-
-const cookieExtractor = (req: any) => {
-  let token = null;
-  if (req && req.cookies) {
-    token = req.cookies["accessToken"];
-  }
-  return token;
-};
-
-const opts = {
-  jwtFromRequest: cookieExtractor,
-  secretOrKey: JWT_SECRET,
-};
+import CustomError from "../utils/interfaces/customError";
+import { Strategy } from "passport-custom";
+import jwt from "jsonwebtoken";
 
 passport.use(
-  new JwtStrategy(opts, (jwtPayload, done) => {
+  "jwt",
+  new Strategy(async (req, done) => {
+    const token = req.cookies["accessToken"];
+
+    if (!token) {
+      const error: CustomError = new Error("Unauthorized");
+      error.status = 401;
+      error.data = {
+        message: "토큰이 존재하지 않습니다.",
+      };
+      return done(error, false); // 토큰이 없을 때 에러 반환
+    }
+
     try {
-      return done(null, jwtPayload);
+      const decoded = jwt.verify(token, JWT_SECRET);
+      return done(null, decoded); // 토큰이 있고 유효하면 유저 정보 반환
+    } catch (err) {
+      const error: CustomError = new Error("Unauthorized");
+      error.status = 401;
+      error.data = {
+        message: "유효하지 않은 토큰입니다.",
+      };
+      return done(error, false); // 토큰이 있지만 유효하지 않으면 false 반환
+    }
+  })
+);
+
+passport.use(
+  "jwt-optional",
+  new Strategy(async (req, done) => {
+    const token = req.cookies["accessToken"];
+    if (!token) {
+      //토큰이 없어도 통과
+      return done(null, null);
+    }
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET); // 토큰이 있다면 검증 후 유저 정보 반환
+      return done(null, decoded);
     } catch (error) {
-      return done(error, false);
+      return done(null, false); // 토큰이 있지만 유효하지 않으면 false 반환
     }
   })
 );

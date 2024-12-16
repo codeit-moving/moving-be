@@ -3,7 +3,10 @@ import RatingResult from "../interfaces/mover/ratingResult";
 
 interface Mover {
   id: number;
-  imageUrl: string | null;
+  user: {
+    name: string;
+  };
+  imageUrl: { imageUrl: string }[];
   nickname: string;
   career: number;
   introduction?: string;
@@ -25,7 +28,7 @@ const processMoversData = async (
     activeRequest = await movingRequestRepository.getActiveRequest(customerId);
   }
   return movers.map((mover) => {
-    const { _count, favorite, ...rest } = mover;
+    const { _count, favorite, user, ...rest } = mover;
 
     let isFavorite = false;
     let isDesignated = false;
@@ -40,6 +43,7 @@ const processMoversData = async (
 
     return {
       ...rest,
+      name: user.name,
       isDesignated,
       isFavorite,
       reviewCount: _count.review,

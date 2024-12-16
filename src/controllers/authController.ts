@@ -3,7 +3,7 @@ import authService from "../services/authService";
 import { asyncHandle } from "../utils/asyncHandler";
 import cookieConfig from "../config/cookie.config";
 import createToken from "../utils/token.utils";
-import passport from "passport";
+import upload from "../utils/multer";
 
 const router = Router();
 
@@ -21,7 +21,7 @@ interface User {
 }
 
 interface SignUpCustomer extends User {
-  imageUrl: string;
+  imageUrl: Express.Multer.File;
   services: number[];
   regions: number[];
 }
@@ -31,7 +31,7 @@ interface SignUpMover extends User {
   career: number;
   introduction: string;
   description: string;
-  imageUrl: string;
+  imageUrl: Express.Multer.File;
   services: number[];
   regions: number[];
 }
@@ -72,9 +72,20 @@ router.post("/signout", (_, res) => {
 
 router.post(
   "/signup/customer",
+  upload.single("imageUrl"),
   asyncHandle(async (req, res, next) => {
     try {
-      const SignUpCustomer: SignUpCustomer = req.body;
+      const SignUpCustomer: SignUpCustomer = {
+        ...req.body,
+        imageUrl: req.file!,
+        services: Array.isArray(req.body.services)
+          ? req.body.services
+          : JSON.parse(req.body.services),
+        regions: Array.isArray(req.body.regions)
+          ? req.body.regions
+          : JSON.parse(req.body.regions),
+        isOAuth: req.body.isOAuth === "true",
+      };
       await authService.signUpCustomer(SignUpCustomer);
       res.status(204).send();
     } catch (error) {
@@ -85,25 +96,12 @@ router.post(
 
 router.post(
   "/signup/mover",
+  upload.single("imageUrl"),
   asyncHandle(async (req, res, next) => {
     try {
       const SignUpMover: SignUpMover = req.body;
       await authService.signUpMover(SignUpMover);
       res.status(204).send();
-    } catch (error) {
-      next(error);
-    }
-  })
-);
-
-router.get(
-  "/user",
-  passport.authenticate("jwt", { session: false }),
-  asyncHandle(async (req, res, next) => {
-    try {
-      const userId = (req.user as any).id;
-      const user = await authService.getUser(userId);
-      res.status(200).send({ user });
     } catch (error) {
       next(error);
     }
