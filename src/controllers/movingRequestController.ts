@@ -142,16 +142,16 @@ router.post(
 //이사요청 기사 지정하기
 router.post(
   "/:id/designated",
-  // passport.authenticate("jwt", { session: false }),
+  passport.authenticate("jwt", { session: false }),
   asyncHandle(async (req, res, next) => {
     try {
       const { id: movingRequestId } = req.params;
       const { moverId } = req.query;
-      // const { customerId } = req.user as { customerId: number };
+      const { customerId } = req.user as { customerId: number };
       const remainingCount = await movingRequestService.designateMover(
         parseInt(movingRequestId),
         parseInt(moverId as string),
-        1
+        customerId
       );
       return res.status(200).send({
         message: "지정 요청 완료",

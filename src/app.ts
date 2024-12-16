@@ -41,6 +41,7 @@ const corsOptions: CorsOptions = {
 
 // Express app에 CORS 적용
 app.use(cors(corsOptions));
+app.use(express.urlencoded({ extended: true }));
 
 //미들웨어
 app.use(express.json()); //json parse
