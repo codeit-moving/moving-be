@@ -5,11 +5,17 @@ import quoteRepository from "../repositorys/quoteRepository";
 import getRatingsByMoverIds from "../utils/mover/getRatingsByMover";
 import processMoverData from "../utils/mover/processMoverData";
 import processQuotes from "../utils/quote/processQuoteData";
+import notificationRepository from "../repositorys/notificationRepository";
 
 interface queryString {
   limit: number;
-  isCompleted: boolean | undefined;
+  isDesignated: boolean | undefined;
   cursor: number | null;
+  keyword: string;
+  smallMove: boolean;
+  houseMove: boolean;
+  officeMove: boolean;
+  orderBy: string;
 }
 
 interface OffsetQueryString {
@@ -17,13 +23,94 @@ interface OffsetQueryString {
   pageNum: number;
 }
 
+interface WhereCondition {
+  keyword?: string;
+  OR?: object[];
+  service?: object;
+  mover?: object;
+}
+
+const setWhereCondition = (query: queryString) => {
+  const { keyword, smallMove, houseMove, officeMove, isDesignated } = query;
+  const where: WhereCondition = {};
+
+  if (keyword) {
+    where.OR = [
+      {
+        mover: {
+          some: {
+            nickname: { contains: keyword },
+          },
+        },
+      },
+      {
+        mover: {
+          some: {
+            introduction: { contains: keyword },
+          },
+        },
+      },
+      {
+        mover: {
+          some: {
+            description: { contains: keyword },
+          },
+        },
+      },
+    ];
+  }
+
+  const serviceTypes = [];
+  if (smallMove) serviceTypes.push(1);
+  if (houseMove) serviceTypes.push(2);
+  if (officeMove) serviceTypes.push(3);
+
+  if (serviceTypes.length > 0) {
+    where.service = {
+      in: serviceTypes,
+    };
+  }
+
+  if (isDesignated === undefined) {
+    where.mover = {};
+  } else if (isDesignated) {
+    where.mover = {
+      some: {},
+    };
+  } else {
+    where.mover = {
+      none: {},
+    };
+  }
+
+  return where;
+};
+
+const setOrderBy = (orderBy: string) => {
+  let orderByQuery: { [key: string]: "desc" | "asc" };
+  switch (orderBy) {
+    case "resent":
+      orderByQuery = { createAt: "desc" };
+      break;
+    case "movingDate":
+      orderByQuery = { movingDate: "asc" };
+      break;
+    default:
+      orderByQuery = { createAt: "desc" };
+  }
+  return orderByQuery;
+};
+
 //이사요청 목록 조회
 const getMovingRequestList = async (customerId: number, query: queryString) => {
-  const { limit, isCompleted, cursor } = query;
+  const { limit, cursor, orderBy } = query;
+  const whereCondition: WhereCondition = setWhereCondition(query);
+  const orderByQuery = setOrderBy(orderBy);
 
   const movingRequestList = await movingRequestRepository.getMovingRequestList(
     customerId,
-    { limit, isCompleted, cursor }
+    { limit, cursor, orderBy: orderByQuery },
+    whereCondition
   );
 
   if (!movingRequestList) {
@@ -50,8 +137,8 @@ const getMovingRequestList = async (customerId: number, query: queryString) => {
       ...rest,
       requestDate: createAt,
       isConfirmed: Boolean(confirmedQuote), //완료된 견적서와 관계가 있다면 true
-      // name: customer.user.name,
-      // isDesignated: _count.mover > 0, //관계가 있다면 true
+      name: customer.user.name,
+      isDesignated: Boolean(_count.mover), //관계가 있다면 true
     };
   });
 
@@ -146,21 +233,22 @@ const getPendingQuotes = async (customerId: number) => {
     throw error;
   }
 
-  const quoteCount = await quoteRepository.getQuoteCountByMovingRequestId(
+  const quoteCountPromise =
+    await quoteRepository.getQuoteCountByMovingRequestId(activeRequest.id);
+
+  const quotesPromise = quoteRepository.getQuoteByMovingRequestId(
     activeRequest.id
   );
 
-  const quotes = quoteRepository.getQuoteByMovingRequestId(activeRequest.id);
-
-  const [promiseQuotes, promiseQuoteCount] = await Promise.all([
-    quotes,
-    quoteCount,
+  const [quotes, quoteCount] = await Promise.all([
+    quotesPromise,
+    quoteCountPromise,
   ]);
 
-  const processedQuotes = await processQuotes(customerId, promiseQuotes);
+  const processedQuotes = await processQuotes(customerId, quotes);
 
   return {
-    totalCount: promiseQuoteCount,
+    totalCount: quoteCount,
     list: processedQuotes,
   };
 };
@@ -209,7 +297,7 @@ const designateMover = async (
     activeRequestPromise,
   ]);
 
-  if (activeRequest) {
+  if (!activeRequest) {
     const error: CustomError = new Error("Bad Request");
     error.status = 400;
     error.data = {
@@ -233,6 +321,13 @@ const designateMover = async (
     movingRequestId,
     moverId
   );
+
+  //알림 생성 기사에게
+  notificationRepository.createNotification({
+    userId: movingRequest.mover[0].user.id,
+    content: `${movingRequest.mover[0].nickname}기사님 새로운 지정 요청이 있습니다.`,
+    isRead: false,
+  });
 
   //남은 지정요청 수 조회
   const designateRemain = 3 - movingRequest._count.mover;

@@ -33,6 +33,12 @@ const createNotification = async (notification: Notification) => {
   });
 };
 
+const createManyNotification = async (notifications: Notification[]) => {
+  return await prismaClient.notification.createMany({
+    data: notifications,
+  });
+};
+
 const isReadNotification = async (notificationId: number) => {
   return await prismaClient.notification.update({
     where: { id: notificationId },
@@ -40,4 +46,9 @@ const isReadNotification = async (notificationId: number) => {
   });
 };
 
-export default { findNotifications, createNotification, isReadNotification };
+export default {
+  findNotifications,
+  createNotification,
+  createManyNotification,
+  isReadNotification,
+};

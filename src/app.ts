@@ -18,6 +18,7 @@ import userRouter from "./controllers/userController";
 import notificationRouter from "./controllers/notificationController";
 
 import confirmedQuoteRouter from "./controllers/confirmedQuoteController";
+import { initNotification } from "./schedules/notifications";
 const app = express();
 
 //CORS 설정
@@ -40,6 +41,7 @@ const corsOptions: CorsOptions = {
 
 // Express app에 CORS 적용
 app.use(cors(corsOptions));
+app.use(express.urlencoded({ extended: true }));
 
 //미들웨어
 app.use(express.json()); //json parse
@@ -56,6 +58,9 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+//알림 스케줄 등록
+initNotification();
 
 //라우터 모음 -> 컨트롤러
 app.use("/services", serviceRouter);
