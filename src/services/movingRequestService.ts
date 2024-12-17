@@ -2,8 +2,6 @@ import movingRequestRepository from "../repositorys/movingRequestRepository";
 import { MovingRequestData } from "../utils/interfaces/movingRequest/movingRequest";
 import CustomError from "../utils/interfaces/customError";
 import quoteRepository from "../repositorys/quoteRepository";
-import getRatingsByMoverIds from "../utils/mover/getRatingsByMover";
-import processMoverData from "../utils/mover/processMoverData";
 import processQuotes from "../utils/quote/processQuoteData";
 import notificationRepository from "../repositorys/notificationRepository";
 
@@ -16,6 +14,7 @@ interface queryString {
   houseMove: boolean;
   officeMove: boolean;
   orderBy: string;
+  isQuoted: boolean;
 }
 
 interface OffsetQueryString {
@@ -28,10 +27,13 @@ interface WhereCondition {
   OR?: object[];
   service?: object;
   mover?: object;
+  quote?: object;
+  isRejected?: object;
 }
 
-const setWhereCondition = (query: queryString) => {
-  const { keyword, smallMove, houseMove, officeMove, isDesignated } = query;
+const setWhereCondition = (query: queryString, moverId: number) => {
+  const { keyword, smallMove, houseMove, officeMove, isDesignated, isQuoted } =
+    query;
   const where: WhereCondition = {};
 
   if (keyword) {
@@ -83,6 +85,30 @@ const setWhereCondition = (query: queryString) => {
     };
   }
 
+  if (!isQuoted) {
+    where.quote = {
+      none: {
+        moverId,
+      },
+    };
+    where.isRejected = {
+      none: {
+        id: moverId,
+      },
+    };
+  } else {
+    where.quote = {
+      some: {
+        moverId,
+      },
+    };
+    where.isRejected = {
+      some: {
+        id: moverId,
+      },
+    };
+  }
+
   return where;
 };
 
@@ -102,16 +128,37 @@ const setOrderBy = (orderBy: string) => {
 };
 
 //이사요청 목록 조회
-const getMovingRequestList = async (customerId: number, query: queryString) => {
+const getMovingRequestListByMover = async (
+  moverId: number,
+  query: queryString
+) => {
   const { limit, cursor, orderBy } = query;
-  const whereCondition: WhereCondition = setWhereCondition(query);
+  const whereCondition: WhereCondition = setWhereCondition(query, moverId);
   const orderByQuery = setOrderBy(orderBy);
 
-  const movingRequestList = await movingRequestRepository.getMovingRequestList(
-    customerId,
+  const serviceCountsPromise =
+    movingRequestRepository.getMovingRequestCountByServices(whereCondition);
+
+  const totalCountPromise =
+    movingRequestRepository.getTotalCount(whereCondition);
+  const designatedCountPromise =
+    movingRequestRepository.getMovingRequestCountByDesignated(
+      whereCondition,
+      moverId
+    );
+
+  const movingRequestListPromise = movingRequestRepository.getMovingRequestList(
     { limit, cursor, orderBy: orderByQuery },
     whereCondition
   );
+
+  const [movingRequestList, serviceCounts, totalCount, designatedCount] =
+    await Promise.all([
+      movingRequestListPromise,
+      serviceCountsPromise,
+      totalCountPromise,
+      designatedCountPromise,
+    ]);
 
   if (!movingRequestList) {
     const error: CustomError = new Error("Not Found");
@@ -143,9 +190,14 @@ const getMovingRequestList = async (customerId: number, query: queryString) => {
   });
 
   return {
-    nextCursor,
-    hasNext,
-    list: resMovingRequestList.slice(0, limit),
+    nextCursor, //다음 페이지 커서
+    hasNext, //다음 페이지 존재 여부
+    serviceCounts, //서비스별 이사요청 수
+    requestCounts: {
+      total: totalCount, //총 이사요청 수
+      designated: designatedCount, //지정 이사요청 수
+    },
+    list: resMovingRequestList.slice(0, limit), //이사요청 목록
   };
 };
 
@@ -351,7 +403,7 @@ const cancelDesignateMover = async (
 };
 
 export default {
-  getMovingRequestList,
+  getMovingRequestListByMover,
   createMovingRequest,
   designateMover,
   cancelDesignateMover,
