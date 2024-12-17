@@ -26,19 +26,72 @@ const getMovingRequestCountByCustomer = (customerId: number) => {
   });
 };
 
+//이사요청 서비스별 카운트 조회
+const getMovingRequestCountByServices = async (where: WhereCondition) => {
+  const counts = await prismaClient.movingRequest.groupBy({
+    where,
+    by: ["service"],
+    _count: {
+      service: true,
+    },
+  });
+
+  // 초기값 설정
+  const result = {
+    smallMove: 0, // service: 1
+    houseMove: 0, // service: 2
+    officeMove: 0, // service: 3
+  };
+
+  // 각 서비스 타입별로 카운트 할당
+  counts.forEach((count) => {
+    switch (count.service) {
+      case 1:
+        result.smallMove = count._count.service;
+        break;
+      case 2:
+        result.houseMove = count._count.service;
+        break;
+      case 3:
+        result.officeMove = count._count.service;
+        break;
+    }
+  });
+
+  return result;
+};
+
+const getMovingRequestCountByDesignated = async (
+  where: WhereCondition,
+  moverId: number
+) => {
+  return prismaClient.movingRequest.count({
+    where: {
+      ...where,
+      mover: {
+        some: {
+          id: moverId,
+        },
+      },
+    },
+  });
+};
+
+const getTotalCount = async (where: WhereCondition) => {
+  return prismaClient.movingRequest.count({
+    where,
+  });
+};
+
 //이사요청 목록 조회
-const getMovingRequestList = (
-  customerId: number,
+const getMovingRequestListByMover = (
   query: CursorQueryString,
   where: WhereCondition
 ) => {
   const { limit, cursor, orderBy } = query;
 
   return prismaClient.movingRequest.findMany({
-    where: {
-      customerId,
-      ...where,
-    },
+    where,
     orderBy,
     take: limit,
     skip: cursor ? 1 : 0, //커서 자신을 스킵하기 위함
@@ -263,7 +316,7 @@ const getActiveRequest = (customerId: number) => {
 };
 
 export default {
-  getMovingRequestList,
+  getMovingRequestList: getMovingRequestListByMover,
   createMovingRequest,
   updateDesignated,
   updateDesignatedCancel,
@@ -272,4 +325,7 @@ export default {
   getMovingRequestById,
   getMovingRequestListByCustomer,
   getMovingRequestCountByCustomer,
+  getMovingRequestCountByServices,
+  getMovingRequestCountByDesignated,
+  getTotalCount,
 };
