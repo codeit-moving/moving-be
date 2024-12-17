@@ -141,4 +141,28 @@ const signUpMover = async (mover: SignUpMover) => {
   }
 };
 
-export default { signIn, signUpCustomer, signUpMover };
+const validate = async (email: string, phoneNumber: string) => {
+  const user = await userRepository.existingUser(email, phoneNumber);
+
+  if (user) {
+    const error: CustomError = new Error("Conflict");
+    if (user.email === email) {
+      error.status = 409;
+      error.data = {
+        message: "이미 존재하는 이메일입니다.",
+      };
+      throw error;
+    }
+    if (user.phoneNumber === phoneNumber) {
+      error.status = 409;
+      error.data = {
+        message: "이미 존재하는 전화번호입니다.",
+      };
+      throw error;
+    }
+  }
+
+  return user;
+};
+
+export default { signIn, signUpCustomer, signUpMover, validate };

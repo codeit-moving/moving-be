@@ -122,6 +122,19 @@ router.post(
 );
 
 router.post(
+  "/validate",
+  asyncHandle(async (req, res, next) => {
+    try {
+      const { email, phoneNumber } = req.body;
+      await authService.validate(email, phoneNumber);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
+router.post(
   "/refresh",
   passport.authenticate("refresh-token", { session: false }),
   asyncHandle(async (req, res, next) => {
