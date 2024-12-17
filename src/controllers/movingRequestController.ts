@@ -9,11 +9,11 @@ const router = express.Router();
 
 //이사요청 목록 조회
 router.get(
-  "/",
-  // passport.authenticate("jwt", { session: false }),
+  "/my-mover",
+  passport.authenticate("jwt", { session: false }),
   asyncHandle(async (req, res, next) => {
     try {
-      // const { customerId } = req.user as { customerId: number };
+      const { moverId } = req.user as { moverId: number };
 
       const {
         limit = "10",
@@ -24,6 +24,7 @@ router.get(
         houseMove = "false",
         officeMove = "false",
         orderBy = "resent",
+        isQuoted = "false",
       } = req.query;
       const parseLimit = parseInt(limit as string);
       const parseCursor = parseInt(cursor as string);
@@ -31,10 +32,10 @@ router.get(
       const parseSmallMove = checkBoolean(smallMove as string);
       const parseHouseMove = checkBoolean(houseMove as string);
       const parseOfficeMove = checkBoolean(officeMove as string);
+      const parseIsQuoted = checkBoolean(isQuoted as string);
 
-      const movingRequestList = await movingRequestService.getMovingRequestList(
-        1,
-        {
+      const movingRequestList =
+        await movingRequestService.getMovingRequestListByMover(moverId, {
           limit: parseLimit,
           isDesignated: parseIsDesignated,
           cursor: parseCursor,
@@ -43,8 +44,8 @@ router.get(
           houseMove: parseHouseMove || false,
           officeMove: parseOfficeMove || false,
           orderBy: orderBy as string,
-        }
-      );
+          isQuoted: parseIsQuoted || false,
+        });
       return res.status(200).send(movingRequestList);
     } catch (error) {
       next(error);

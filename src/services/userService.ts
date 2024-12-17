@@ -1,5 +1,6 @@
 import userRepository from "../repositorys/userRepository";
 import CustomError from "../utils/interfaces/customError";
+import bcrypt from "bcrypt";
 
 interface UpdateUser {
   name?: string;
@@ -32,8 +33,13 @@ interface MoverResponse {
 
 const updateUser = async (userId: number, updateData: UpdateUser) => {
   const user = await userRepository.findById(userId);
+  const isPasswordCorrect = await bcrypt.compare(
+    updateData.currentPassword!,
+    user!.password!
+  );
+
   if (updateData.newPassword && updateData.currentPassword) {
-    if (user!.password !== updateData.currentPassword) {
+    if (!isPasswordCorrect) {
       const error: CustomError = new Error("Unauthorized");
       error.status = 401;
       error.data = {
@@ -52,10 +58,12 @@ const updateUser = async (userId: number, updateData: UpdateUser) => {
     }
   }
 
+  const hashedNewPassword = await bcrypt.hash(updateData.newPassword!, 10);
+
   const updateUserData = {
     name: updateData.name,
     phoneNumber: updateData.phoneNumber,
-    password: updateData.newPassword,
+    password: hashedNewPassword,
   };
 
   return await userRepository.updateUser(userId, updateUserData);
