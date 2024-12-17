@@ -3,31 +3,23 @@ import customError from "../utils/interfaces/customError";
 import { ReviewCreateData, ReviewQuery } from "../utils/review/types";
 
 // 기사의 리뷰 목록 조회 (상세페이지용)
-const getMoverReviewsDetail = async (moverId: number, query: ReviewQuery) => {
+const getMoverReviewsList = async (moverId: number, query: ReviewQuery) => {
   const pageSize = query.pageSize || 5;
   const pageNum = query.pageNum || 1;
 
-  const [totalCount, reviews] = await reviewRepository.getMoverReviews(
-    moverId,
-    {
+  const [totalCount, reviews] = await Promise.all([
+    reviewRepository.getMoverReviewCount(moverId),
+    reviewRepository.getMoverReviewList(moverId, {
       pageSize,
       pageNum,
-    }
-  );
+    }),
+  ]);
 
   return {
     currentPage: pageNum,
-    pageSize,
     totalPages: Math.ceil(totalCount / pageSize),
     totalCount,
-    list: reviews.map((review) => ({
-      id: review.id,
-      images: Array.isArray(review.imageUrl) ? review.imageUrl : [], // 배열 확인 및 변환
-      name: review.customer.user.name,
-      rating: review.rating,
-      content: review.content,
-      createdAt: review.createAt,
-    })),
+    list: reviews,
   };
 };
 
@@ -36,31 +28,19 @@ const getMyReviewsList = async (customerId: number, query: ReviewQuery) => {
   const pageSize = query.pageSize || 6;
   const pageNum = query.pageNum || 1;
 
-  const [totalCount, reviews] = await reviewRepository.getMyReviews(
-    customerId,
-    {
+  const [totalCount, reviews] = await Promise.all([
+    reviewRepository.getMyReviewCount(customerId),
+    reviewRepository.getMyReviewList(customerId, {
       pageSize,
       pageNum,
-    }
-  );
+    }),
+  ]);
 
   return {
     currentPage: pageNum,
-
     totalPages: Math.ceil(totalCount / pageSize),
     totalCount,
-    list: reviews.map((review) => ({
-      id: review.id,
-      service: review.confirmedQuote.movingRequest.service,
-      isDesignated: review.confirmedQuote.movingRequest.isDesignated,
-      imageUrl: review.mover.imageUrl,
-      nickname: review.mover.nickname,
-      movingDate: review.confirmedQuote.movingRequest.movingDate,
-      cost: review.confirmedQuote.quote.cost,
-      rating: review.rating,
-      content: review.content,
-      createdAt: review.createAt,
-    })),
+    list: reviews,
   };
 };
 
@@ -118,30 +98,24 @@ const getAvailableReviewsList = async (
   const pageSize = query.pageSize || 6;
   const pageNum = query.pageNum || 1;
 
-  const [totalCount, confirmedQuotes] =
-    await reviewRepository.getAvailableReviews(customerId, {
+  const [totalCount, reviews] = await Promise.all([
+    reviewRepository.getAvailableReviewCount(customerId),
+    reviewRepository.getAvailableReviewList(customerId, {
       pageSize,
       pageNum,
-    });
+    }),
+  ]);
 
   return {
     currentPage: pageNum,
     totalPages: Math.ceil(totalCount / pageSize),
     totalCount,
-    list: confirmedQuotes.map((quote) => ({
-      id: quote.id,
-      service: quote.movingRequest.service,
-      isDesignated: quote.movingRequest.isDesignated,
-      imageUrl: quote.mover.imageUrl,
-      nickname: quote.mover.nickname,
-      movingDate: quote.movingRequest.movingDate,
-      cost: quote.quote.cost,
-    })),
+    list: reviews,
   };
 };
 
 export default {
-  getMoverReviewsDetail,
+  getMoverReviewsList,
   getMyReviewsList,
   createNewReview,
   getAvailableReviewsList,

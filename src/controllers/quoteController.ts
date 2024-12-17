@@ -26,7 +26,7 @@ router.get(
   })
 );
 
-// 견적서 생성 엔드포인트를 정의
+// 견적서 생성하기
 router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
@@ -43,12 +43,11 @@ router.post(
       comment
     );
 
-    // 견적서가 성공적으로 생성되었다는 응답을 보내요.
-    return res.status(201).json(quote);
+    return res.status(201).send(quote);
   })
 );
 
-// 기사님이 작성한 견적서 목록을 조회하는 엔드포인트를 정의
+// (기사님이 작성한) 견적서 목록 조회
 router.get(
   "/mover",
   passport.authenticate("jwt", { session: false }),
@@ -80,11 +79,11 @@ router.get(
       cursor: nextCursorId, // 내부적으로는 cursor로 사용
     });
 
-    return res.status(200).json(quotes);
+    return res.status(200).send(quotes);
   })
 );
 
-// 기사님이 작성한 특정 견적서의 상세 정보를 조회하는 엔드포인트를 정의
+// (기사님이 작성한)특정 견적서 상세 조회
 router.get(
   "/mover/:quoteId",
   passport.authenticate("jwt", { session: false }),
@@ -117,7 +116,7 @@ router.get(
 
     const quote = await quoteService.getQuoteDetail(moverId, quoteId, cost);
 
-    return res.status(200).json(quote);
+    return res.status(200).send(quote);
   })
 );
 
@@ -145,7 +144,7 @@ router.post(
     const result = await quoteService.rejectRequest(moverId, movingRequestId);
 
     // 응답 추가
-    res.status(200).json(result);
+    res.status(200).send(result);
   })
 );
 
@@ -181,7 +180,7 @@ router.get(
     });
 
     // 응답
-    res.status(200).json(result);
+    res.status(200).send(result);
   })
 );
 

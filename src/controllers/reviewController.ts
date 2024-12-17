@@ -13,12 +13,12 @@ router.get(
     const moverId = parseInt(req.params.moverId);
     const { pageSize, pageNum } = req.query;
 
-    const result = await reviewService.getMoverReviewsDetail(moverId, {
+    const result = await reviewService.getMoverReviewsList(moverId, {
       pageSize: pageSize ? parseInt(pageSize as string) : undefined,
       pageNum: pageNum ? parseInt(pageNum as string) : undefined,
     });
 
-    res.status(200).json(result);
+    res.status(200).send(result);
   })
 );
 
@@ -44,7 +44,7 @@ router.get(
       pageNum: pageNum ? parseInt(pageNum as string) : undefined,
     });
 
-    res.status(200).json(result);
+    res.status(200).send(result);
   })
 );
 
@@ -80,7 +80,7 @@ router.post(
       imageUrl,
     });
 
-    res.status(200).json(result);
+    res.status(200).send(result);
   })
 );
 
@@ -106,7 +106,7 @@ router.get(
       pageNum: pageNum ? parseInt(pageNum as string) : undefined,
     });
 
-    res.status(200).json(result);
+    res.status(200).send(result);
   })
 );
 
