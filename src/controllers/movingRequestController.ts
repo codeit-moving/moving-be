@@ -9,7 +9,7 @@ const router = express.Router();
 
 //이사요청 목록 조회
 router.get(
-  "/my-mover",
+  "/by-mover",
   passport.authenticate("jwt", { session: false }),
   asyncHandle(async (req, res, next) => {
     try {
