@@ -22,7 +22,7 @@ const naver = async (profile: any) => {
     const newUser = await userRepository.createUser({
       email: profile.emails?.[0].value!,
       name: "Unknown",
-      phoneNumber: "Unknown",
+      phoneNumber: null,
       password: null,
       isOAuth: true,
     });
@@ -32,4 +32,53 @@ const naver = async (profile: any) => {
     throw error;
   }
 };
-export default { naver };
+
+const kakao = async (profile: any) => {
+  try {
+    const existingUser = await userRepository.findByEmail(
+      profile._json.kakao_account.email
+    );
+
+    if (existingUser) {
+      return existingUser;
+    }
+
+    const newUser = await userRepository.createUser({
+      email: profile._json.kakao_account.email,
+      name: "Unknown",
+      phoneNumber: null,
+      password: null,
+      isOAuth: true,
+    });
+
+    return newUser;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const google = async (profile: any) => {
+  try {
+    const existingUser = await userRepository.findByEmail(
+      profile.emails?.[0].value
+    );
+
+    if (existingUser) {
+      return existingUser;
+    }
+
+    const newUser = await userRepository.createUser({
+      email: profile.emails?.[0].value!,
+      name: "Unknown",
+      phoneNumber: null,
+      password: null,
+      isOAuth: true,
+    });
+
+    return newUser;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export default { naver, kakao, google };

@@ -22,4 +22,20 @@ const deactivateImage = async (customerId: number) => {
   });
 }; //기존 이미지 비활성화
 
-export default { createImage, deactivateImage };
+const findInActiveImage = async () => {
+  return prismaClient.profileImage.findMany({
+    where: {
+      status: false,
+    },
+  });
+};
+
+const deleteImage = async (imageUrl: string) => {
+  return prismaClient.profileImage.deleteMany({
+    where: {
+      imageUrl,
+    },
+  });
+};
+
+export default { createImage, deactivateImage, deleteImage, findInActiveImage };
