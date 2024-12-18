@@ -40,6 +40,17 @@ interface UpdateProfile {
   regions?: number[];
 }
 
+interface Profile {
+  userId: number;
+  nickname: string;
+  career: number;
+  introduction: string;
+  description: string;
+  services: number[];
+  regions: number[];
+  imageUrl: Express.Multer.File;
+}
+
 const setOrderByOptions = (
   order: string
 ): { [key: string]: object | string } => {
@@ -285,6 +296,15 @@ const updateMoverProfile = async (userId: number, profile: UpdateProfile) => {
   });
 };
 
+const createMoverProfile = async (profile: Profile) => {
+  const imageUrl = await uploadFile(profile.imageUrl);
+  const moverProfile = {
+    ...profile,
+    imageUrl,
+  };
+  return moverRepository.createMoverProfile(moverProfile);
+};
+
 export default {
   getMoverList,
   getMoverDetail,
@@ -292,4 +312,5 @@ export default {
   getMoverByFavorite,
   getMover,
   updateMoverProfile,
+  createMoverProfile,
 };

@@ -16,6 +16,17 @@ interface UpdateProfile {
   regions?: number[];
 }
 
+interface Profile {
+  userId: number;
+  nickname: string;
+  career: number;
+  introduction: string;
+  description: string;
+  services: number[];
+  regions: number[];
+  imageUrl: string;
+}
+
 const defaultSelect = {
   id: true,
   services: true,
@@ -187,6 +198,12 @@ const updateMoverProfile = async (userId: number, profile: UpdateProfile) => {
   });
 };
 
+const createMoverProfile = (profile: Profile) => {
+  return prismaClient.mover.create({
+    data: { ...profile, imageUrl: { create: { imageUrl: profile.imageUrl } } },
+  });
+};
+
 export default {
   getMoverCount,
   getMoverList,
@@ -195,4 +212,5 @@ export default {
   toggleFavorite,
   getMoverByFavorite,
   updateMoverProfile,
+  createMoverProfile,
 };
