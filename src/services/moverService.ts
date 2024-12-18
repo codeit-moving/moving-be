@@ -3,6 +3,9 @@ import moverRepository from "../repositorys/moverRepository";
 import CustomError from "../utils/interfaces/customError";
 import processMoversData from "../utils/mover/processMoverData";
 import RatingResult from "../utils/interfaces/mover/ratingResult";
+import imageRepository from "../repositorys/imageRepository";
+import { uploadFile } from "../utils/s3.utils";
+import prismaClient from "../utils/prismaClient";
 
 interface queryString {
   order: string;
@@ -25,6 +28,16 @@ interface whereConditions {
 interface FavoriteData {
   connect?: object;
   disconnect?: object;
+}
+
+interface UpdateProfile {
+  nickname?: string;
+  imageUrl?: Express.Multer.File;
+  career?: number;
+  introduction?: string;
+  description?: string;
+  services?: number[];
+  regions?: number[];
 }
 
 const setOrderByOptions = (
@@ -255,10 +268,28 @@ const getRatingsByMoverIds = async (moverIds: number | number[]) => {
   return ratingsByMover;
 };
 
+const updateMoverProfile = async (userId: number, profile: UpdateProfile) => {
+  const { imageUrl, ...rest } = profile;
+  return prismaClient.$transaction(async () => {
+    const mover = await moverRepository.updateMoverProfile(userId, {
+      ...rest,
+    });
+
+    if (imageUrl) {
+      const uploadImage = await uploadFile(imageUrl);
+      await imageRepository.deactivateImage(mover.id);
+      await imageRepository.createImage(mover.id, uploadImage);
+    }
+
+    return mover;
+  });
+};
+
 export default {
   getMoverList,
   getMoverDetail,
   toggleFavorite,
   getMoverByFavorite,
   getMover,
+  updateMoverProfile,
 };

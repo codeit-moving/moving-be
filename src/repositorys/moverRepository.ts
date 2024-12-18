@@ -7,6 +7,15 @@ interface whereConditions {
   OR?: object[];
 }
 
+interface UpdateProfile {
+  nickname?: string;
+  career?: number;
+  introduction?: string;
+  description?: string;
+  services?: number[];
+  regions?: number[];
+}
+
 const defaultSelect = {
   id: true,
   services: true,
@@ -171,6 +180,13 @@ const getMoverByFavorite = (
   });
 };
 
+const updateMoverProfile = async (userId: number, profile: UpdateProfile) => {
+  return prismaClient.mover.update({
+    where: { userId: userId },
+    data: profile,
+  });
+};
+
 export default {
   getMoverCount,
   getMoverList,
@@ -178,4 +194,5 @@ export default {
   getMoverById,
   toggleFavorite,
   getMoverByFavorite,
+  updateMoverProfile,
 };
