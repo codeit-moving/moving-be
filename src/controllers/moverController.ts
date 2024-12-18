@@ -4,6 +4,8 @@ import express from "express";
 import checkBoolean from "../utils/checkBoolean";
 import passport from "passport";
 import { optionalJwtAuth } from "../middlewares/authMiddleware";
+import upload from "../utils/multer";
+import { Payload } from "../utils/token.utils";
 
 interface queryString {
   nextCursorId: string;
@@ -136,6 +138,64 @@ router.get(
       const { moverId } = req.user as { moverId: number };
       const mover = await moverService.getMover(moverId);
       res.status(200).send(mover);
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
+router.patch(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  upload.single("imageUrl"),
+  asyncHandle(async (req, res, next) => {
+    try {
+      const userId = (req.user as Payload).id;
+      const moverId = (req.user as { moverId: number }).moverId;
+      const profile = {
+        ...req.body,
+        imageUrl: req.file,
+        career: parseInt(req.body.career),
+        regions: req.body.regions
+          ? JSON.parse(req.body.regions).map(Number)
+          : [],
+        services: req.body.services
+          ? JSON.parse(req.body.services).map(Number)
+          : [],
+      };
+      await moverService.updateMoverProfile(userId, moverId, profile);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
+router.post(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  upload.single("imageUrl"),
+  asyncHandle(async (req, res, next) => {
+    try {
+      const userId = (req.user as Payload).id;
+      const profile = {
+        userId: userId,
+        ...req.body,
+        career: parseInt(req.body.career),
+        imageUrl: req.file!,
+        regions: req.body.regions
+          ? Array.isArray(req.body.regions)
+            ? req.body.regions.map(Number)
+            : JSON.parse(req.body.regions).map(Number)
+          : [],
+        services: req.body.services
+          ? Array.isArray(req.body.services)
+            ? req.body.services.map(Number)
+            : JSON.parse(req.body.services).map(Number)
+          : [],
+      };
+      await moverService.createMoverProfile(profile);
+      res.status(204).send();
     } catch (error) {
       next(error);
     }

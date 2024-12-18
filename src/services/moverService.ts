@@ -3,6 +3,8 @@ import moverRepository from "../repositorys/moverRepository";
 import CustomError from "../utils/interfaces/customError";
 import processMoversData from "../utils/mover/processMoverData";
 import RatingResult from "../utils/interfaces/mover/ratingResult";
+import imageRepository from "../repositorys/imageRepository";
+import { uploadFile } from "../utils/s3.utils";
 
 interface queryString {
   order: string;
@@ -25,6 +27,27 @@ interface whereConditions {
 interface FavoriteData {
   connect?: object;
   disconnect?: object;
+}
+
+interface UpdateProfile {
+  nickname?: string;
+  imageUrl?: Express.Multer.File;
+  career?: number;
+  introduction?: string;
+  description?: string;
+  services?: number[];
+  regions?: number[];
+}
+
+interface Profile {
+  userId: number;
+  nickname: string;
+  career: number;
+  introduction: string;
+  description: string;
+  services: number[];
+  regions: number[];
+  imageUrl: Express.Multer.File;
 }
 
 const setOrderByOptions = (
@@ -255,10 +278,59 @@ const getRatingsByMoverIds = async (moverIds: number | number[]) => {
   return ratingsByMover;
 };
 
+const updateMoverProfile = async (
+  userId: number,
+  moverId: number,
+  profile: UpdateProfile
+) => {
+  const { imageUrl, ...rest } = profile;
+  let uploadedImageUrl;
+
+  if (imageUrl) {
+    try {
+      uploadedImageUrl = await uploadFile(imageUrl);
+    } catch (e) {
+      const error: CustomError = new Error("Internal Server Error");
+      error.status = 500;
+      error.data = {
+        message: "이미지 업로드 실패",
+      };
+      throw error;
+    }
+  }
+
+  try {
+    return await imageRepository.updateMoverProfile(
+      uploadedImageUrl,
+      userId,
+      moverId,
+      rest
+    );
+  } catch (e) {
+    const error: CustomError = new Error("Internal Server Error");
+    error.status = 500;
+    error.data = {
+      message: "프로필 업데이트 실패",
+    };
+    throw error;
+  }
+};
+
+const createMoverProfile = async (profile: Profile) => {
+  const imageUrl = await uploadFile(profile.imageUrl);
+  const moverProfile = {
+    ...profile,
+    imageUrl,
+  };
+  return moverRepository.createMoverProfile(moverProfile);
+};
+
 export default {
   getMoverList,
   getMoverDetail,
   toggleFavorite,
   getMoverByFavorite,
   getMover,
+  updateMoverProfile,
+  createMoverProfile,
 };
