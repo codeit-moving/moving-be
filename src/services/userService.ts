@@ -35,7 +35,9 @@ const updateUser = async (userId: number, updateData: UpdateUser) => {
   const user = await userRepository.findById(userId);
 
   if (updateData.newPassword || updateData.currentPassword) {
+    //새로운 비밀번호, 현재 비밀번호가 존재하면 일단 로직 수행
     if (!updateData.newPassword || !updateData.currentPassword) {
+      //그런데 둘 중 하나라도 없으면 에러 발생
       const error: CustomError = new Error("Bad Request");
       error.status = 400;
       error.data = {
