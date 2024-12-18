@@ -165,4 +165,35 @@ const validate = async (email: string, phoneNumber: string) => {
   return user;
 };
 
-export default { signIn, signUpCustomer, signUpMover, validate };
+const validatePassword = async (userId: number, password: string) => {
+  const findPassword = await userRepository.findPassword(userId);
+  const decodedPassword = await bcrypt.compare(
+    password,
+    findPassword?.password!
+  );
+  if (!findPassword) {
+    const error: CustomError = new Error("Not Found");
+    error.status = 404;
+    error.data = {
+      message: "사용자가 존재하지 않습니다.",
+    };
+    throw error;
+  }
+
+  if (!decodedPassword) {
+    const error: CustomError = new Error("Unauthorized");
+    error.status = 401;
+    error.data = {
+      message: "비밀번호가 일치하지 않습니다.",
+    };
+    throw error;
+  }
+};
+
+export default {
+  signIn,
+  signUpCustomer,
+  signUpMover,
+  validate,
+  validatePassword,
+};

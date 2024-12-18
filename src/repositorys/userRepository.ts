@@ -243,6 +243,13 @@ const updateUser = async (userId: number, data: UpdateUser) => {
   });
 };
 
+const findPassword = (userId: number) => {
+  return prismaClient.user.findUnique({
+    where: { id: userId },
+    select: { password: true },
+  });
+};
+
 export default {
   findByEmail,
   createCustomer,
@@ -254,4 +261,5 @@ export default {
   getMover,
   updateUser,
   findById,
+  findPassword,
 };
