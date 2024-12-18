@@ -5,7 +5,6 @@ import processMoversData from "../utils/mover/processMoverData";
 import RatingResult from "../utils/interfaces/mover/ratingResult";
 import imageRepository from "../repositorys/imageRepository";
 import { uploadFile } from "../utils/s3.utils";
-import prismaClient from "../utils/prismaClient";
 
 interface queryString {
   order: string;
@@ -279,21 +278,36 @@ const getRatingsByMoverIds = async (moverIds: number | number[]) => {
   return ratingsByMover;
 };
 
-const updateMoverProfile = async (userId: number, profile: UpdateProfile) => {
+const updateMoverProfile = async (
+  userId: number,
+  moverId: number,
+  profile: UpdateProfile
+) => {
   const { imageUrl, ...rest } = profile;
-  return prismaClient.$transaction(async () => {
-    const mover = await moverRepository.updateMoverProfile(userId, {
-      ...rest,
-    });
 
+  try {
+    let uploadedImageUrl;
     if (imageUrl) {
-      const uploadImage = await uploadFile(imageUrl);
-      await imageRepository.deactivateImage(mover.id);
-      await imageRepository.createImage(mover.id, uploadImage);
+      uploadedImageUrl = await uploadFile(imageUrl);
     }
 
-    return mover;
-  });
+    const result = await imageRepository.updateMoverProfile(
+      uploadedImageUrl,
+      userId,
+      moverId,
+      {
+        ...rest,
+      }
+    );
+    return result;
+  } catch (e) {
+    const error: CustomError = new Error("Internal Server Error");
+    error.status = 500;
+    error.data = {
+      message: "이미지 업로드 실패",
+    };
+    throw error;
+  }
 };
 
 const createMoverProfile = async (profile: Profile) => {

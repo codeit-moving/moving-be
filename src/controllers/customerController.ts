@@ -43,6 +43,7 @@ router.patch(
   asyncHandle(async (req, res, next) => {
     try {
       const userId = (req.user as Payload).id;
+      const customerId = (req.user as { customerId: number }).customerId;
       const profile = {
         ...req.body,
         imageUrl: req.file,
@@ -53,7 +54,7 @@ router.patch(
           ? JSON.parse(req.body.services).map(Number)
           : [],
       };
-      await customerService.updateCustomerProfile(userId, profile);
+      await customerService.updateCustomerProfile(userId, customerId, profile);
       res.status(204).send();
     } catch (error) {
       next(error);

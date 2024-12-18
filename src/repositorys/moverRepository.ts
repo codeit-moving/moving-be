@@ -191,13 +191,6 @@ const getMoverByFavorite = (
   });
 };
 
-const updateMoverProfile = async (userId: number, profile: UpdateProfile) => {
-  return prismaClient.mover.update({
-    where: { userId: userId },
-    data: profile,
-  });
-};
-
 const createMoverProfile = (profile: Profile) => {
   return prismaClient.mover.create({
     data: { ...profile, imageUrl: { create: { imageUrl: profile.imageUrl } } },
@@ -211,6 +204,5 @@ export default {
   getMoverById,
   toggleFavorite,
   getMoverByFavorite,
-  updateMoverProfile,
   createMoverProfile,
 };

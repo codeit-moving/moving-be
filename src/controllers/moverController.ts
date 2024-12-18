@@ -151,9 +151,11 @@ router.patch(
   asyncHandle(async (req, res, next) => {
     try {
       const userId = (req.user as Payload).id;
+      const moverId = (req.user as { moverId: number }).moverId;
       const profile = {
         ...req.body,
         imageUrl: req.file,
+        career: parseInt(req.body.career),
         regions: req.body.regions
           ? JSON.parse(req.body.regions).map(Number)
           : [],
@@ -161,7 +163,7 @@ router.patch(
           ? JSON.parse(req.body.services).map(Number)
           : [],
       };
-      await moverService.updateMoverProfile(userId, profile);
+      await moverService.updateMoverProfile(userId, moverId, profile);
       res.status(204).send();
     } catch (error) {
       next(error);
