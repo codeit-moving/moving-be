@@ -284,27 +284,33 @@ const updateMoverProfile = async (
   profile: UpdateProfile
 ) => {
   const { imageUrl, ...rest } = profile;
+  let uploadedImageUrl;
+
+  if (imageUrl) {
+    try {
+      uploadedImageUrl = await uploadFile(imageUrl);
+    } catch (e) {
+      const error: CustomError = new Error("Internal Server Error");
+      error.status = 500;
+      error.data = {
+        message: "이미지 업로드 실패",
+      };
+      throw error;
+    }
+  }
 
   try {
-    let uploadedImageUrl;
-    if (imageUrl) {
-      uploadedImageUrl = await uploadFile(imageUrl);
-    }
-
-    const result = await imageRepository.updateMoverProfile(
+    return await imageRepository.updateMoverProfile(
       uploadedImageUrl,
       userId,
       moverId,
-      {
-        ...rest,
-      }
+      rest
     );
-    return result;
   } catch (e) {
     const error: CustomError = new Error("Internal Server Error");
     error.status = 500;
     error.data = {
-      message: "이미지 업로드 실패",
+      message: "프로필 업데이트 실패",
     };
     throw error;
   }
