@@ -18,7 +18,7 @@ import userRouter from "./controllers/userController";
 import notificationRouter from "./controllers/notificationController";
 
 import confirmedQuoteRouter from "./controllers/confirmedQuoteController";
-import { initNotification } from "./schedules/notifications";
+import { scheduleNotification } from "./schedules/notifications";
 const app = express();
 
 //CORS 설정
@@ -60,7 +60,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //알림 스케줄 등록
-initNotification();
+scheduleNotification();
 
 //라우터 모음 -> 컨트롤러
 app.use("/services", serviceRouter);
