@@ -98,19 +98,24 @@ const getQuoteList = async (moverId: number, query: QuoteQueryString) => {
   return {
     nextCursor,
     hasNext,
-    list: quotes.map((quote) => ({
-      // 데이터 가공
-      id: quote.id,
-      cost: quote.cost,
-      comment: quote.comment,
-      service: quote.movingRequest.service,
-      customerName: quote.movingRequest.customer.user.name,
-      movingDate: quote.movingRequest.movingDate,
-      pickupAddress: quote.movingRequest.pickupAddress,
-      dropOffAddress: quote.movingRequest.dropOffAddress,
-      isDesignated: quote.movingRequest.isDesignated,
-      isConfirmed: !!quote.confirmedQuote,
-    })),
+    list: quotes.map((quote) => {
+      const today = new Date(); // 추가 : isCompleted 계산을 위한 현재 날짜
+      const movingDate = new Date(quote.movingRequest.movingDate);
+
+      return {
+        id: quote.id,
+        service: quote.movingRequest.service,
+        isDesignated: quote.movingRequest.isDesignated,
+        name: quote.movingRequest.customer.user.name, // 변경: customerName -> name
+        movingDate: quote.movingRequest.movingDate,
+        pickupAddress: quote.movingRequest.pickupAddress,
+        dropOffAddress: quote.movingRequest.dropOffAddress,
+        cost: quote.cost,
+        isCompleted: movingDate < today, // 추가: 이사일이 지났는지 확인
+        isConfirmed: !!quote.confirmedQuote,
+        requestDate: quote.createAt, // 추가: 요청일자 추가
+      };
+    }),
   };
 };
 

@@ -7,7 +7,26 @@ import quoteValidation from "../middlewares/validations/quote";
 
 const router = express.Router();
 
-// 견적서 생성 엔드포인트를 정의
+//견적서 상세 조회
+router.get(
+  "/:id",
+  passport.authenticate("jwt", { session: false }),
+  asyncHandle(async (req, res, next) => {
+    try {
+      const { customerId } = req.user as { customerId: number };
+      const { id: quoteId } = req.params;
+      const quote = await quoteService.getQuoteById(
+        customerId,
+        parseInt(quoteId)
+      );
+      return res.status(200).send(quote);
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
+// 견적서 생성하기
 router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
@@ -24,16 +43,11 @@ router.post(
       comment
     );
 
-    // 견적서가 성공적으로 생성되었다는 응답을 보내요.
-    return res.status(201).json({
-      success: true,
-      message: "견적서가 성공적으로 생성되었습니다.",
-      data: quote, // 생성된 견적서 정보를 포함
-    });
+    return res.status(201).send(quote);
   })
 );
 
-// 기사님이 작성한 견적서 목록을 조회하는 엔드포인트를 정의
+// (기사님이 작성한) 견적서 목록 조회
 router.get(
   "/mover",
   passport.authenticate("jwt", { session: false }),
@@ -56,19 +70,20 @@ router.get(
 
     // 기본값 설정
     const limit = Number(req.query.limit) || 10;
-    const cursor = req.query.cursor ? Number(req.query.cursor) : null;
+    const nextCursorId = req.query.nextCursorId
+      ? Number(req.query.nextCursorId)
+      : null;
 
-    const quotes = await quoteService.getQuoteList(moverId, { limit, cursor });
-
-    return res.status(200).json({
-      success: true,
-      message: "견적서 목록 조회 성공",
-      data: quotes,
+    const quotes = await quoteService.getQuoteList(moverId, {
+      limit,
+      cursor: nextCursorId, // 내부적으로는 cursor로 사용
     });
+
+    return res.status(200).send(quotes);
   })
 );
 
-// 기사님이 작성한 특정 견적서의 상세 정보를 조회하는 엔드포인트를 정의
+// (기사님이 작성한)특정 견적서 상세 조회
 router.get(
   "/mover/:quoteId",
   passport.authenticate("jwt", { session: false }),
@@ -101,11 +116,7 @@ router.get(
 
     const quote = await quoteService.getQuoteDetail(moverId, quoteId, cost);
 
-    return res.status(200).json({
-      success: true,
-      message: "견적서 상세 조회 성공",
-      data: quote,
-    });
+    return res.status(200).send(quote);
   })
 );
 
@@ -133,13 +144,13 @@ router.post(
     const result = await quoteService.rejectRequest(moverId, movingRequestId);
 
     // 응답 추가
-    res.status(200).json(result);
+    res.status(200).send(result);
   })
 );
 
 // (기사님이) 반려한 이사 요청 목록 조회
 router.get(
-  "/mover/reject",
+  "/mover/rejected",
   passport.authenticate("jwt", { session: false }),
   asyncHandle(async (req, res, next) => {
     const user = req.user as any;
@@ -158,37 +169,18 @@ router.get(
 
     // 쿼리 파라미터 처리 (페이지네이션)
     const limit = parseInt(req.query.limit as string) || 10;
-    const cursor = req.query.cursor
-      ? parseInt(req.query.cursor as string)
+    const nextCursorId = req.query.nextCursorId
+      ? Number(req.query.nextCursorId)
       : null;
 
     // 서비스 호출
     const result = await quoteService.getRejectedRequestList(moverId, {
       limit,
-      cursor,
+      cursor: nextCursorId,
     });
 
     // 응답
-    res.status(200).json(result);
-  })
-);
-
-//견적서 상세 조회
-router.get(
-  "/:id",
-  passport.authenticate("jwt", { session: false }),
-  asyncHandle(async (req, res, next) => {
-    try {
-      const { customerId } = req.user as { customerId: number };
-      const { id: quoteId } = req.params;
-      const quote = await quoteService.getQuoteById(
-        customerId,
-        parseInt(quoteId)
-      );
-      return res.status(200).send(quote);
-    } catch (error) {
-      next(error);
-    }
+    res.status(200).send(result);
   })
 );
 

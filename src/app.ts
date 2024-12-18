@@ -15,6 +15,7 @@ import session from "express-session";
 import cookieConfig from "./config/cookie.config";
 import customerRouter from "./controllers/customerController";
 import userRouter from "./controllers/userController";
+import reviewRouter from "./controllers/reviewController";
 import notificationRouter from "./controllers/notificationController";
 
 import confirmedQuoteRouter from "./controllers/confirmedQuoteController";
@@ -77,7 +78,7 @@ app.use("/oauth", oauthRouter);
 app.use("/customers", customerRouter);
 app.use("/users", userRouter);
 app.use("/notifications", notificationRouter);
-
+app.use("/reviews", reviewRouter);
 app.use(errorHandler); //전체 에러 핸들링 미들웨어
 
 app.listen(PORT || 3000, () => console.log("Server Started"));
