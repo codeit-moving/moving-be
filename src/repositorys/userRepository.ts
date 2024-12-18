@@ -4,7 +4,7 @@ interface User {
   name: string;
   email: string;
   password?: string | null;
-  phoneNumber?: string;
+  phoneNumber?: string | null;
   isOAuth: boolean;
 }
 
@@ -101,7 +101,7 @@ const createCustomer = (customer: Customer) => {
       customer: {
         create: {
           ...customerData,
-          imageUrl: { create: { imageUrl: imageUrl } },
+          imageUrl: { create: { imageUrl } },
         },
       },
     },
@@ -145,7 +145,10 @@ const createMover = (mover: Mover) => {
     data: {
       ...userData,
       mover: {
-        create: { ...moverData, imageUrl: { create: { imageUrl: imageUrl } } },
+        create: {
+          ...moverData,
+          imageUrl: { create: { imageUrl: imageUrl } },
+        },
       },
     },
   });
