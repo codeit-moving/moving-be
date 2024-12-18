@@ -33,12 +33,23 @@ interface MoverResponse {
 
 const updateUser = async (userId: number, updateData: UpdateUser) => {
   const user = await userRepository.findById(userId);
-  const isPasswordCorrect = await bcrypt.compare(
-    updateData.currentPassword!,
-    user!.password!
-  );
 
-  if (updateData.newPassword && updateData.currentPassword) {
+  if (updateData.newPassword || updateData.currentPassword) {
+    if (!updateData.newPassword || !updateData.currentPassword) {
+      const error: CustomError = new Error("Bad Request");
+      error.status = 400;
+      error.data = {
+        message:
+          "비밀번호 변경을 위해서는 현재 비밀번호와 새로운 비밀번호가 모두 필요합니다.",
+      };
+      throw error;
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(
+      updateData.currentPassword,
+      user!.password!
+    );
+
     if (!isPasswordCorrect) {
       const error: CustomError = new Error("Unauthorized");
       error.status = 401;
@@ -58,13 +69,18 @@ const updateUser = async (userId: number, updateData: UpdateUser) => {
     }
   }
 
-  const hashedNewPassword = await bcrypt.hash(updateData.newPassword!, 10);
+  const updateUserData: {
+    name?: string;
+    phoneNumber?: string;
+    password?: string;
+  } = {};
 
-  const updateUserData = {
-    name: updateData.name,
-    phoneNumber: updateData.phoneNumber,
-    password: hashedNewPassword,
-  };
+  if (updateData.name) updateUserData.name = updateData.name;
+  if (updateData.phoneNumber)
+    updateUserData.phoneNumber = updateData.phoneNumber;
+  if (updateData.newPassword) {
+    updateUserData.password = await bcrypt.hash(updateData.newPassword, 10);
+  }
 
   return await userRepository.updateUser(userId, updateUserData);
 };
