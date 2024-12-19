@@ -1,6 +1,6 @@
 import customerRepository from "../repositorys/customerRepository";
 import imageRepository from "../repositorys/imageRepository";
-import prismaClient from "../utils/prismaClient";
+import CustomError from "../utils/interfaces/customError";
 import { uploadFile } from "../utils/s3.utils";
 
 interface Profile {
@@ -30,22 +30,40 @@ const createCustomerProfile = async (profile: Profile) => {
 
 const updateCustomerProfile = async (
   userId: number,
+  customerId: number,
   profile: UpdateProfile
 ) => {
-  return prismaClient.$transaction(async () => {
-    const customer = await customerRepository.updateCustomerProfile(userId, {
-      services: profile.services,
-      regions: profile.regions,
-    });
+  const { imageUrl, ...rest } = profile;
+  let uploadedImageUrl;
 
-    if (profile.imageUrl) {
-      const uploadImage = await uploadFile(profile.imageUrl);
-      await imageRepository.deactivateImage(customer.id);
-      await imageRepository.createImage(customer.id, uploadImage);
+  if (imageUrl) {
+    try {
+      uploadedImageUrl = await uploadFile(imageUrl);
+    } catch (e) {
+      const error: CustomError = new Error("Internal Server Error");
+      error.status = 500;
+      error.data = {
+        message: "이미지 업로드 실패",
+      };
+      throw error;
     }
+  }
 
-    return customer;
-  });
+  try {
+    return await imageRepository.updateCustomerProfile(
+      uploadedImageUrl,
+      userId,
+      customerId,
+      rest
+    );
+  } catch (e) {
+    const error: CustomError = new Error("Internal Server Error");
+    error.status = 500;
+    error.data = {
+      message: "프로필 업데이트 실패",
+    };
+    throw error;
+  }
 };
 
 export default { createCustomerProfile, updateCustomerProfile };

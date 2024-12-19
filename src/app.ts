@@ -19,7 +19,8 @@ import reviewRouter from "./controllers/reviewController";
 import notificationRouter from "./controllers/notificationController";
 
 import confirmedQuoteRouter from "./controllers/confirmedQuoteController";
-import { initNotification } from "./schedules/notifications";
+import { scheduleNotification } from "./schedules/notifications";
+import { imageCleanup } from "./schedules/images";
 const app = express();
 
 //CORS 설정
@@ -61,7 +62,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //알림 스케줄 등록
-initNotification();
+imageCleanup();
+scheduleNotification();
 
 //라우터 모음 -> 컨트롤러
 app.use("/services", serviceRouter);

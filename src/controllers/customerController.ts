@@ -17,12 +17,16 @@ router.post(
       const profile = {
         userId: userId,
         imageUrl: req.file!,
-        services: Array.isArray(req.body.services)
-          ? req.body.services
-          : JSON.parse(req.body.services),
-        regions: Array.isArray(req.body.regions)
-          ? req.body.regions
-          : JSON.parse(req.body.regions), //postman으로 테스트하였는데 문자 배열로 인식하는 것 같아 임시 코드 작성 수정예정
+        regions: req.body.regions
+          ? Array.isArray(req.body.regions)
+            ? req.body.regions.map(Number)
+            : JSON.parse(req.body.regions).map(Number)
+          : [],
+        services: req.body.services
+          ? Array.isArray(req.body.services)
+            ? req.body.services.map(Number)
+            : JSON.parse(req.body.services).map(Number)
+          : [],
       };
       await customerService.createCustomerProfile(profile);
       res.status(204).send();
@@ -39,8 +43,18 @@ router.patch(
   asyncHandle(async (req, res, next) => {
     try {
       const userId = (req.user as Payload).id;
-      const profile = { ...req.body, imageUrl: req.file };
-      await customerService.updateCustomerProfile(userId, profile);
+      const customerId = (req.user as { customerId: number }).customerId;
+      const profile = {
+        ...req.body,
+        imageUrl: req.file,
+        regions: req.body.regions
+          ? JSON.parse(req.body.regions).map(Number)
+          : [],
+        services: req.body.services
+          ? JSON.parse(req.body.services).map(Number)
+          : [],
+      };
+      await customerService.updateCustomerProfile(userId, customerId, profile);
       res.status(204).send();
     } catch (error) {
       next(error);

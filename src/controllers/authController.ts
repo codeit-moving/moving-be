@@ -2,8 +2,9 @@ import { Router } from "express";
 import authService from "../services/authService";
 import { asyncHandle } from "../utils/asyncHandler";
 import cookieConfig from "../config/cookie.config";
-import createToken from "../utils/token.utils";
+import createToken, { Payload } from "../utils/token.utils";
 import upload from "../utils/multer";
+import passport from "passport";
 
 const router = Router();
 
@@ -75,18 +76,19 @@ router.post(
   upload.single("imageUrl"),
   asyncHandle(async (req, res, next) => {
     try {
-      const SignUpCustomer: SignUpCustomer = {
+      const signUpCustomer: SignUpCustomer = {
         ...req.body,
         imageUrl: req.file!,
         services: Array.isArray(req.body.services)
-          ? req.body.services
-          : JSON.parse(req.body.services),
+          ? req.body.services.map(Number)
+          : JSON.parse(req.body.services).map(Number),
         regions: Array.isArray(req.body.regions)
-          ? req.body.regions
-          : JSON.parse(req.body.regions),
+          ? req.body.regions.map(Number)
+          : JSON.parse(req.body.regions).map(Number),
         isOAuth: req.body.isOAuth === "true",
       };
-      await authService.signUpCustomer(SignUpCustomer);
+
+      await authService.signUpCustomer(signUpCustomer);
       res.status(204).send();
     } catch (error) {
       next(error);
@@ -99,8 +101,62 @@ router.post(
   upload.single("imageUrl"),
   asyncHandle(async (req, res, next) => {
     try {
-      const SignUpMover: SignUpMover = req.body;
+      const SignUpMover: SignUpMover = {
+        ...req.body,
+        imageUrl: req.file!,
+        services: Array.isArray(req.body.services)
+          ? req.body.services.map(Number)
+          : JSON.parse(req.body.services).map(Number),
+        regions: Array.isArray(req.body.regions)
+          ? req.body.regions.map(Number)
+          : JSON.parse(req.body.regions).map(Number),
+        isOAuth: req.body.isOAuth === "true",
+        career: Number(req.body.career),
+      };
       await authService.signUpMover(SignUpMover);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
+router.post(
+  "/validate",
+  asyncHandle(async (req, res, next) => {
+    try {
+      const { email, phoneNumber } = req.body;
+      await authService.validate(email, phoneNumber);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
+router.post(
+  "/refresh",
+  passport.authenticate("refresh-token", { session: false }),
+  asyncHandle(async (req, res, next) => {
+    try {
+      const user = req.user as Payload;
+      const accessToken = createToken(user, "access");
+      res.cookie("accessToken", accessToken, cookieConfig.accessTokenOption);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
+router.post(
+  "/password",
+  passport.authenticate("jwt", { session: false }),
+  asyncHandle(async (req, res, next) => {
+    try {
+      const userId = (req.user as Payload).id;
+      const { password } = req.body;
+      await authService.validatePassword(userId, password);
       res.status(204).send();
     } catch (error) {
       next(error);

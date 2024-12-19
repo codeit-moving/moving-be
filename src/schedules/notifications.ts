@@ -27,15 +27,32 @@ interface ConfirmedQuote {
   };
 }
 
+const extractLocationInfo = (address: string) => {
+  // 시/도와 시/군/구를 추출하는 정규식
+  const match = address.match(/([가-힣]+)\s([가-힣]+시[가-힣]*)/);
+  if (!match) return address;
+
+  const province = match[1]; // 첫 번째 그룹 (시/도)
+  const city = match[2].replace(/시.*$/, ""); // 두 번째 그룹에서 '시' 이후 제거
+
+  return `${province}(${city})`;
+};
+
 const setMessage = async (confirmedQuote: ConfirmedQuote) => {
+  const pickupLocation = extractLocationInfo(
+    confirmedQuote.movingRequest.pickupAddress
+  );
+  const dropOffLocation = extractLocationInfo(
+    confirmedQuote.movingRequest.dropOffAddress
+  );
   return [
     {
-      content: `내일은 ,${confirmedQuote.movingRequest.pickupAddress} -> ${confirmedQuote.movingRequest.dropOffAddress} 이사 예정일,이에요.`,
+      content: `내일은 ,${pickupLocation} -> ${dropOffLocation} 이사 예정일,이에요.`,
       isRead: false,
       userId: confirmedQuote.mover.user.id,
     },
     {
-      content: `내일은 ,${confirmedQuote.movingRequest.pickupAddress} -> ${confirmedQuote.movingRequest.dropOffAddress} 이사 예정일,이에요.`,
+      content: `내일은 ,${pickupLocation} -> ${dropOffLocation} 이사 예정일,이에요.`,
       isRead: false,
       userId: confirmedQuote.customer.user.id,
     },
@@ -64,4 +81,12 @@ export const initNotification = async () => {
   } catch (error) {
     console.error("알림 발송 중 오류 발생:", error);
   }
+};
+
+// 매일 자정에 실행되는 크론 작업 추가
+export const scheduleNotification = () => {
+  cron.schedule("0 0 * * *", async () => {
+    console.log("자정 알림 스케줄 실행");
+    await initNotification();
+  });
 };

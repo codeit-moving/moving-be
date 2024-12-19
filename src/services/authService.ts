@@ -44,9 +44,7 @@ const signIn = async ({ email, password }: SignInData) => {
     throw error;
   }
 
-  // const isPasswordValid = await bcrypt.compare(password, user.password!);
-
-  const isPasswordValid = password === user.password;
+  const isPasswordValid = await bcrypt.compare(password, user.password!); //패스워드 검증
 
   if (!isPasswordValid) {
     const error: CustomError = new Error("Unauthorized");
@@ -87,9 +85,12 @@ const signUpCustomer = async (customer: SignUpCustomer) => {
       }
     }
 
+    const hashedPassword = await bcrypt.hash(customer.password, 10);
+
     const customerData = {
       ...customer,
       imageUrl,
+      password: hashedPassword,
     };
 
     const result = await userRepository.createCustomer(customerData);
@@ -125,9 +126,12 @@ const signUpMover = async (mover: SignUpMover) => {
       }
     }
 
+    const hashedPassword = await bcrypt.hash(mover.password, 10);
+
     const moverData = {
       ...mover,
       imageUrl,
+      password: hashedPassword,
     };
     const result = await userRepository.createMover(moverData);
 
@@ -137,4 +141,59 @@ const signUpMover = async (mover: SignUpMover) => {
   }
 };
 
-export default { signIn, signUpCustomer, signUpMover };
+const validate = async (email: string, phoneNumber: string) => {
+  const user = await userRepository.existingUser(email, phoneNumber);
+
+  if (user) {
+    const error: CustomError = new Error("Conflict");
+    if (user.email === email) {
+      error.status = 409;
+      error.data = {
+        message: "이미 존재하는 이메일입니다.",
+      };
+      throw error;
+    }
+    if (user.phoneNumber === phoneNumber) {
+      error.status = 409;
+      error.data = {
+        message: "이미 존재하는 전화번호입니다.",
+      };
+      throw error;
+    }
+  }
+
+  return user;
+};
+
+const validatePassword = async (userId: number, password: string) => {
+  const findPassword = await userRepository.findPassword(userId);
+  const decodedPassword = await bcrypt.compare(
+    password,
+    findPassword?.password!
+  );
+  if (!findPassword) {
+    const error: CustomError = new Error("Not Found");
+    error.status = 404;
+    error.data = {
+      message: "사용자가 존재하지 않습니다.",
+    };
+    throw error;
+  }
+
+  if (!decodedPassword) {
+    const error: CustomError = new Error("Unauthorized");
+    error.status = 401;
+    error.data = {
+      message: "비밀번호가 일치하지 않습니다.",
+    };
+    throw error;
+  }
+};
+
+export default {
+  signIn,
+  signUpCustomer,
+  signUpMover,
+  validate,
+  validatePassword,
+};
