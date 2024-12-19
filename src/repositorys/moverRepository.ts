@@ -7,6 +7,26 @@ interface whereConditions {
   OR?: object[];
 }
 
+interface UpdateProfile {
+  nickname?: string;
+  career?: number;
+  introduction?: string;
+  description?: string;
+  services?: number[];
+  regions?: number[];
+}
+
+interface Profile {
+  userId: number;
+  nickname: string;
+  career: number;
+  introduction: string;
+  description: string;
+  services: number[];
+  regions: number[];
+  imageUrl: string;
+}
+
 const defaultSelect = {
   id: true,
   services: true,
@@ -171,6 +191,12 @@ const getMoverByFavorite = (
   });
 };
 
+const createMoverProfile = (profile: Profile) => {
+  return prismaClient.mover.create({
+    data: { ...profile, imageUrl: { create: { imageUrl: profile.imageUrl } } },
+  });
+};
+
 export default {
   getMoverCount,
   getMoverList,
@@ -178,4 +204,5 @@ export default {
   getMoverById,
   toggleFavorite,
   getMoverByFavorite,
+  createMoverProfile,
 };

@@ -98,6 +98,7 @@ model MovingRequest {
   id             Int             @id @unique @default(autoincrement()) //자동증가
   service        Int //서비스 테이블의 코드값 예 ) 1
   movingDate     DateTime //이사하는 날
+  region         Int             @default(0) //지역 테이블의 코드값 예 ) 8202 
   pickupAddress  String //출발지 pickupAddress
   dropOffAddress String //도착지 dropoffAddress
   requestCount   Int             @default(0) //견적서 받은 수 예 0~5

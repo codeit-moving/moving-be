@@ -5,7 +5,7 @@ const accessTokenOption: CookieOptions = {
   secure: true,
   sameSite: "none",
   maxAge: 1000 * 60 * 60, // 1시간
-  // path: "/",
+  path: "/",
 };
 
 const refreshTokenOption: CookieOptions = {
@@ -13,14 +13,15 @@ const refreshTokenOption: CookieOptions = {
   secure: true,
   sameSite: "none",
   maxAge: 1000 * 60 * 60 * 24 * 7, // 7일
-  // path: "/auth/refresh",
+  path: "/auth/refresh",
 };
 
 const clearCookieOption: CookieOptions = {
   httpOnly: true,
-  secure: false,
-  sameSite: "lax",
+  secure: true,
+  sameSite: "none",
   maxAge: 0,
+  path: "/",
 };
 
 const sessionOption: CookieOptions = {

@@ -149,4 +149,19 @@ router.post(
   })
 );
 
+router.post(
+  "/password",
+  passport.authenticate("jwt", { session: false }),
+  asyncHandle(async (req, res, next) => {
+    try {
+      const userId = (req.user as Payload).id;
+      const { password } = req.body;
+      await authService.validatePassword(userId, password);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
 export default router;

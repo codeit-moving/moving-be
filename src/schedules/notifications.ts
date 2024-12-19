@@ -82,3 +82,11 @@ export const initNotification = async () => {
     console.error("알림 발송 중 오류 발생:", error);
   }
 };
+
+// 매일 자정에 실행되는 크론 작업 추가
+export const scheduleNotification = () => {
+  cron.schedule("0 0 * * *", async () => {
+    console.log("자정 알림 스케줄 실행");
+    await initNotification();
+  });
+};
