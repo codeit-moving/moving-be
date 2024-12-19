@@ -15,7 +15,7 @@ interface queryString {
   officeMove: boolean;
   orderBy: string;
   isQuoted: boolean;
-  pastRequest: boolean;
+  isPastRequest: boolean;
 }
 
 interface OffsetQueryString {
@@ -41,7 +41,7 @@ const setWhereCondition = (query: queryString, moverId: number) => {
     officeMove,
     isDesignated,
     isQuoted,
-    pastRequest,
+    isPastRequest,
   } = query;
   const where: WhereCondition = {};
 
@@ -49,10 +49,8 @@ const setWhereCondition = (query: queryString, moverId: number) => {
     where.OR = [
       {
         customer: {
-          some: {
-            user: {
-              name: { contains: keyword },
-            },
+          user: {
+            name: { contains: keyword },
           },
         },
       },
@@ -116,7 +114,7 @@ const setWhereCondition = (query: queryString, moverId: number) => {
     };
   }
 
-  if (pastRequest) {
+  if (isPastRequest) {
     // pastRequest가 true면 모든 날짜 조회 (where 조건 없음)
   } else {
     // pastRequest가 false면 오늘 자정 이후의 요청만 조회
