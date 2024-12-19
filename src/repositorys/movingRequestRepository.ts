@@ -27,7 +27,7 @@ const getMovingRequestCountByCustomer = (customerId: number) => {
 };
 
 //이사요청 서비스별 카운트 조회
-const getMovingRequestCountByServices = async (where: WhereCondition) => {
+const getMovingRequestCountByServices = async (where: WhereCondition = {}) => {
   const counts = await prismaClient.movingRequest.groupBy({
     where,
     by: ["service"],
@@ -62,8 +62,8 @@ const getMovingRequestCountByServices = async (where: WhereCondition) => {
 };
 
 const getMovingRequestCountByDesignated = async (
-  where: WhereCondition,
-  moverId: number
+  moverId: number,
+  where: WhereCondition = {}
 ) => {
   return prismaClient.movingRequest.count({
     where: {
@@ -77,7 +77,7 @@ const getMovingRequestCountByDesignated = async (
   });
 };
 
-const getTotalCount = async (where: WhereCondition) => {
+const getTotalCount = async (where: WhereCondition = {}) => {
   return prismaClient.movingRequest.count({
     where,
   });
@@ -316,7 +316,7 @@ const getActiveRequest = (customerId: number) => {
 };
 
 export default {
-  getMovingRequestList: getMovingRequestListByMover,
+  getMovingRequestListByMover,
   createMovingRequest,
   updateDesignated,
   updateDesignatedCancel,

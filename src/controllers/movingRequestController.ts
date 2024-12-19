@@ -25,6 +25,7 @@ router.get(
         officeMove = "false",
         orderBy = "resent",
         isQuoted = "false",
+        pastRequest = "false",
       } = req.query;
       const parseLimit = parseInt(limit as string);
       const parseCursor = parseInt(cursor as string);
@@ -33,6 +34,7 @@ router.get(
       const parseHouseMove = checkBoolean(houseMove as string);
       const parseOfficeMove = checkBoolean(officeMove as string);
       const parseIsQuoted = checkBoolean(isQuoted as string);
+      const parsePastRequest = checkBoolean(pastRequest as string);
 
       const movingRequestList =
         await movingRequestService.getMovingRequestListByMover(moverId, {
@@ -45,6 +47,7 @@ router.get(
           officeMove: parseOfficeMove || false,
           orderBy: orderBy as string,
           isQuoted: parseIsQuoted || false,
+          pastRequest: parsePastRequest || false,
         });
       return res.status(200).send(movingRequestList);
     } catch (error) {
