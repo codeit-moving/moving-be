@@ -40,7 +40,6 @@
 ## **📌 백엔드 팀원별 구현 기능 상세**
 
 ### **탁우현**
-<details>
 <summary>이사요청</summary>
 </br>
 
@@ -52,17 +51,17 @@
     - end-point : `POST /moving-request`
     - request-body :
     
-    ```json
+```json
     {
       "service": "number", // 1, 2, 3
         "movingDate" : "date", //이사하는 날
         "pickupAddress" : "string", // 출발지
         "dropOffAddress" : "string", // 출발지
     }
-    ```
+```
     
-    - Response:
-        - `201 Create`: 사용자 정보 전달
+- Response:
+- `201 Create`: 사용자 정보 전달
             
             ```json
              {
@@ -75,7 +74,7 @@
             
             ```
             
-        - `400 Bad Request`: 유효성 검사 실패
+- `400 Bad Request`: 유효성 검사 실패
             
             ```json
             {
@@ -443,7 +442,6 @@
 </details>
 </details>
 
-<details>
 <summary>기사</summary>
 <br>
 
@@ -689,8 +687,7 @@
 </details>
 </details>
 
-<details>
-    <summary>견적</summary>
+<summary>견적</summary>
 <br>
 <details>
     <summary>고객페이지 견적서 상세 조회</summary>
@@ -772,8 +769,7 @@
 </details>
 </details>
 
-<details>
-    <summary>확정 견적</summary>
+<summary>확정 견적</summary>
 <br>
 <details>
     <summary>고객페이지 견적서 확정하기</summary>
