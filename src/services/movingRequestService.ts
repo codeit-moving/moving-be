@@ -4,6 +4,7 @@ import CustomError from "../utils/interfaces/customError";
 import quoteRepository from "../repositorys/quoteRepository";
 import processQuotes from "../utils/quote/processQuoteData";
 import notificationRepository from "../repositorys/notificationRepository";
+import moverRepository from "../repositorys/moverRepository";
 
 interface queryString {
   limit: number;
@@ -31,6 +32,7 @@ interface WhereCondition {
   quote?: object;
   isRejected?: object;
   movingDate?: object;
+  region?: object;
 }
 
 const setWhereCondition = (query: queryString, moverId: number) => {
@@ -152,6 +154,21 @@ const getMovingRequestListByMover = async (
   const { limit, cursor, orderBy } = query;
   const whereCondition: WhereCondition = setWhereCondition(query, moverId);
   const orderByQuery = setOrderBy(orderBy);
+
+  const mover = await moverRepository.getMoverById(null, moverId);
+  const regions = mover?.regions;
+  if (!regions) {
+    const error: CustomError = new Error("Not Found");
+    error.status = 404;
+    error.data = {
+      message: "프로필에서 서비스 지역을 설정해 주세요.",
+    };
+    throw error;
+  }
+
+  whereCondition.region = {
+    in: regions,
+  };
 
   const serviceCountsPromise =
     movingRequestRepository.getMovingRequestCountByServices();

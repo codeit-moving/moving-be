@@ -125,8 +125,10 @@ router.post(
   asyncHandle(async (req, res, next) => {
     try {
       const { customerId } = req.user as { customerId: number };
-      const { service, movingDate, pickupAddress, dropOffAddress } = req.body;
+      const { service, movingDate, pickupAddress, dropOffAddress, region } =
+        req.body;
       const date = new Date(movingDate);
+      const parseRegion = parseInt(region as string);
       const movingRequest = await movingRequestService.createMovingRequest(
         customerId,
         {
@@ -134,6 +136,7 @@ router.post(
           movingDate: date,
           pickupAddress,
           dropOffAddress,
+          region: parseRegion,
         }
       );
       return res.status(201).send(movingRequest);
