@@ -26,8 +26,8 @@ passport.use(
     const token = req.cookies["accessToken"];
 
     if (!token) {
-      const error: CustomError = new Error("Unauthorized");
-      error.status = 401;
+      const error: CustomError = new Error("Token missing");
+      error.status = 403;
       error.data = {
         message: "토큰이 존재하지 않습니다.",
       };
@@ -38,8 +38,8 @@ passport.use(
       const decoded = jwt.verify(token, JWT_SECRET);
       return done(null, decoded); // 토큰이 있고 유효하면 유저 정보 반환
     } catch (err) {
-      const error: CustomError = new Error("Unauthorized");
-      error.status = 401;
+      const error: CustomError = new Error("Invalid token");
+      error.status = 403;
       error.data = {
         message: "유효하지 않은 토큰입니다.",
       };
@@ -71,8 +71,8 @@ passport.use(
     const refreshToken = req.cookies["refreshToken"];
 
     if (!refreshToken) {
-      const error: CustomError = new Error("Unauthorized");
-      error.status = 401;
+      const error: CustomError = new Error("Token missing");
+      error.status = 403;
       error.data = {
         message: "리프레시 토큰이 존재하지 않습니다.",
       };
@@ -83,8 +83,8 @@ passport.use(
       const decoded = jwt.verify(refreshToken, REFRESH_SECRET);
       return done(null, decoded);
     } catch (err) {
-      const error: CustomError = new Error("Unauthorized");
-      error.status = 401;
+      const error: CustomError = new Error("Invalid token");
+      error.status = 403;
       error.data = {
         message: "유효하지 않은 리프레시 토큰입니다.",
       };

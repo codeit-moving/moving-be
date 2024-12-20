@@ -47,7 +47,7 @@ const signIn = async ({ email, password }: SignInData) => {
   const isPasswordValid = await bcrypt.compare(password, user.password!); //패스워드 검증
 
   if (!isPasswordValid) {
-    const error: CustomError = new Error("Unauthorized");
+    const error: CustomError = new Error("Invalid password");
     error.status = 401;
     error.data = {
       message: "비밀번호가 일치하지 않습니다.",
@@ -181,7 +181,7 @@ const validatePassword = async (userId: number, password: string) => {
   }
 
   if (!decodedPassword) {
-    const error: CustomError = new Error("Unauthorized");
+    const error: CustomError = new Error("Invalid password");
     error.status = 401;
     error.data = {
       message: "비밀번호가 일치하지 않습니다.",
