@@ -53,7 +53,7 @@ const updateUser = async (userId: number, updateData: UpdateUser) => {
     );
 
     if (!isPasswordCorrect) {
-      const error: CustomError = new Error("Unauthorized");
+      const error: CustomError = new Error("Invalid password");
       error.status = 401;
       error.data = {
         message: "현재 비밀번호가 일치하지 않습니다.",
