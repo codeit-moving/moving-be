@@ -392,10 +392,25 @@ const designateMover = async (
   const activeRequestPromise =
     movingRequestRepository.getActiveRequest(customerId);
 
-  const [result, activeRequest] = await Promise.all([
+  const designatedMoversPromise = movingRequestRepository.getDesignatedMovers(
+    movingRequestId,
+    moverId
+  );
+
+  const [result, activeRequest, designatedMovers] = await Promise.all([
     designateCountPromise,
     activeRequestPromise,
+    designatedMoversPromise,
   ]);
+
+  if (designatedMovers) {
+    const error: CustomError = new Error("Bad Request");
+    error.status = 400;
+    error.data = {
+      message: "이미 지정된 기사 입니다.",
+    };
+    throw error;
+  }
 
   if (!activeRequest) {
     const error: CustomError = new Error("Bad Request");
@@ -424,7 +439,7 @@ const designateMover = async (
 
   //알림 생성 기사에게
   notificationRepository.createNotification({
-    userId: movingRequest.mover[0].user.id,
+    userId: moverId,
     content: `${movingRequest.mover[0].nickname}기사님 새로운 지정 요청이 있습니다.`,
     isRead: false,
   });
@@ -439,6 +454,20 @@ const cancelDesignateMover = async (
   movingRequestId: number,
   moverId: number
 ) => {
+  const designatedMovers = await movingRequestRepository.getDesignatedMovers(
+    movingRequestId,
+    moverId
+  );
+
+  if (!designatedMovers) {
+    const error: CustomError = new Error("Bad Request");
+    error.status = 400;
+    error.data = {
+      message: "지정된 기사가 아닙니다.",
+    };
+    throw error;
+  }
+
   //이사요청 지정 취소
   const movingRequest = await movingRequestRepository.updateDesignatedCancel(
     movingRequestId,

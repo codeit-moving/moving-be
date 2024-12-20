@@ -5,6 +5,7 @@ import processMoversData from "../utils/mover/processMoverData";
 import RatingResult from "../utils/interfaces/mover/ratingResult";
 import imageRepository from "../repositorys/imageRepository";
 import { uploadFile } from "../utils/s3.utils";
+import getRatingsByMoverIds from "../utils/mover/getRatingsByMover";
 
 interface queryString {
   order: string;
@@ -21,7 +22,7 @@ interface whereConditions {
   regions?: object;
   services?: object;
   OR?: object[];
-  customer?: object;
+  favorite?: object;
 }
 
 interface FavoriteData {
@@ -88,7 +89,7 @@ const getMoverList = async (query: queryString, customerId: number | null) => {
     whereConditions.services = { has: service };
   }
   if (isFavorite === "true" && customerId) {
-    whereConditions.customer = { has: customerId };
+    whereConditions.favorite = { some: { id: customerId } };
   }
 
   //데이터 조회
@@ -146,6 +147,15 @@ const getMoverByFavorite = async (
     limit,
     cursor
   );
+
+  if (!movers.length) {
+    const error: CustomError = new Error("Not Found");
+    error.status = 404;
+    error.data = {
+      message: "찜한 기사가 없습니다.",
+    };
+    throw error;
+  }
 
   const moverIds = movers.map((mover) => mover.id);
   const ratingsByMover = await getRatingsByMoverIds(moverIds);
@@ -236,46 +246,6 @@ const getMover = async (moverId: number) => {
   const processedMover = await processMoversData(null, mover, ratingsByMover);
 
   return processedMover[0];
-};
-
-//평점 조회
-const getRatingsByMoverIds = async (moverIds: number | number[]) => {
-  const moverIdArray = Array.isArray(moverIds) ? moverIds : [moverIds];
-
-  const ratings = await moverRepository.getRatingsByMoverIds(moverIdArray);
-
-  // moverId별로 그룹화
-  const ratingsByMover = moverIdArray.reduce((acc, moverId) => {
-    acc[moverId] = {
-      totalCount: 0,
-      totalSum: 0,
-      "1": 0,
-      "2": 0,
-      "3": 0,
-      "4": 0,
-      "5": 0,
-      average: 0,
-    };
-    return acc;
-  }, {} as Record<number, RatingResult>);
-
-  // 각 rating 데이터 처리
-  ratings.forEach((rating) => {
-    const moverRating = ratingsByMover[rating.moverId];
-    moverRating.totalCount += rating._count.rating;
-    moverRating.totalSum += rating.rating * rating._count.rating;
-    moverRating[`${rating.rating}`] = rating._count.rating;
-  });
-
-  // 평균 계산 및 totalSum 제거
-  Object.values(ratingsByMover).forEach((rating) => {
-    rating.average =
-      Math.round((rating.totalSum / rating.totalCount) * 10) / 10;
-    const { totalSum, ...returnResult } = rating;
-    return returnResult;
-  });
-
-  return ratingsByMover;
 };
 
 const updateMoverProfile = async (

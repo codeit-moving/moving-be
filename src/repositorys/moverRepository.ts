@@ -58,7 +58,7 @@ const getMoverList = (
   return prismaClient.mover.findMany({
     orderBy,
     where,
-    take: limit + 1,
+    take: limit + 1, //커서 페이지 넘버 계산을 위해 1개 더 조회
     skip: cursor ? 1 : 0, //커서 자신을 스킵하기 위함
     cursor: cursor ? { id: cursor } : undefined,
     select: {
