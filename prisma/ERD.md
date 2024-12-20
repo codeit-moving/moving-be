@@ -10,16 +10,16 @@ erDiagram
   Int id PK
   String email UK
   String name
-  String password
-  String phoneNumber UK
+  String password "nullable"
+  String phoneNumber UK "nullable"
+  Boolean isOAuth
   DateTime createAt
   DateTime updateAt
 }
 "Customer" {
   Int id PK
-  String imageUrl
   Int services
-  Int areas
+  Int regions
   DateTime createAt
   DateTime updateAt
   Int userId FK
@@ -27,26 +27,24 @@ erDiagram
 "Mover" {
   Int id PK
   String nickname
-  String imageUrl
   Int services
-  Int areas
+  Int regions
   Int career
   String description
   String introduction
   Int userId FK
   DateTime createAt
   DateTime updateAt
-  Int movingInfoId FK "nullable"
 }
 "Service" {
   Int id PK
   String value
-  Int code
+  Int code UK
   Boolean status
   DateTime createAt
   DateTime updateAt
 }
-"Area" {
+"Region" {
   Int id PK
   String value
   Int code
@@ -54,34 +52,35 @@ erDiagram
   DateTime createAt
   DateTime updateAt
 }
-"MovingInfo" {
+"MovingRequest" {
   Int id PK
-  Int serviceType
+  Int service
   DateTime movingDate
-  String startAddress
-  String endAddress
+  Int region
+  String pickupAddress
+  String dropOffAddress
   Int requestCount
   Int designateCount
-  Boolean isDesignated "nullable"
+  Boolean isDesignated
   DateTime createAt
   DateTime updateAt
   Int customerId FK
 }
-"Estimate" {
+"Quote" {
   Int id PK
-  Int price
+  Int cost
   String comment
   DateTime createAt
   DateTime updateAt
-  Int movingInfoId FK
+  Int movingRequestId FK
   Int moverId FK
 }
-"ConfirmedEstimate" {
+"ConfirmedQuote" {
   Int id PK
   DateTime createAt
   DateTime updateAt
-  Int movingInfoId FK
-  Int estimateId FK
+  Int movingRequestId FK
+  Int quoteId FK
   Int customerId FK
   Int moverId FK
 }
@@ -92,7 +91,7 @@ erDiagram
   String imageUrl
   DateTime createAt
   DateTime updateAt
-  Int confirmedEstimateId FK
+  Int confirmedQuoteId FK
   Int customerId FK
   Int moverId FK
 }
@@ -112,34 +111,44 @@ erDiagram
   Int reviewId FK
   Int moverId FK
 }
+"ProfileImage" {
+  Int id PK
+  String imageUrl
+  Boolean status
+  DateTime createAt
+  DateTime updateAt
+  Int customerId FK "nullable"
+  Int moverId FK "nullable"
+}
 "_CustomerToMover" {
   String A FK
   String B FK
 }
-"_MoverToMovingInfo" {
+"_MoverToMovingRequest" {
   String A FK
   String B FK
 }
 "Customer" |o--|| "User" : user
 "Mover" |o--|| "User" : user
-"Mover" }o--o| "MovingInfo" : MovingInfo
-"MovingInfo" }o--|| "Customer" : customer
-"Estimate" }o--|| "MovingInfo" : movingInfo
-"Estimate" }o--|| "Mover" : mover
-"ConfirmedEstimate" |o--|| "MovingInfo" : movingInfo
-"ConfirmedEstimate" |o--|| "Estimate" : estimate
-"ConfirmedEstimate" }o--|| "Customer" : customer
-"ConfirmedEstimate" }o--|| "Mover" : mover
-"Review" }o--|| "ConfirmedEstimate" : confirmedEstimate
+"MovingRequest" }o--|| "Customer" : customer
+"Quote" }o--|| "MovingRequest" : movingRequest
+"Quote" }o--|| "Mover" : mover
+"ConfirmedQuote" |o--|| "MovingRequest" : movingRequest
+"ConfirmedQuote" |o--|| "Quote" : quote
+"ConfirmedQuote" }o--|| "Customer" : customer
+"ConfirmedQuote" }o--|| "Mover" : mover
+"Review" }o--|| "ConfirmedQuote" : confirmedQuote
 "Review" }o--|| "Customer" : customer
 "Review" }o--|| "Mover" : mover
 "notification" }o--|| "User" : user
 "ReviewComment" }o--|| "Review" : review
 "ReviewComment" }o--|| "Mover" : mover
+"ProfileImage" }o--o| "Customer" : customer
+"ProfileImage" }o--o| "Mover" : mover
 "_CustomerToMover" }o--|| "Customer" : Customer
 "_CustomerToMover" }o--|| "Mover" : Mover
-"_MoverToMovingInfo" }o--|| "Mover" : Mover
-"_MoverToMovingInfo" }o--|| "MovingInfo" : MovingInfo
+"_MoverToMovingRequest" }o--|| "Mover" : Mover
+"_MoverToMovingRequest" }o--|| "MovingRequest" : MovingRequest
 ```
 
 ### `User`
@@ -150,6 +159,7 @@ erDiagram
   - `name`: 
   - `password`: 
   - `phoneNumber`: 
+  - `isOAuth`: 
   - `createAt`: 
   - `updateAt`: 
 
@@ -157,9 +167,8 @@ erDiagram
 
 **Properties**
   - `id`: 
-  - `imageUrl`: 
   - `services`: 
-  - `areas`: 
+  - `regions`: 
   - `createAt`: 
   - `updateAt`: 
   - `userId`: 
@@ -169,16 +178,14 @@ erDiagram
 **Properties**
   - `id`: 
   - `nickname`: 
-  - `imageUrl`: 
   - `services`: 
-  - `areas`: 
+  - `regions`: 
   - `career`: 
   - `description`: 
   - `introduction`: 
   - `userId`: 
   - `createAt`: 
   - `updateAt`: 
-  - `movingInfoId`: 
 
 ### `Service`
 
@@ -190,7 +197,7 @@ erDiagram
   - `createAt`: 
   - `updateAt`: 
 
-### `Area`
+### `Region`
 
 **Properties**
   - `id`: 
@@ -200,14 +207,15 @@ erDiagram
   - `createAt`: 
   - `updateAt`: 
 
-### `MovingInfo`
+### `MovingRequest`
 
 **Properties**
   - `id`: 
-  - `serviceType`: 
+  - `service`: 
   - `movingDate`: 
-  - `startAddress`: 
-  - `endAddress`: 
+  - `region`: 
+  - `pickupAddress`: 
+  - `dropOffAddress`: 
   - `requestCount`: 
   - `designateCount`: 
   - `isDesignated`: 
@@ -215,25 +223,25 @@ erDiagram
   - `updateAt`: 
   - `customerId`: 
 
-### `Estimate`
+### `Quote`
 
 **Properties**
   - `id`: 
-  - `price`: 
+  - `cost`: 
   - `comment`: 
   - `createAt`: 
   - `updateAt`: 
-  - `movingInfoId`: 
+  - `movingRequestId`: 
   - `moverId`: 
 
-### `ConfirmedEstimate`
+### `ConfirmedQuote`
 
 **Properties**
   - `id`: 
   - `createAt`: 
   - `updateAt`: 
-  - `movingInfoId`: 
-  - `estimateId`: 
+  - `movingRequestId`: 
+  - `quoteId`: 
   - `customerId`: 
   - `moverId`: 
 
@@ -246,7 +254,7 @@ erDiagram
   - `imageUrl`: 
   - `createAt`: 
   - `updateAt`: 
-  - `confirmedEstimateId`: 
+  - `confirmedQuoteId`: 
   - `customerId`: 
   - `moverId`: 
 
@@ -270,6 +278,17 @@ erDiagram
   - `reviewId`: 
   - `moverId`: 
 
+### `ProfileImage`
+
+**Properties**
+  - `id`: 
+  - `imageUrl`: 
+  - `status`: 
+  - `createAt`: 
+  - `updateAt`: 
+  - `customerId`: 
+  - `moverId`: 
+
 ### `_CustomerToMover`
 Pair relationship table between [Customer](#Customer) and [Mover](#Mover)
 
@@ -277,8 +296,8 @@ Pair relationship table between [Customer](#Customer) and [Mover](#Mover)
   - `A`: 
   - `B`: 
 
-### `_MoverToMovingInfo`
-Pair relationship table between [Mover](#Mover) and [MovingInfo](#MovingInfo)
+### `_MoverToMovingRequest`
+Pair relationship table between [Mover](#Mover) and [MovingRequest](#MovingRequest)
 
 **Properties**
   - `A`: 

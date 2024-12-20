@@ -8,5 +8,13 @@ declare namespace NodeJS {
     AWS_REGION: string;
     AWS_SECRET_ACCESS_KEY: string;
     AWS_BUCKET_NAME: string;
+    NAVER_CLIENT_ID: string;
+    NAVER_CLIENT_SECRET: string;
+    NAVER_REDIRECT_URI: string;
+    SESSION_SECRET: string;
+    AWS_S3_BUCKET_NAME: string;
+    AWS_S3_REGION: string;
+    AWS_S3_ACCESS_KEY: string;
+    AWS_S3_SECRET_KEY: string;
   }
 }
