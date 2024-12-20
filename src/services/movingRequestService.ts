@@ -4,6 +4,7 @@ import CustomError from "../utils/interfaces/customError";
 import quoteRepository from "../repositorys/quoteRepository";
 import processQuotes from "../utils/quote/processQuoteData";
 import notificationRepository from "../repositorys/notificationRepository";
+import moverRepository from "../repositorys/moverRepository";
 
 interface queryString {
   limit: number;
@@ -15,6 +16,7 @@ interface queryString {
   officeMove: boolean;
   orderBy: string;
   isQuoted: boolean;
+  isPastRequest: boolean;
 }
 
 interface OffsetQueryString {
@@ -29,34 +31,39 @@ interface WhereCondition {
   mover?: object;
   quote?: object;
   isRejected?: object;
+  movingDate?: object;
+  region?: object;
 }
 
 const setWhereCondition = (query: queryString, moverId: number) => {
-  const { keyword, smallMove, houseMove, officeMove, isDesignated, isQuoted } =
-    query;
+  const {
+    keyword,
+    smallMove,
+    houseMove,
+    officeMove,
+    isDesignated,
+    isQuoted,
+    isPastRequest,
+  } = query;
   const where: WhereCondition = {};
 
   if (keyword) {
     where.OR = [
       {
-        mover: {
-          some: {
-            nickname: { contains: keyword },
+        customer: {
+          user: {
+            name: { contains: keyword },
           },
         },
       },
       {
-        mover: {
-          some: {
-            introduction: { contains: keyword },
-          },
+        pickupAddress: {
+          contains: keyword,
         },
       },
       {
-        mover: {
-          some: {
-            description: { contains: keyword },
-          },
+        dropOffAddress: {
+          contains: keyword,
         },
       },
     ];
@@ -109,6 +116,18 @@ const setWhereCondition = (query: queryString, moverId: number) => {
     };
   }
 
+  if (isPastRequest) {
+    // pastRequest가 true면 모든 날짜 조회 (where 조건 없음)
+  } else {
+    // pastRequest가 false면 오늘 자정 이후의 요청만 조회
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    where.movingDate = {
+      gt: today,
+    };
+  }
+
   return where;
 };
 
@@ -136,21 +155,33 @@ const getMovingRequestListByMover = async (
   const whereCondition: WhereCondition = setWhereCondition(query, moverId);
   const orderByQuery = setOrderBy(orderBy);
 
+  const mover = await moverRepository.getMoverById(null, moverId);
+  const regions = mover?.regions;
+  if (!regions) {
+    const error: CustomError = new Error("Not Found");
+    error.status = 404;
+    error.data = {
+      message: "프로필에서 서비스 지역을 설정해 주세요.",
+    };
+    throw error;
+  }
+
+  whereCondition.region = {
+    in: regions,
+  };
+
   const serviceCountsPromise =
-    movingRequestRepository.getMovingRequestCountByServices(whereCondition);
+    movingRequestRepository.getMovingRequestCountByServices();
 
-  const totalCountPromise =
-    movingRequestRepository.getTotalCount(whereCondition);
+  const totalCountPromise = movingRequestRepository.getTotalCount();
   const designatedCountPromise =
-    movingRequestRepository.getMovingRequestCountByDesignated(
-      whereCondition,
-      moverId
-    );
+    movingRequestRepository.getMovingRequestCountByDesignated(moverId);
 
-  const movingRequestListPromise = movingRequestRepository.getMovingRequestList(
-    { limit, cursor, orderBy: orderByQuery },
-    whereCondition
-  );
+  const movingRequestListPromise =
+    movingRequestRepository.getMovingRequestListByMover(
+      { limit, cursor, orderBy: orderByQuery },
+      whereCondition
+    );
 
   const [movingRequestList, serviceCounts, totalCount, designatedCount] =
     await Promise.all([

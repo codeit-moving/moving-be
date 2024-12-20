@@ -3,4 +3,5 @@ export interface MovingRequestData {
   movingDate: Date;
   pickupAddress: string;
   dropOffAddress: string;
+  region: number;
 }
