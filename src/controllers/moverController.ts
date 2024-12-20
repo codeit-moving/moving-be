@@ -29,7 +29,6 @@ router.get(
       if (req.user) {
         customerId = (req.user as { customerId: number | null }).customerId;
       }
-
       const {
         nextCursorId = "0",
         order = "",
@@ -58,6 +57,21 @@ router.get(
         customerId
       );
       return res.status(200).send(movers);
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
+router.get(
+  "/my-profile",
+  passport.authenticate("jwt", { session: false }),
+  asyncHandle(async (req, res, next) => {
+    try {
+      const { moverId } = req.user as { moverId: number };
+      console.log(moverId);
+      const mover = await moverService.getMover(moverId);
+      return res.status(200).send(mover);
     } catch (error) {
       next(error);
     }
@@ -124,20 +138,6 @@ router.get(
         parseNextCursorId
       );
       return res.status(200).send(movers);
-    } catch (error) {
-      next(error);
-    }
-  })
-);
-
-router.get(
-  "/my-profile",
-  passport.authenticate("jwt", { session: false }),
-  asyncHandle(async (req, res, next) => {
-    try {
-      const { moverId } = req.user as { moverId: number };
-      const mover = await moverService.getMover(moverId);
-      res.status(200).send(mover);
     } catch (error) {
       next(error);
     }

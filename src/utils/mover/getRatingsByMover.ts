@@ -24,12 +24,10 @@ const getRatingsByMoverIds = async (moverIds: number | number[]) => {
 
   // 각 rating 데이터 처리
   ratings.forEach((rating) => {
-    console.log("Rating data:", rating); // 각 rating 데이터 확인
     const moverRating = ratingsByMover[rating.moverId];
     moverRating.totalCount += rating._count.rating;
     moverRating.totalSum += rating.rating * rating._count.rating;
     moverRating[`${rating.rating}`] = rating._count.rating;
-    console.log("After calculation:", moverRating); // 계산 후 상태 확인
   });
 
   // 평균 계산 및 totalSum 제거
