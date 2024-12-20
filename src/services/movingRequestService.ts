@@ -15,7 +15,7 @@ interface queryString {
   houseMove: boolean;
   officeMove: boolean;
   orderBy: string;
-  isQuoted: boolean;
+  isQuoted: boolean | undefined;
   isPastRequest: boolean;
 }
 
@@ -27,6 +27,7 @@ interface OffsetQueryString {
 interface WhereCondition {
   keyword?: string;
   OR?: object[];
+  AND?: object[];
   service?: object;
   mover?: object;
   quote?: object;
@@ -92,28 +93,43 @@ const setWhereCondition = (query: queryString, moverId: number) => {
     };
   }
 
-  if (!isQuoted) {
-    where.quote = {
-      none: {
-        moverId,
+  if (isQuoted === undefined) {
+    where.quote = {};
+    where.isRejected = {};
+  } else if (isQuoted) {
+    where.OR = [
+      {
+        quote: {
+          some: {
+            moverId,
+          },
+        },
       },
-    };
-    where.isRejected = {
-      none: {
-        id: moverId,
+      {
+        isRejected: {
+          some: {
+            id: moverId,
+          },
+        },
       },
-    };
+    ];
   } else {
-    where.quote = {
-      some: {
-        moverId,
+    where.AND = [
+      {
+        quote: {
+          none: {
+            moverId,
+          },
+        },
       },
-    };
-    where.isRejected = {
-      some: {
-        id: moverId,
+      {
+        isRejected: {
+          none: {
+            id: moverId,
+          },
+        },
       },
-    };
+    ];
   }
 
   if (isPastRequest) {
@@ -208,7 +224,7 @@ const getMovingRequestListByMover = async (
 
   //데이터 가공
   const resMovingRequestList = movingRequestList.map((movingRequest) => {
-    const { _count, customer, createAt, confirmedQuote, ...rest } =
+    const { _count, customer, createAt, confirmedQuote, isRejected, ...rest } =
       movingRequest;
 
     return {
@@ -217,6 +233,7 @@ const getMovingRequestListByMover = async (
       isConfirmed: Boolean(confirmedQuote), //완료된 견적서와 관계가 있다면 true
       name: customer.user.name,
       isDesignated: Boolean(_count.mover), //관계가 있다면 true
+      isRejected: Boolean(isRejected.length > 0), //반려된 견적서와 관계가 있다면 true
     };
   });
 
