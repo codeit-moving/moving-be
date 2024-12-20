@@ -148,6 +148,15 @@ const getMoverByFavorite = async (
     cursor
   );
 
+  if (!movers.length) {
+    const error: CustomError = new Error("Not Found");
+    error.status = 404;
+    error.data = {
+      message: "찜한 기사가 없습니다.",
+    };
+    throw error;
+  }
+
   const moverIds = movers.map((mover) => mover.id);
   const ratingsByMover = await getRatingsByMoverIds(moverIds);
   const processMovers = await processMoversData(
