@@ -24,7 +24,7 @@ router.get(
         houseMove = "false",
         officeMove = "false",
         orderBy = "resent",
-        isQuoted = "false",
+        isQuoted = "",
         isPastRequest = "false",
       } = req.query;
       const parseLimit = parseInt(limit as string);
@@ -46,7 +46,7 @@ router.get(
           houseMove: parseHouseMove || false,
           officeMove: parseOfficeMove || false,
           orderBy: orderBy as string,
-          isQuoted: parseIsQuoted || false,
+          isQuoted: parseIsQuoted,
           isPastRequest: parsePastRequest || false,
         });
       return res.status(200).send(movingRequestList);

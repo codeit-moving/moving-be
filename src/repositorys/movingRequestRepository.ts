@@ -122,6 +122,11 @@ const getMovingRequestListByMover = (
           },
         },
       },
+      isRejected: {
+        select: {
+          id: true,
+        },
+      },
     },
   });
 };
