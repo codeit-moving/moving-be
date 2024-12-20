@@ -15,7 +15,7 @@ interface queryString {
   houseMove: boolean;
   officeMove: boolean;
   orderBy: string;
-  isQuoted: boolean;
+  isQuoted: boolean | undefined;
   isPastRequest: boolean;
 }
 
@@ -27,6 +27,7 @@ interface OffsetQueryString {
 interface WhereCondition {
   keyword?: string;
   OR?: object[];
+  AND?: object[];
   service?: object;
   mover?: object;
   quote?: object;
@@ -92,28 +93,43 @@ const setWhereCondition = (query: queryString, moverId: number) => {
     };
   }
 
-  if (!isQuoted) {
-    where.quote = {
-      none: {
-        moverId,
+  if (isQuoted === undefined) {
+    where.quote = {};
+    where.isRejected = {};
+  } else if (isQuoted) {
+    where.OR = [
+      {
+        quote: {
+          some: {
+            moverId,
+          },
+        },
       },
-    };
-    where.isRejected = {
-      none: {
-        id: moverId,
+      {
+        isRejected: {
+          some: {
+            id: moverId,
+          },
+        },
       },
-    };
+    ];
   } else {
-    where.quote = {
-      some: {
-        moverId,
+    where.AND = [
+      {
+        quote: {
+          none: {
+            moverId,
+          },
+        },
       },
-    };
-    where.isRejected = {
-      some: {
-        id: moverId,
+      {
+        isRejected: {
+          none: {
+            id: moverId,
+          },
+        },
       },
-    };
+    ];
   }
 
   if (isPastRequest) {
@@ -208,7 +224,7 @@ const getMovingRequestListByMover = async (
 
   //데이터 가공
   const resMovingRequestList = movingRequestList.map((movingRequest) => {
-    const { _count, customer, createAt, confirmedQuote, ...rest } =
+    const { _count, customer, createAt, confirmedQuote, isRejected, ...rest } =
       movingRequest;
 
     return {
@@ -217,6 +233,7 @@ const getMovingRequestListByMover = async (
       isConfirmed: Boolean(confirmedQuote), //완료된 견적서와 관계가 있다면 true
       name: customer.user.name,
       isDesignated: Boolean(_count.mover), //관계가 있다면 true
+      isRejected: Boolean(isRejected.length > 0), //반려된 견적서와 관계가 있다면 true
     };
   });
 
@@ -375,10 +392,25 @@ const designateMover = async (
   const activeRequestPromise =
     movingRequestRepository.getActiveRequest(customerId);
 
-  const [result, activeRequest] = await Promise.all([
+  const designatedMoversPromise = movingRequestRepository.getDesignatedMovers(
+    movingRequestId,
+    moverId
+  );
+
+  const [result, activeRequest, designatedMovers] = await Promise.all([
     designateCountPromise,
     activeRequestPromise,
+    designatedMoversPromise,
   ]);
+
+  if (designatedMovers) {
+    const error: CustomError = new Error("Bad Request");
+    error.status = 400;
+    error.data = {
+      message: "이미 지정된 기사 입니다.",
+    };
+    throw error;
+  }
 
   if (!activeRequest) {
     const error: CustomError = new Error("Bad Request");
@@ -407,7 +439,7 @@ const designateMover = async (
 
   //알림 생성 기사에게
   notificationRepository.createNotification({
-    userId: movingRequest.mover[0].user.id,
+    userId: moverId,
     content: `${movingRequest.mover[0].nickname}기사님 새로운 지정 요청이 있습니다.`,
     isRead: false,
   });
@@ -422,6 +454,20 @@ const cancelDesignateMover = async (
   movingRequestId: number,
   moverId: number
 ) => {
+  const designatedMovers = await movingRequestRepository.getDesignatedMovers(
+    movingRequestId,
+    moverId
+  );
+
+  if (!designatedMovers) {
+    const error: CustomError = new Error("Bad Request");
+    error.status = 400;
+    error.data = {
+      message: "지정된 기사가 아닙니다.",
+    };
+    throw error;
+  }
+
   //이사요청 지정 취소
   const movingRequest = await movingRequestRepository.updateDesignatedCancel(
     movingRequestId,
