@@ -21,7 +21,7 @@ interface whereConditions {
   regions?: object;
   services?: object;
   OR?: object[];
-  customer?: object;
+  favorite?: object;
 }
 
 interface FavoriteData {
@@ -88,7 +88,7 @@ const getMoverList = async (query: queryString, customerId: number | null) => {
     whereConditions.services = { has: service };
   }
   if (isFavorite === "true" && customerId) {
-    whereConditions.customer = { has: customerId };
+    whereConditions.favorite = { some: { id: customerId } };
   }
 
   //데이터 조회
