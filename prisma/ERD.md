@@ -56,6 +56,7 @@ erDiagram
   Int id PK
   Int service
   DateTime movingDate
+  Int region
   String pickupAddress
   String dropOffAddress
   Int requestCount
@@ -212,6 +213,7 @@ erDiagram
   - `id`: 
   - `service`: 
   - `movingDate`: 
+  - `region`: 
   - `pickupAddress`: 
   - `dropOffAddress`: 
   - `requestCount`: 

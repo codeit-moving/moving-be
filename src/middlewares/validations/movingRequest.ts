@@ -2,7 +2,8 @@ import { RequestHandler } from "express";
 import customError from "../../utils/interfaces/customError";
 
 const createMovingRequestValidation: RequestHandler = (req, res, next) => {
-  const { service, movingDate, pickupAddress, dropOffAddress } = req.body;
+  const { service, movingDate, pickupAddress, dropOffAddress, region } =
+    req.body;
 
   if (!service || typeof service !== "number" || service < 1 || service > 3) {
     const error: customError = new Error("Bad Request");
@@ -41,6 +42,16 @@ const createMovingRequestValidation: RequestHandler = (req, res, next) => {
     error.message = "Bad Request";
     error.data = {
       message: "이사 도착지가 올바르지 않습니다.",
+    };
+    return next(error);
+  }
+
+  if (!region || typeof region !== "number") {
+    const error: customError = new Error("Bad Request");
+    error.status = 400;
+    error.message = "Bad Request";
+    error.data = {
+      message: "지역코드가 올바르지 않습니다.",
     };
     return next(error);
   }
