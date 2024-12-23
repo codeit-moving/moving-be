@@ -51,4 +51,17 @@ export const movers = [
     createAt: "2024-11-27T10:15:00.000Z",
     updateAt: "2024-11-27T10:15:00.000Z",
   },
+  {
+    id: 5,
+    nickname: "배진수",
+    services: [1, 3],
+    regions: [82032, 82033],
+    career: 6,
+    description:
+      "6년 경력의 이사 전문가, 안전하고 신속한 이사로 고객 만족을 최우선으로 생각합니다.",
+    introduction: "안전하고 빠른 이사를 보장하는 전문가입니다.",
+    userId: 10,
+    createAt: "2024-11-27T10:15:00.000Z",
+    updateAt: "2024-11-27T10:15:00.000Z",
+  },
 ];
