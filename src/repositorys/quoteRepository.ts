@@ -203,6 +203,7 @@ const getQuoteListByMoverId = (moverId: number, options: PaginationOptions) => {
       id: true,
       cost: true,
       comment: true,
+      createAt: true,
       movingRequest: {
         select: {
           service: true, // service로 매핑 필요
