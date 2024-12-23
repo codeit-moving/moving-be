@@ -320,6 +320,26 @@ const getActiveRequest = (customerId: number) => {
   });
 };
 
+const getDesignatedMovers = (movingRequestId: number, moverId: number) => {
+  return prismaClient.movingRequest.findUnique({
+    where: {
+      id: movingRequestId,
+      mover: {
+        some: {
+          id: moverId,
+        },
+      },
+    },
+    select: {
+      mover: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+};
+
 export default {
   getMovingRequestListByMover,
   createMovingRequest,
@@ -333,4 +353,5 @@ export default {
   getMovingRequestCountByServices,
   getMovingRequestCountByDesignated,
   getTotalCount,
+  getDesignatedMovers,
 };
