@@ -832,6 +832,10 @@
 ## 📁 파일 구조
 
 ```
+├─ .github
+│  └─ workflows
+│     └─ main.yml
+├─ .gitignore
 ├─ data
 │  ├─ customer.ts
 │  ├─ mock
@@ -845,10 +849,24 @@
 ├─ package-lock.json
 ├─ package.json
 ├─ prisma
-│  ├─ ERD.md
 │  ├─ migrations
 │  │  ├─ 20241127014347_init
 │  │  │  └─ migration.sql
+│  │  ├─ 20241127021240_
+│  │  │  └─ migration.sql
+│  │  ├─ 20241127021420_
+│  │  │  └─ migration.sql
+│  │  ├─ 20241128014440_update_user_table
+│  │  │  └─ migration.sql
+│  │  ├─ 20241202044806_update
+│  │  │  └─ migration.sql
+│  │  ├─ 20241205002823_update_moving_requset
+│  │  │  └─ migration.sql
+│  │  ├─ 20241212064234_add_image_table
+│  │  │  └─ migration.sql
+│  │  ├─ 20241219083653_update_moving_request
+│  │  │  └─ migration.sql
+│  │  └─ migration_lock.toml
 │  └─ schema.prisma
 ├─ src
 │  ├─ app.ts
@@ -856,33 +874,50 @@
 │  │  └─ cookie.config.ts
 │  ├─ controllers
 │  │  ├─ authController.ts
+│  │  ├─ confirmedQuoteController.ts
+│  │  ├─ customerController.ts
 │  │  ├─ moverController.ts
 │  │  ├─ movingRequestController.ts
+│  │  ├─ notificationController.ts
 │  │  ├─ oauthController.ts
 │  │  ├─ quoteController.ts
 │  │  ├─ regionController.ts
-│  │  └─ serviceController.ts
+│  │  ├─ serviceController.ts
+│  │  └─ userController.ts
 │  ├─ env.ts
 │  ├─ middlewares
+│  │  ├─ authMiddleware.ts
 │  │  ├─ errorHandler.ts
 │  │  ├─ passport.ts
 │  │  └─ validations
-│  │     └─ movingRequest.ts
+│  │     ├─ movingRequest.ts
+│  │     └─ quote.ts
 │  ├─ repositorys
-│  │  ├─ authRepository.ts
+│  │  ├─ confirmedQuoteRepository.ts
+│  │  ├─ customerRepository.ts
+│  │  ├─ imageRepository.ts
 │  │  ├─ moverRepository.ts
 │  │  ├─ movingRequestRepository.ts
+│  │  ├─ notificationRepository.ts
 │  │  ├─ quoteRepository.ts
 │  │  ├─ regionRepository.ts
-│  │  └─ serviceRepository.ts
+│  │  ├─ serviceRepository.ts
+│  │  └─ userRepository.ts
+│  ├─ schedules
+│  │  ├─ images.ts
+│  │  └─ notifications.ts
 │  ├─ services
 │  │  ├─ authService.ts
+│  │  ├─ confirmedQuoteService.ts
+│  │  ├─ customerService.ts
 │  │  ├─ moverService.ts
 │  │  ├─ movingRequestService.ts
+│  │  ├─ notificationService.ts
 │  │  ├─ oauthService.ts
 │  │  ├─ quoteService.ts
 │  │  ├─ regionService.ts
-│  │  └─ serviceService.ts
+│  │  ├─ serviceService.ts
+│  │  └─ userService.ts
 │  ├─ typings
 │  │  └─ env.d.ts
 │  └─ utils
@@ -897,9 +932,13 @@
 │     ├─ mover
 │     │  ├─ getRatingsByMover.ts
 │     │  └─ processMoverData.ts
+│     ├─ multer.ts
 │     ├─ prismaClient.ts
 │     ├─ quote
-│     │  └─ processQuoteData.ts
+│     │  ├─ processQuoteData.ts
+│     │  └─ types.ts
+│     ├─ s3.utils.ts
+│     ├─ timeGap.utils.ts
 │     └─ token.utils.ts
 └─ tsconfig.json
 
