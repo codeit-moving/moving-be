@@ -201,23 +201,8 @@ const getMoverDetail = async (customerId: number | null, moverId: number) => {
 };
 
 //찜 토글
-const toggleFavorite = async (
-  customerId: number,
-  moverId: number,
-  favorite: boolean | undefined
-) => {
-  const favoriteData: FavoriteData = {};
-  if (favorite) {
-    favoriteData.connect = {
-      id: customerId,
-    };
-  } else {
-    favoriteData.disconnect = {
-      id: customerId,
-    };
-  }
-
-  const mover = await moverRepository.toggleFavorite(moverId, favoriteData);
+const moverFavorite = async (customerId: number, moverId: number) => {
+  const mover = await moverRepository.moverFavorite(customerId, moverId);
   if (!mover) {
     const error: CustomError = new Error("Not Found");
     error.status = 404;
@@ -227,7 +212,20 @@ const toggleFavorite = async (
     throw error;
   }
 
-  return { ...mover, isFavorite: favorite };
+  return { ...mover, isFavorite: true };
+};
+
+const moverFavoriteCancel = async (customerId: number, moverId: number) => {
+  const mover = await moverRepository.moverFavoriteCancel(customerId, moverId);
+  if (!mover) {
+    const error: CustomError = new Error("Not Found");
+    error.status = 404;
+    error.data = {
+      message: "기사 정보를 찾을 수 없습니다.",
+    };
+    throw error;
+  }
+  return { ...mover, isFavorite: false };
 };
 
 const getMover = async (moverId: number) => {
@@ -298,7 +296,8 @@ const createMoverProfile = async (profile: Profile) => {
 export default {
   getMoverList,
   getMoverDetail,
-  toggleFavorite,
+  moverFavorite,
+  moverFavoriteCancel,
   getMoverByFavorite,
   getMover,
   updateMoverProfile,
