@@ -380,26 +380,32 @@ const createMovingRequest = async (
 };
 
 //이사요청 지정
-const designateMover = async (
-  movingRequestId: number,
-  moverId: number,
-  customerId: number
-) => {
-  //지정 가능 인원 조회
-  const designateCountPromise =
-    movingRequestRepository.getDesignateCount(movingRequestId);
+const designateMover = async (moverId: number, customerId: number) => {
+  const activeRequest = await movingRequestRepository.getActiveRequest(
+    customerId
+  );
 
-  const activeRequestPromise =
-    movingRequestRepository.getActiveRequest(customerId);
+  if (!activeRequest) {
+    const error: CustomError = new Error("Bad Request");
+    error.status = 422;
+    error.data = {
+      message: "일반 견적 요청을 먼저 진행해 주세요.",
+    };
+    throw error;
+  }
+
+  //지정 가능 인원 조회
+  const designateCountPromise = movingRequestRepository.getDesignateCount(
+    activeRequest.id
+  );
 
   const designatedMoversPromise = movingRequestRepository.getDesignatedMovers(
-    movingRequestId,
+    activeRequest.id,
     moverId
   );
 
-  const [result, activeRequest, designatedMovers] = await Promise.all([
+  const [result, designatedMovers] = await Promise.all([
     designateCountPromise,
-    activeRequestPromise,
     designatedMoversPromise,
   ]);
 
@@ -408,15 +414,6 @@ const designateMover = async (
     error.status = 400;
     error.data = {
       message: "이미 지정된 기사 입니다.",
-    };
-    throw error;
-  }
-
-  if (!activeRequest) {
-    const error: CustomError = new Error("Bad Request");
-    error.status = 400;
-    error.data = {
-      message: "일반 견적 요청을 먼저 진행해 주세요.",
     };
     throw error;
   }
@@ -433,7 +430,7 @@ const designateMover = async (
 
   //이사요청 지정
   const movingRequest = await movingRequestRepository.updateDesignated(
-    movingRequestId,
+    activeRequest.id,
     moverId
   );
 
@@ -450,12 +447,22 @@ const designateMover = async (
 };
 
 //이사요청 지정 취소
-const cancelDesignateMover = async (
-  movingRequestId: number,
-  moverId: number
-) => {
+const cancelDesignateMover = async (moverId: number, customerId: number) => {
+  const activeRequest = await movingRequestRepository.getActiveRequest(
+    customerId
+  );
+
+  if (!activeRequest) {
+    const error: CustomError = new Error("Bad Request");
+    error.status = 422;
+    error.data = {
+      message: "일반 견적 요청을 먼저 진행해 주세요.",
+    };
+    throw error;
+  }
+
   const designatedMovers = await movingRequestRepository.getDesignatedMovers(
-    movingRequestId,
+    activeRequest.id,
     moverId
   );
 
@@ -470,7 +477,7 @@ const cancelDesignateMover = async (
 
   //이사요청 지정 취소
   const movingRequest = await movingRequestRepository.updateDesignatedCancel(
-    movingRequestId,
+    activeRequest.id,
     moverId
   );
 
