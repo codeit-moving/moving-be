@@ -16,5 +16,6 @@ declare namespace NodeJS {
     AWS_S3_REGION: string;
     AWS_S3_ACCESS_KEY: string;
     AWS_S3_SECRET_KEY: string;
+    DEFAULT_PROFILE_IMAGE: string;
   }
 }
