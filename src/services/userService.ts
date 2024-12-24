@@ -1,3 +1,4 @@
+import { DEFAULT_PROFILE_IMAGE } from "../env";
 import userRepository from "../repositorys/userRepository";
 import CustomError from "../utils/interfaces/customError";
 import bcrypt from "bcrypt";
@@ -89,21 +90,25 @@ const updateUser = async (userId: number, updateData: UpdateUser) => {
 
 const getUser = async (userId: number) => {
   const userType = await userRepository.getUserType(userId);
+
   if (userType === "customer") {
     const response = (await userRepository.getCustomer(
       userId
     )) as CustomerResponse;
-    if (
-      response?.customer?.imageUrl &&
-      Array.isArray(response.customer.imageUrl)
-    ) {
-      response.customer.imageUrl = response.customer.imageUrl[0].imageUrl;
+    if (!response?.customer?.imageUrl) {
+      response.customer.imageUrl = DEFAULT_PROFILE_IMAGE;
+    } else if (Array.isArray(response.customer.imageUrl)) {
+      response.customer.imageUrl =
+        response.customer.imageUrl[0]?.imageUrl || DEFAULT_PROFILE_IMAGE;
     }
     return response;
   } else if (userType === "mover") {
     const response = (await userRepository.getMover(userId)) as MoverResponse;
-    if (response?.mover?.imageUrl && Array.isArray(response.mover.imageUrl)) {
-      response.mover.imageUrl = response.mover.imageUrl[0].imageUrl;
+    if (!response?.mover?.imageUrl) {
+      response.mover.imageUrl = DEFAULT_PROFILE_IMAGE;
+    } else if (Array.isArray(response.mover.imageUrl)) {
+      response.mover.imageUrl =
+        response.mover.imageUrl[0]?.imageUrl || DEFAULT_PROFILE_IMAGE;
     }
     return response;
   } else {
