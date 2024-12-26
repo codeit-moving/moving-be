@@ -24,7 +24,10 @@ import { imageCleanup } from "./schedules/images";
 const app = express();
 
 //CORS 설정
-const allowedOrigins: string[] = ["http://localhost:3001"];
+const allowedOrigins: string[] = [
+  "http://localhost:3001",
+  "https://52.78.245.231.nip.io", // 백엔드 도메인도 허용
+];
 // CORS 설정
 const corsOptions: CorsOptions = {
   credentials: true,
