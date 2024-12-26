@@ -4,6 +4,7 @@ import { Request, Response, NextFunction } from "express";
 import passport from "passport";
 import CustomError from "../utils/interfaces/customError";
 import userRepository from "../repositorys/userRepository";
+import { FRONTEND_URL } from "../env";
 
 interface authUser {
   id: number;
@@ -81,7 +82,7 @@ export const isCustomer = async (
     error.status = 403;
     error.data = {
       message: "고객 프로필을 먼저 등록해주세요",
-      redirectUrl: process.env.FRONTEND_URL + "/me/profile",
+      redirectUrl: FRONTEND_URL + "/me/profile",
       redirect: true,
     };
     return next(error);
@@ -115,9 +116,7 @@ export const isMover = async (
     error.status = 403;
     error.data = {
       message: "기사 프로필을 먼저 등록해 주세요.",
-      redirectUrl:
-        process.env.FRONTEND_URL + "/mover/profile" ||
-        "http://localhost:3000/mover/profile",
+      redirectUrl: FRONTEND_URL + "/mover/profile",
       redirect: true,
     };
     return next(error);
