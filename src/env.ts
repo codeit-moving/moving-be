@@ -23,3 +23,5 @@ export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 export const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL;
 export const DEFAULT_PROFILE_IMAGE = process.env
   .DEFAULT_PROFILE_IMAGE as string;
+
+export const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
