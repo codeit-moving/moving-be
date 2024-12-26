@@ -21,4 +21,5 @@ export const KAKAO_CALLBACK_URL = process.env.KAKAO_CALLBACK_URL;
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 export const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL;
-export const DEFAULT_PROFILE_IMAGE = process.env.DEFAULT_PROFILE_IMAGE;
+export const DEFAULT_PROFILE_IMAGE = process.env
+  .DEFAULT_PROFILE_IMAGE as string;
