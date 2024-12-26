@@ -66,19 +66,13 @@ export const isCustomer = async (
     moverId?: number;
   };
 
-  const findUser = await userRepository.findById(user.id);
-  if (!findUser) {
-    res.status(403).send("유효하지 않은 사용자입니다.");
-  }
-
   if (!user?.customerId) {
-    return res.status(403).send({
-      message: "고객 프로필을 먼저 등록해 주세요.",
-      redirectUrl:
-        process.env.FRONTEND_URL + "/me/profile" ||
-        "http://localhost:3000/me/profile",
+    res.status(403).send({
+      message: "고객 프로필을 먼저 등록해주세요",
+      redirectUrl: process.env.FRONTEND_URL + "/me/profile",
       redirect: true,
     });
+    return;
   }
 
   next();
@@ -100,13 +94,14 @@ export const isMover = async (
   }
 
   if (!user?.moverId) {
-    return res.status(403).send({
+    res.status(403).send({
       message: "기사 프로필을 먼저 등록해 주세요.",
       redirectUrl:
         process.env.FRONTEND_URL + "/mover/profile" ||
         "http://localhost:3000/mover/profile",
       redirect: true,
     });
+    return;
   }
 
   next();

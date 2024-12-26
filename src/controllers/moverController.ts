@@ -3,7 +3,11 @@ import { asyncHandle } from "../utils/asyncHandler";
 import express from "express";
 import checkBoolean from "../utils/checkBoolean";
 import passport from "passport";
-import { optionalJwtAuth } from "../middlewares/authMiddleware";
+import {
+  isCustomer,
+  isMover,
+  optionalJwtAuth,
+} from "../middlewares/authMiddleware";
 import upload from "../utils/multer";
 import { Payload } from "../utils/token.utils";
 
@@ -66,6 +70,7 @@ router.get(
 router.get(
   "/my-profile",
   passport.authenticate("jwt", { session: false }),
+  isMover,
   asyncHandle(async (req, res, next) => {
     try {
       const { moverId } = req.user as { moverId: number };
@@ -82,6 +87,7 @@ router.get(
 router.get(
   "/favorite-list",
   passport.authenticate("jwt", { session: false }),
+  isCustomer,
   asyncHandle(async (req, res, next) => {
     try {
       const { limit = "10", nextCursorId = "0" } = req.query;
