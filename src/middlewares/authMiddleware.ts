@@ -65,14 +65,26 @@ export const isCustomer = async (
     customerId?: number;
     moverId?: number;
   };
+  const findUser = await userRepository.findById(user.id);
+
+  if (!findUser) {
+    const error: CustomError = new Error("Unauthorized");
+    error.status = 403;
+    error.data = {
+      message: "유효하지 않은 사용자입니다.",
+    };
+    return next(error);
+  }
 
   if (!user?.customerId) {
-    res.status(403).send({
+    const error: CustomError = new Error("Unauthorized");
+    error.status = 403;
+    error.data = {
       message: "고객 프로필을 먼저 등록해주세요",
       redirectUrl: process.env.FRONTEND_URL + "/me/profile",
       redirect: true,
-    });
-    return;
+    };
+    return next(error);
   }
 
   next();
@@ -90,18 +102,25 @@ export const isMover = async (
   };
   const findUser = await userRepository.findById(user.id);
   if (!findUser) {
-    res.status(403).send("유효하지 않은 사용자입니다.");
+    const error: CustomError = new Error("Unauthorized");
+    error.status = 403;
+    error.data = {
+      message: "유효하지 않은 사용자입니다.",
+    };
+    return next(error);
   }
 
   if (!user?.moverId) {
-    res.status(403).send({
+    const error: CustomError = new Error("Unauthorized");
+    error.status = 403;
+    error.data = {
       message: "기사 프로필을 먼저 등록해 주세요.",
       redirectUrl:
         process.env.FRONTEND_URL + "/mover/profile" ||
         "http://localhost:3000/mover/profile",
       redirect: true,
-    });
-    return;
+    };
+    return next(error);
   }
 
   next();
