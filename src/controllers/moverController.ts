@@ -133,6 +133,7 @@ router.get(
 router.post(
   "/:id/favorite",
   passport.authenticate("jwt", { session: false }),
+  isCustomer,
   asyncHandle(async (req, res, next) => {
     try {
       const { customerId } = req.user as { customerId: number };
@@ -152,6 +153,7 @@ router.post(
 router.delete(
   "/:id/favorite",
   passport.authenticate("jwt", { session: false }),
+  isCustomer,
   asyncHandle(async (req, res, next) => {
     try {
       const { customerId } = req.user as { customerId: number };
