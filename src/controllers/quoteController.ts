@@ -4,6 +4,7 @@ import { asyncHandle } from "../utils/asyncHandler";
 import passport from "passport";
 import customError from "../utils/interfaces/customError";
 import quoteValidation from "../middlewares/validations/quote";
+import { isCustomer } from "../middlewares/authMiddleware";
 
 const router = express.Router();
 
@@ -11,6 +12,7 @@ const router = express.Router();
 router.get(
   "/:id",
   passport.authenticate("jwt", { session: false }),
+  isCustomer,
   asyncHandle(async (req, res, next) => {
     try {
       const { customerId } = req.user as { customerId: number };
