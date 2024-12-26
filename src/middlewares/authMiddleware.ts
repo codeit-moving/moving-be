@@ -3,6 +3,7 @@
 import { Request, Response, NextFunction } from "express";
 import passport from "passport";
 import CustomError from "../utils/interfaces/customError";
+import userRepository from "../repositorys/userRepository";
 
 interface authUser {
   id: number;
@@ -52,4 +53,61 @@ export const optionalJwtAuth = (
       }
     }
   )(req, res, next);
+};
+
+export const isCustomer = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const user = req.user as {
+    id: number;
+    customerId?: number;
+    moverId?: number;
+  };
+
+  const findUser = await userRepository.findById(user.id);
+  if (!findUser) {
+    res.status(403).send("유효하지 않은 사용자입니다.");
+  }
+
+  if (!user?.customerId) {
+    return res.status(403).send({
+      message: "고객 프로필을 먼저 등록해 주세요.",
+      redirectUrl:
+        process.env.FRONTEND_URL + "/me/profile" ||
+        "http://localhost:3000/me/profile",
+      redirect: true,
+    });
+  }
+
+  next();
+};
+
+export const isMover = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const user = req.user as {
+    id: number;
+    customerId?: number;
+    moverId?: number;
+  };
+  const findUser = await userRepository.findById(user.id);
+  if (!findUser) {
+    res.status(403).send("유효하지 않은 사용자입니다.");
+  }
+
+  if (!user?.moverId) {
+    return res.status(403).send({
+      message: "기사 프로필을 먼저 등록해 주세요.",
+      redirectUrl:
+        process.env.FRONTEND_URL + "/mover/profile" ||
+        "http://localhost:3000/mover/profile",
+      redirect: true,
+    });
+  }
+
+  next();
 };
