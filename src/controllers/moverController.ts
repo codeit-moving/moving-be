@@ -131,11 +131,28 @@ router.post(
     try {
       const { customerId } = req.user as { customerId: number };
       const { id: moverId } = req.params;
-      const { favorite = "true" } = req.query;
-      const mover = await moverService.toggleFavorite(
+      const mover = await moverService.moverFavorite(
         customerId,
-        parseInt(moverId),
-        checkBoolean(favorite as string)
+        parseInt(moverId)
+      );
+      return res.status(200).send(mover);
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
+//기사 찜 취소
+router.delete(
+  "/:id/favorite",
+  passport.authenticate("jwt", { session: false }),
+  asyncHandle(async (req, res, next) => {
+    try {
+      const { customerId } = req.user as { customerId: number };
+      const { id: moverId } = req.params;
+      const mover = await moverService.moverFavoriteCancel(
+        customerId,
+        parseInt(moverId)
       );
       return res.status(200).send(mover);
     } catch (error) {

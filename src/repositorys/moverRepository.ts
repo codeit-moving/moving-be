@@ -143,10 +143,20 @@ const getRatingsByMoverIds = async (moverIds: number[]) => {
   return ratings;
 };
 
-const toggleFavorite = async (moverId: number, favorite: object) => {
+const moverFavorite = async (customerId: number, moverId: number) => {
   return prismaClient.mover.update({
     where: { id: moverId },
-    data: { favorite },
+    data: { favorite: { connect: { id: customerId } } },
+    select: {
+      id: true,
+    },
+  });
+};
+
+const moverFavoriteCancel = async (customerId: number, moverId: number) => {
+  return prismaClient.mover.update({
+    where: { id: moverId },
+    data: { favorite: { disconnect: { id: customerId } } },
     select: {
       id: true,
     },
@@ -202,7 +212,8 @@ export default {
   getMoverList,
   getRatingsByMoverIds,
   getMoverById,
-  toggleFavorite,
+  moverFavorite,
+  moverFavoriteCancel,
   getMoverByFavorite,
   createMoverProfile,
 };

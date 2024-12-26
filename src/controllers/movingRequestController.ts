@@ -152,11 +152,9 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   asyncHandle(async (req, res, next) => {
     try {
-      const { id: movingRequestId } = req.params;
-      const { moverId } = req.query;
+      const { id: moverId } = req.params;
       const { customerId } = req.user as { customerId: number };
       const remainingCount = await movingRequestService.designateMover(
-        parseInt(movingRequestId),
         parseInt(moverId as string),
         customerId
       );
@@ -176,11 +174,11 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   asyncHandle(async (req, res, next) => {
     try {
-      const { id: movingRequestId } = req.params;
-      const { moverId } = req.query;
+      const { id: moverId } = req.params;
+      const { customerId } = req.user as { customerId: number };
       const remainingCount = await movingRequestService.cancelDesignateMover(
-        parseInt(movingRequestId),
-        parseInt(moverId as string)
+        parseInt(moverId as string),
+        customerId
       );
       return res.status(200).send({
         message: "지정 요청 취소",
