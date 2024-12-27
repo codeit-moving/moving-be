@@ -8,26 +8,6 @@ import { isCustomer } from "../middlewares/authMiddleware";
 
 const router = express.Router();
 
-//견적서 상세 조회
-router.get(
-  "/:id",
-  passport.authenticate("jwt", { session: false }),
-  isCustomer,
-  asyncHandle(async (req, res, next) => {
-    try {
-      const { customerId } = req.user as { customerId: number };
-      const { id: quoteId } = req.params;
-      const quote = await quoteService.getQuoteById(
-        customerId,
-        parseInt(quoteId)
-      );
-      return res.status(200).send(quote);
-    } catch (error) {
-      next(error);
-    }
-  })
-);
-
 // 견적서 생성하기
 router.post(
   "/",
@@ -183,6 +163,26 @@ router.get(
 
     // 응답
     res.status(200).send(result);
+  })
+);
+
+//견적서 상세 조회
+router.get(
+  "/:id",
+  passport.authenticate("jwt", { session: false }),
+  isCustomer,
+  asyncHandle(async (req, res, next) => {
+    try {
+      const { customerId } = req.user as { customerId: number };
+      const { id: quoteId } = req.params;
+      const quote = await quoteService.getQuoteById(
+        customerId,
+        parseInt(quoteId)
+      );
+      return res.status(200).send(quote);
+    } catch (error) {
+      next(error);
+    }
   })
 );
 
