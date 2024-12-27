@@ -74,7 +74,6 @@ router.get(
   asyncHandle(async (req, res, next) => {
     try {
       const { moverId } = req.user as { moverId: number };
-      console.log(moverId);
       const mover = await moverService.getMover(moverId);
       return res.status(200).send(mover);
     } catch (error) {
