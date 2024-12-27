@@ -67,7 +67,6 @@ export const isCustomer = async (
     moverId?: number;
   };
   const findUser = await userRepository.findById(user.id);
-
   if (!findUser) {
     const error: CustomError = new Error("Unauthorized");
     error.status = 403;
@@ -110,7 +109,6 @@ export const isMover = async (
     };
     return next(error);
   }
-
   if (!user?.moverId) {
     const error: CustomError = new Error("Unauthorized");
     error.status = 403;
