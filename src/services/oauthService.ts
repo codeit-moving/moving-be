@@ -11,9 +11,7 @@ passport.deserializeUser((user: any, done) => {
 
 const naver = async (profile: any, userType: string) => {
   try {
-    const existingUser = await userRepository.findByEmail(
-      profile.emails?.[0].value
-    );
+    const existingUser = await userRepository.findByEmail(profile._json.email);
 
     if (existingUser) {
       return existingUser;
@@ -21,8 +19,8 @@ const naver = async (profile: any, userType: string) => {
 
     const newUser = await userRepository.createUser(
       {
-        email: profile.emails?.[0].value!,
-        name: "Unknown",
+        email: profile._json.email,
+        name: profile._json.nickname || "Unknown",
         phoneNumber: null,
         password: null,
         isOAuth: true,
@@ -49,7 +47,7 @@ const kakao = async (profile: any, userType: string) => {
     const newUser = await userRepository.createUser(
       {
         email: profile._json.kakao_account.email,
-        name: "Unknown",
+        name: profile._json.properties.nickname || "Unknown",
         phoneNumber: null,
         password: null,
         isOAuth: true,
@@ -65,9 +63,7 @@ const kakao = async (profile: any, userType: string) => {
 
 const google = async (profile: any, userType: string) => {
   try {
-    const existingUser = await userRepository.findByEmail(
-      profile.emails?.[0].value
-    );
+    const existingUser = await userRepository.findByEmail(profile._json.email);
 
     if (existingUser) {
       return existingUser;
@@ -75,8 +71,8 @@ const google = async (profile: any, userType: string) => {
 
     const newUser = await userRepository.createUser(
       {
-        email: profile.emails?.[0].value!,
-        name: "Unknown",
+        email: profile._json.email,
+        name: profile._json.name || "Unknown",
         phoneNumber: null,
         password: null,
         isOAuth: true,

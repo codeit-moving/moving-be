@@ -198,7 +198,6 @@ const getQuoteListByMoverId = (moverId: number, options: PaginationOptions) => {
     },
     // 페이지네이션 코드 추가
     take: options.limit,
-    skip: options.cursor ? 1 : 0,
     cursor: options.cursor ? { id: options.cursor } : undefined,
     select: {
       id: true,
