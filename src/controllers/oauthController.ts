@@ -87,7 +87,7 @@ router.get(
   })
 );
 
-const handleOAuthCallback: RequestHandler = (req, res) => {
+const handleOAuthCallback: RequestHandler = (req, res, next) => {
   if (!req.user) {
     return res.redirect("/login");
   }
@@ -120,7 +120,7 @@ const handleOAuthCallback: RequestHandler = (req, res) => {
       redirectUrl: FRONTEND_URL + redirectUrls[userType],
       redirect: true,
     };
-    throw error;
+    next(error);
   }
 };
 
