@@ -120,11 +120,7 @@ const getQuoteList = async (moverId: number, query: QuoteQueryString) => {
 };
 
 // (기사님이 작성한) 견적서 상세 조회
-const getQuoteDetail = async (
-  moverId: number,
-  quoteId: number,
-  cost: number
-) => {
+const getQuoteDetail = async (moverId: number, quoteId: number) => {
   // 1. 견적서가 존재하는지 확인합니다.
   const quote = await quoteRepository.getQuoteDetailByMoverId(moverId, quoteId);
 

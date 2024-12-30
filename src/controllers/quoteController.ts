@@ -148,9 +148,8 @@ router.get(
     }
 
     const quoteId = parseInt(req.params.quoteId);
-    const cost = parseInt(req.query.cost as string);
 
-    if (isNaN(quoteId) || isNaN(cost)) {
+    if (isNaN(quoteId)) {
       const error: customError = new Error("Bad Request");
       error.status = 400;
       error.message = "Bad Request";
@@ -160,7 +159,7 @@ router.get(
       throw error;
     }
 
-    const quote = await quoteService.getQuoteDetail(moverId, quoteId, cost);
+    const quote = await quoteService.getQuoteDetail(moverId, quoteId);
 
     return res.status(200).send(quote);
   })
