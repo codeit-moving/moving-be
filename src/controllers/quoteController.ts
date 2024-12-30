@@ -129,7 +129,7 @@ router.post(
   })
 );
 
-// (기사님이 작성한)특정 견적서 상세 조회
+// (기사님이 작성한)특정 견적서 상세 조회회
 router.get(
   "/mover/:quoteId",
   passport.authenticate("jwt", { session: false }),
