@@ -4,6 +4,13 @@ import { asyncHandle } from "../utils/asyncHandler";
 import reviewService from "../services/reviewService";
 import customError from "../utils/interfaces/customError";
 import { ReviewCreateData, ReviewQuery } from "../utils/review/types";
+import { uploadFile } from "../utils/s3.utils";
+import upload from "../utils/multer";
+
+interface User {
+  customerId: number;
+  // 다른 필요한 필드들...
+}
 
 const router = Router();
 
@@ -28,7 +35,7 @@ router.get(
   "/me",
   passport.authenticate("jwt", { session: false }),
   asyncHandle(async (req, res) => {
-    const user = req.user as any;
+    const user = req.user as User;
     const customerId = user.customerId;
 
     if (!customerId) {
@@ -53,8 +60,9 @@ router.get(
 router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
+  upload.array("images", 10),
   asyncHandle(async (req, res) => {
-    const user = req.user as any;
+    const user = req.user as User;
     const customerId = user.customerId;
 
     if (!customerId) {
@@ -64,7 +72,7 @@ router.post(
       throw error;
     }
 
-    const { confirmedQuoteId, rating, content, imageUrl } = req.body; // moverId 제거
+    const { confirmedQuoteId, rating, content } = req.body;
 
     if (!confirmedQuoteId || !rating) {
       // moverId 체크 제거
@@ -72,6 +80,13 @@ router.post(
       error.status = 400;
       error.message = "필수 항목이 누락되었습니다.";
       throw error;
+    }
+
+    // 이미지 파일이 있다면 S3에 업로드
+    let imageUrl: string[] = []; // 배열로 초기화
+    if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+      const uploadedUrl = await uploadFile(req.files[0]); // 첫 번째 이미지만 업로드
+      imageUrl = uploadedUrl ? [uploadedUrl] : []; // 배열로 감싸서 저장
     }
 
     const result = await reviewService.createNewReview(customerId, {
@@ -90,7 +105,7 @@ router.get(
   "/available",
   passport.authenticate("jwt", { session: false }),
   asyncHandle(async (req, res) => {
-    const user = req.user as any;
+    const user = req.user as User;
     const customerId = user.customerId;
 
     if (!customerId) {
@@ -113,7 +128,3 @@ router.get(
 );
 
 export default router;
-
-
-
-
