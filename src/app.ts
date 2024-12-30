@@ -26,7 +26,7 @@ const app = express();
 //CORS 설정
 const allowedOrigins: string[] = [
   "http://localhost:3001",
-  "https://52.78.245.231.nip.io", // 백엔드 도메인도 허용
+  "https://moving-fe-e1p7.vercel.app",
 ];
 // CORS 설정
 const corsOptions: CorsOptions = {

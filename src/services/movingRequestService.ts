@@ -5,6 +5,7 @@ import quoteRepository from "../repositorys/quoteRepository";
 import processQuotes from "../utils/quote/processQuoteData";
 import notificationRepository from "../repositorys/notificationRepository";
 import moverRepository from "../repositorys/moverRepository";
+import { object } from "superstruct";
 
 interface queryString {
   limit: number;
@@ -167,7 +168,7 @@ const getMovingRequestListByMover = async (
   moverId: number,
   query: queryString
 ) => {
-  const { limit, cursor, orderBy } = query;
+  const { limit, cursor, orderBy, isQuoted } = query;
   const whereCondition: WhereCondition = setWhereCondition(query, moverId);
   const orderByQuery = setOrderBy(orderBy);
 
@@ -186,10 +187,52 @@ const getMovingRequestListByMover = async (
     in: regions,
   };
 
-  const serviceCountsPromise =
-    movingRequestRepository.getMovingRequestCountByServices();
+  const countCondition: WhereCondition = {
+    movingDate: whereCondition.movingDate,
+    region: whereCondition.region,
+  };
 
-  const totalCountPromise = movingRequestRepository.getTotalCount();
+  if (isQuoted) {
+    countCondition.OR = [
+      {
+        quote: {
+          some: {
+            moverId,
+          },
+        },
+      },
+      {
+        isRejected: {
+          some: {
+            id: moverId,
+          },
+        },
+      },
+    ];
+  } else {
+    countCondition.AND = [
+      {
+        quote: {
+          none: {
+            moverId,
+          },
+        },
+      },
+      {
+        isRejected: {
+          none: {
+            id: moverId,
+          },
+        },
+      },
+    ];
+  }
+
+  const serviceCountsPromise =
+    movingRequestRepository.getMovingRequestCountByServices(countCondition);
+
+  const totalCountPromise =
+    movingRequestRepository.getTotalCount(countCondition);
   const designatedCountPromise =
     movingRequestRepository.getMovingRequestCountByDesignated(moverId);
 
