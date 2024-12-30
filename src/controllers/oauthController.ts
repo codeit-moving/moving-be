@@ -1,7 +1,7 @@
 import { RequestHandler, Router } from "express";
 import passport from "passport";
 import cookieConfig from "../config/cookie.config";
-import createToken from "../utils/token.utils";
+import createToken, { Payload } from "../utils/token.utils";
 import {
   FRONTEND_URL,
   KAKAO_CALLBACK_URL,
@@ -12,12 +12,6 @@ import {
 import CustomError from "../utils/interfaces/customError";
 
 const router = Router();
-
-interface OAuthUser {
-  id: number;
-  customerId?: number | null;
-  moverId?: number | null;
-}
 
 router.get("/naver/customer", (req, res) => {
   const baseURL = "https://nid.naver.com/oauth2.0/authorize";
@@ -97,7 +91,7 @@ const handleOAuthCallback: RequestHandler = (req, res) => {
   if (!req.user) {
     return res.redirect("/login");
   }
-  const user = req.user as OAuthUser;
+  const user = req.user as Payload;
   const userType = req.query.state as string;
 
   const accessToken = createToken(user, "access");
@@ -106,7 +100,7 @@ const handleOAuthCallback: RequestHandler = (req, res) => {
   res.cookie("accessToken", accessToken, cookieConfig.accessTokenOption);
   res.cookie("refreshToken", refreshToken, cookieConfig.refreshTokenOption);
 
-  if (user.customerId || user.moverId) {
+  if (user.customer?.id || user.mover?.id) {
     res.redirect(FRONTEND_URL);
   } else {
     const messages: Record<string, string> = {
