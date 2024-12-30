@@ -168,6 +168,7 @@ const getAvailableReviewList = (
     select: {
       id: true,
       imageUrl: true,
+      content: true,
       mover: {
         // 여기에 mover 정보 추가
         select: {
