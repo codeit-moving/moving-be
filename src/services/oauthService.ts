@@ -19,14 +19,16 @@ const naver = async (profile: any, userType: string) => {
       return existingUser;
     }
 
-    const newUser = await userRepository.createUser({
-      email: profile.emails?.[0].value!,
-      name: "Unknown",
-      phoneNumber: null,
-      password: null,
-      isOAuth: true,
-      userType: userType,
-    });
+    const newUser = await userRepository.createUser(
+      {
+        email: profile.emails?.[0].value!,
+        name: "Unknown",
+        phoneNumber: null,
+        password: null,
+        isOAuth: true,
+      },
+      userType
+    );
 
     return newUser;
   } catch (error) {
@@ -44,14 +46,16 @@ const kakao = async (profile: any, userType: string) => {
       return existingUser;
     }
 
-    const newUser = await userRepository.createUser({
-      email: profile._json.kakao_account.email,
-      name: "Unknown",
-      phoneNumber: null,
-      password: null,
-      isOAuth: true,
-      userType: userType,
-    });
+    const newUser = await userRepository.createUser(
+      {
+        email: profile._json.kakao_account.email,
+        name: "Unknown",
+        phoneNumber: null,
+        password: null,
+        isOAuth: true,
+      },
+      userType
+    );
 
     return newUser;
   } catch (error) {
@@ -69,14 +73,16 @@ const google = async (profile: any, userType: string) => {
       return existingUser;
     }
 
-    const newUser = await userRepository.createUser({
-      email: profile.emails?.[0].value!,
-      name: "Unknown",
-      phoneNumber: null,
-      password: null,
-      isOAuth: true,
-      userType: userType,
-    });
+    const newUser = await userRepository.createUser(
+      {
+        email: profile.emails?.[0].value!,
+        name: "Unknown",
+        phoneNumber: null,
+        password: null,
+        isOAuth: true,
+      },
+      userType
+    );
 
     return newUser;
   } catch (error) {
