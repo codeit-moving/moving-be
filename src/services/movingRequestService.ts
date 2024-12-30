@@ -422,6 +422,24 @@ const createMovingRequest = async (
   return movingRequest;
 };
 
+const checkActiveRequest = async (customerId: number) => {
+  const activeRequest = await movingRequestRepository.getActiveRequest(
+    customerId
+  );
+
+  if (!activeRequest) {
+    return {
+      activeRequest: false,
+      message: "활성중인 이사요청이 없습니다.",
+    };
+  }
+
+  return {
+    activeRequest: true,
+    message: "활성중인 이사요청이 있습니다.",
+  };
+};
+
 //이사요청 지정
 const designateMover = async (moverId: number, customerId: number) => {
   const activeRequest = await movingRequestRepository.getActiveRequest(
@@ -537,4 +555,5 @@ export default {
   getQuoteByMovingRequestId,
   getPendingQuotes,
   getMovingRequestListByCustomer,
+  checkActiveRequest,
 };

@@ -122,6 +122,23 @@ router.get(
   })
 );
 
+router.get(
+  "/active",
+  passport.authenticate("jwt", { session: false }),
+  isCustomer,
+  asyncHandle(async (req, res, next) => {
+    try {
+      const { customerId } = req.user as { customerId: number };
+      const activeRequest = await movingRequestService.checkActiveRequest(
+        customerId
+      );
+      return res.status(200).send(activeRequest);
+    } catch (error) {
+      next(error);
+    }
+  })
+);
+
 //이사요청 생성
 router.post(
   "/",
