@@ -9,8 +9,15 @@ import {
   NAVER_CLIENT_ID,
   NAVER_REDIRECT_URI,
 } from "../env";
+import CustomError from "../utils/interfaces/customError";
 
 const router = Router();
+
+interface OAuthUser {
+  id: number;
+  customerId?: number | null;
+  moverId?: number | null;
+}
 
 router.get("/naver/customer", (req, res) => {
   const baseURL = "https://nid.naver.com/oauth2.0/authorize";
@@ -90,7 +97,7 @@ const handleOAuthCallback: RequestHandler = (req, res) => {
   if (!req.user) {
     return res.redirect("/login");
   }
-  const user = req.user as any;
+  const user = req.user as OAuthUser;
   const userType = req.query.state as string;
 
   const accessToken = createToken(user, "access");
@@ -99,21 +106,28 @@ const handleOAuthCallback: RequestHandler = (req, res) => {
   res.cookie("accessToken", accessToken, cookieConfig.accessTokenOption);
   res.cookie("refreshToken", refreshToken, cookieConfig.refreshTokenOption);
 
-  const messages: Record<string, string> = {
-    customer: "고객 프로필을 등록해주세요.",
-    mover: "기사 프로필을 등록해주세요.",
-  };
+  if (user.customerId || user.moverId) {
+    res.redirect(FRONTEND_URL);
+  } else {
+    const messages: Record<string, string> = {
+      customer: "고객 프로필을 등록해주세요.",
+      mover: "기사 프로필을 등록해주세요.",
+    };
 
-  const redirectUrls: Record<string, string> = {
-    customer: "/me/profile",
-    mover: "/mover/profile",
-  };
+    const redirectUrls: Record<string, string> = {
+      customer: "/me/profile",
+      mover: "/mover/profile",
+    };
 
-  res.status(204).send({
-    message: messages[userType] || "프로필을 등록해주세요.",
-    redirectUrl: FRONTEND_URL + redirectUrls[userType],
-    redirect: true,
-  });
+    const error: CustomError = new Error("Forbidden");
+    error.status = 403;
+    error.data = {
+      message: messages[userType] || "프로필을 등록해주세요.",
+      redirectUrl: FRONTEND_URL + redirectUrls[userType],
+      redirect: true,
+    };
+    throw error;
+  }
 };
 
 router.get(
