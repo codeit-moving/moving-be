@@ -29,7 +29,6 @@ const createConfirmedQuote = async (confirmedQuoteData: ConfirmedQuote) => {
     };
     throw error;
   }
-
   if (!quote) {
     const error: customError = new Error("Not Found");
     error.status = 404;

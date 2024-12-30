@@ -310,6 +310,9 @@ const getActiveRequest = (customerId: number) => {
       confirmedQuote: {
         is: null,
       },
+      movingDate: {
+        gt: new Date(),
+      },
     },
     select: {
       id: true,
