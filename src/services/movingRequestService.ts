@@ -435,6 +435,7 @@ const checkActiveRequest = async (customerId: number) => {
   }
 
   return {
+    id: activeRequest.id,
     activeRequest: true,
     message: "활성중인 이사요청이 있습니다.",
   };
