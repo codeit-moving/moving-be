@@ -1,3 +1,4 @@
+import confirmedQuoteRepository from "../repositorys/confirmedQuoteRepository";
 import reviewRepository from "../repositorys/reviewRepository";
 import customError from "../utils/interfaces/customError";
 import {
@@ -121,9 +122,14 @@ const getAvailableReviewsList = async (
   const pageSize = query.pageSize || 6;
   const pageNum = query.pageNum || 1;
 
-  const [totalCount, reviews] = await Promise.all([
-    reviewRepository.getAvailableReviewCount(customerId),
-    reviewRepository.getAvailableReviewList(customerId, {
+  const [totalCount, confirmedQuotes] = await Promise.all([
+    // reviewRepository.getAvailableReviewCount(customerId),
+    // reviewRepository.getAvailableReviewList(customerId, {
+    //   pageSize,
+    //   pageNum,
+    // }),
+    confirmedQuoteRepository.getAvailableReviewCount(customerId),
+    confirmedQuoteRepository.getAvailableReviewList(customerId, {
       pageSize,
       pageNum,
     }),
@@ -133,13 +139,16 @@ const getAvailableReviewsList = async (
     currentPage: pageNum,
     totalPages: Math.ceil(totalCount / pageSize),
     totalCount,
-    list: reviews.map((review) => ({
-      ...review,
-      service: review.confirmedQuote.movingRequest.service,
-      isDesignated: review.confirmedQuote.movingRequest.isDesignated,
-      movingDate: review.confirmedQuote.movingRequest.movingDate,
-      nickname: review.mover.nickname,
-      cost: review.confirmedQuote.quote.cost,
+    list: confirmedQuotes.map((confirmedQuote) => ({
+      id: confirmedQuote.mover.id,
+      service: confirmedQuote.movingRequest.service,
+      isDesignated: confirmedQuote.movingRequest.mover.some(
+        (mover) => mover.id === confirmedQuote.mover.id
+      ),
+      movingDate: confirmedQuote.movingRequest.movingDate,
+      nickname: confirmedQuote.mover.nickname,
+      cost: confirmedQuote.quote.cost,
+      imageUrl: confirmedQuote.mover.imageUrl[0]?.imageUrl ?? "",
       confirmedQuote: undefined,
       movingRequest: undefined,
       mover: undefined,
