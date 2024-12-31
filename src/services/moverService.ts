@@ -6,6 +6,7 @@ import RatingResult from "../utils/interfaces/mover/ratingResult";
 import imageRepository from "../repositorys/imageRepository";
 import { uploadFile } from "../utils/s3.utils";
 import getRatingsByMoverIds from "../utils/mover/getRatingsByMover";
+import { throwHttpError } from "../utils/constructors/httpError";
 
 interface queryString {
   order: string;
@@ -23,11 +24,6 @@ interface whereConditions {
   services?: object;
   OR?: object[];
   favorite?: object;
-}
-
-interface FavoriteData {
-  connect?: object;
-  disconnect?: object;
 }
 
 interface UpdateProfile {
@@ -101,12 +97,7 @@ const getMoverList = async (query: queryString, customerId: number | null) => {
   );
 
   if (!movers) {
-    const error: CustomError = new Error("Not Found");
-    error.status = 404;
-    error.data = {
-      message: "조건에 맞는 기사 목록이 없습니다.",
-    };
-    throw error;
+    return throwHttpError(404, "조건에 맞는 기사 목록이 없습니다.");
   }
 
   //평균 평점 조회
@@ -149,12 +140,7 @@ const getMoverByFavorite = async (
   );
 
   if (!movers.length) {
-    const error: CustomError = new Error("Not Found");
-    error.status = 404;
-    error.data = {
-      message: "찜한 기사가 없습니다.",
-    };
-    throw error;
+    return throwHttpError(404, "찜한 기사가 없습니다.");
   }
 
   const moverIds = movers.map((mover) => mover.id);
@@ -181,12 +167,7 @@ const getMoverByFavorite = async (
 const getMoverDetail = async (customerId: number | null, moverId: number) => {
   const mover = await moverRepository.getMoverById(customerId, moverId);
   if (!mover) {
-    const error: CustomError = new Error("Not Found");
-    error.status = 404;
-    error.data = {
-      message: "기사 정보를 찾을 수 없습니다.",
-    };
-    throw error;
+    return throwHttpError(404, "기사 정보를 찾을 수 없습니다.");
   }
 
   //데이터 가공
@@ -204,12 +185,7 @@ const getMoverDetail = async (customerId: number | null, moverId: number) => {
 const moverFavorite = async (customerId: number, moverId: number) => {
   const mover = await moverRepository.moverFavorite(customerId, moverId);
   if (!mover) {
-    const error: CustomError = new Error("Not Found");
-    error.status = 404;
-    error.data = {
-      message: "기사 정보를 찾을 수 없습니다.",
-    };
-    throw error;
+    return throwHttpError(404, "기사 정보를 찾을 수 없습니다.");
   }
 
   return { ...mover, isFavorite: true };
@@ -218,12 +194,7 @@ const moverFavorite = async (customerId: number, moverId: number) => {
 const moverFavoriteCancel = async (customerId: number, moverId: number) => {
   const mover = await moverRepository.moverFavoriteCancel(customerId, moverId);
   if (!mover) {
-    const error: CustomError = new Error("Not Found");
-    error.status = 404;
-    error.data = {
-      message: "기사 정보를 찾을 수 없습니다.",
-    };
-    throw error;
+    return throwHttpError(404, "기사 정보를 찾을 수 없습니다.");
   }
   return { ...mover, isFavorite: false };
 };
@@ -232,12 +203,7 @@ const getMover = async (moverId: number) => {
   const mover = await moverRepository.getMoverById(null, moverId);
 
   if (!mover) {
-    const error: CustomError = new Error("NotFound");
-    error.status = 404;
-    error.data = {
-      message: "존재하지 않는 기사입니다.",
-    };
-    throw error;
+    return throwHttpError(404, "존재하지 않는 기사입니다.");
   }
 
   const ratingsByMover = await getRatingsByMoverIds(moverId);

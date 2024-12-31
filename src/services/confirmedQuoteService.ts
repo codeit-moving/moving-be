@@ -2,7 +2,7 @@ import confirmedQuoteRepository from "../repositorys/confirmedQuoteRepository";
 import movingRequestRepository from "../repositorys/movingRequestRepository";
 import notificationRepository from "../repositorys/notificationRepository";
 import quoteRepository from "../repositorys/quoteRepository";
-import customError from "../utils/interfaces/customError";
+import { throwHttpError } from "../utils/constructors/httpError";
 
 interface ConfirmedQuote {
   quoteId: number;
@@ -22,20 +22,10 @@ const createConfirmedQuote = async (confirmedQuoteData: ConfirmedQuote) => {
   ]);
 
   if (!activeMovingRequest) {
-    const error: customError = new Error("Not Found");
-    error.status = 404;
-    error.data = {
-      message: "활성중인 이사요청이 없습니다.",
-    };
-    throw error;
+    return throwHttpError(404, "활성중인 이사요청이 없습니다.");
   }
   if (!quote) {
-    const error: customError = new Error("Not Found");
-    error.status = 404;
-    error.data = {
-      message: "견적서를 찾을 수 없습니다.",
-    };
-    throw error;
+    return throwHttpError(404, "견적서를 찾을 수 없습니다.");
   }
 
   const confirmedQuote = await confirmedQuoteRepository.CreateConfirmedQuote({
