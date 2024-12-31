@@ -150,7 +150,11 @@ const getQuoteDetail = async (moverId: number, quoteId: number) => {
 };
 
 // (기사님의) 지정이사 요청 반려
-const rejectRequest = async (moverId: number, movingRequestId: number) => {
+const rejectRequest = async (
+  moverId: number,
+  movingRequestId: number,
+  comment: string // comment 파라미터 추가
+) => {
   // 1. 이사 요청이 존재하는지 확인
   const movingRequest = await movingRequestRepository.getMovingRequestById(
     movingRequestId
@@ -168,13 +172,14 @@ const rejectRequest = async (moverId: number, movingRequestId: number) => {
   // 2. 반려 처리
   const rejectedRequest = await quoteRepository.rejectMovingRequest(
     moverId,
-    movingRequestId
+    movingRequestId,
+    comment // comment 전달
   );
 
   // 3. API 명세에 맞는 응답 데이터 반환
   return {
     id: movingRequestId,
-    comment: "죄송합니다. 그날 예약이 되어 있습니다", // 실제 데이터에서 가져오거나 설정된 메시지
+    comment: comment, // 실제 데이터에서 가져오거나 설정된 메시지
   };
 };
 

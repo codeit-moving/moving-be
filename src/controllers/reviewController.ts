@@ -60,10 +60,11 @@ router.get(
 router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
-  upload.array("images", 10),
+  upload.array("imageUrl", 3), // 수정: images -> imageUrl로 변경 (DB 필드명과 일치)
   asyncHandle(async (req, res) => {
     const user = req.user as User;
     const customerId = user.customerId;
+    const { confirmedQuoteId, rating, content } = req.body;
 
     if (!customerId) {
       const error: customError = new Error("Bad Request");
@@ -72,31 +73,42 @@ router.post(
       throw error;
     }
 
-    const { confirmedQuoteId, rating, content } = req.body;
-
     if (!confirmedQuoteId || !rating) {
-      // moverId 체크 제거
       const error: customError = new Error("Bad Request");
       error.status = 400;
       error.message = "필수 항목이 누락되었습니다.";
       throw error;
     }
 
-    // 이미지 파일이 있다면 S3에 업로드
-    let imageUrl: string[] = []; // 배열로 초기화
-    if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-      const uploadedUrl = await uploadFile(req.files[0]); // 첫 번째 이미지만 업로드
-      imageUrl = uploadedUrl ? [uploadedUrl] : []; // 배열로 감싸서 저장
+    // 이미지 파일 처리 로직
+    let imageUrl: string[] = [];
+    if (req.files && Array.isArray(req.files)) {
+      for (const file of req.files) {
+        try {
+          const uploadedUrl = await uploadFile(file);
+          if (uploadedUrl) {
+            imageUrl.push(uploadedUrl);
+          }
+        } catch (error) {
+          const uploadError: customError = new Error("Internal Server Error");
+          uploadError.status = 500;
+          uploadError.message = "Internal Server Error";
+          uploadError.data = {
+            message: "이미지 업로드에 실패했습니다.",
+          };
+          throw uploadError;
+        }
+      }
     }
 
     const result = await reviewService.createNewReview(customerId, {
       confirmedQuoteId,
       rating,
       content,
-      imageUrl,
+      imageUrl, // S3에 업로드된 URL 배열 전달
     });
 
-    res.status(200).send(result);
+    res.status(201).send(result); // 수정: 201 Created 상태코드 사용
   })
 );
 
