@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import userRepository from "../repositorys/userRepository";
 import CustomError from "../utils/interfaces/customError";
 import { uploadFile } from "../utils/s3.utils";
+import { throwHttpError } from "../utils/constructors/httpError";
 
 interface SignInData {
   email: string;
@@ -35,24 +36,13 @@ interface SignUpMover extends User {
 const signIn = async ({ email, password }: SignInData) => {
   const user = await userRepository.findByEmail(email);
   if (!user) {
-    const error: CustomError = new Error("Not Found");
-    error.status = 404;
-    error.data = {
-      message: "이메일로 등록된 사용자가 없습니다.",
-      email,
-    };
-    throw error;
+    return throwHttpError(404, "이메일로 등록된 사용자가 없습니다.");
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password!); //패스워드 검증
 
   if (!isPasswordValid) {
-    const error: CustomError = new Error("Invalid password");
-    error.status = 401;
-    error.data = {
-      message: "비밀번호가 일치하지 않습니다.",
-    };
-    throw error;
+    return throwHttpError(401, "비밀번호가 일치하지 않습니다.");
   }
 
   const { password: _, ...userWithoutPassword } = user;
