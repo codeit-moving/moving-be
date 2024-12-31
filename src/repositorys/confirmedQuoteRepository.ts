@@ -100,4 +100,79 @@ const findAllByDay = (day: Date) => {
   });
 };
 
-export default { CreateConfirmedQuote, findAllByDay };
+const getAvailableReviewCount = (customerId: number) => {
+  return prismaClient.confirmedQuote.count({
+    where: {
+      customerId,
+      review: {
+        none: {},
+      },
+      movingRequest: {
+        movingDate: {
+          lt: new Date(),
+        },
+      },
+    },
+  });
+};
+
+const getAvailableReviewList = (
+  customerId: number,
+  query: { pageSize: number; pageNum: number }
+) => {
+  return prismaClient.confirmedQuote.findMany({
+    where: {
+      customerId,
+      movingRequest: {
+        movingDate: {
+          lt: new Date(),
+        },
+      },
+    },
+    take: query.pageSize || 6,
+    skip: (query.pageNum - 1) * (query.pageSize || 6),
+    select: {
+      id: true,
+      movingRequest: {
+        select: {
+          service: true,
+          movingDate: true,
+          mover: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      },
+      quote: {
+        select: {
+          cost: true,
+        },
+      },
+      mover: {
+        select: {
+          id: true,
+          nickname: true,
+          imageUrl: {
+            orderBy: {
+              createAt: "desc",
+            },
+            where: {
+              status: true,
+            },
+            select: {
+              imageUrl: true,
+            },
+          },
+        },
+      },
+    },
+  });
+};
+
+export default {
+  CreateConfirmedQuote,
+  findAllByDay,
+  getAvailableReviewCount,
+  getAvailableReviewList,
+};

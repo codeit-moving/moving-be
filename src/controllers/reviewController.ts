@@ -134,7 +134,6 @@ router.get(
       pageNum: pageNum ? parseInt(pageNum as string) : undefined,
     });
 
-    console.log(result);
     res.status(200).send(result);
   })
 );

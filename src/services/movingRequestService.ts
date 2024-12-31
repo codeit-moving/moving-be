@@ -137,11 +137,8 @@ const setWhereCondition = (query: queryString, moverId: number) => {
     // pastRequest가 true면 모든 날짜 조회 (where 조건 없음)
   } else {
     // pastRequest가 false면 오늘 자정 이후의 요청만 조회
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
     where.movingDate = {
-      gt: today,
+      gt: new Date(),
     };
   }
 
@@ -168,7 +165,7 @@ const getMovingRequestListByMover = async (
   moverId: number,
   query: queryString
 ) => {
-  const { limit, cursor, orderBy, isQuoted } = query;
+  const { limit, cursor, orderBy, isQuoted, isPastRequest } = query;
   const whereCondition: WhereCondition = setWhereCondition(query, moverId);
   const orderByQuery = setOrderBy(orderBy);
 
@@ -422,6 +419,25 @@ const createMovingRequest = async (
   return movingRequest;
 };
 
+const checkActiveRequest = async (customerId: number) => {
+  const activeRequest = await movingRequestRepository.getActiveRequest(
+    customerId
+  );
+
+  if (!activeRequest) {
+    return {
+      activeRequest: false,
+      message: "활성중인 이사요청이 없습니다.",
+    };
+  }
+
+  return {
+    id: activeRequest.id,
+    activeRequest: true,
+    message: "활성중인 이사요청이 있습니다.",
+  };
+};
+
 //이사요청 지정
 const designateMover = async (moverId: number, customerId: number) => {
   const activeRequest = await movingRequestRepository.getActiveRequest(
@@ -537,4 +553,5 @@ export default {
   getQuoteByMovingRequestId,
   getPendingQuotes,
   getMovingRequestListByCustomer,
+  checkActiveRequest,
 };
