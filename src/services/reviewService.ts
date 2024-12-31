@@ -140,7 +140,8 @@ const getAvailableReviewsList = async (
     totalPages: Math.ceil(totalCount / pageSize),
     totalCount,
     list: confirmedQuotes.map((confirmedQuote) => ({
-      id: confirmedQuote.mover.id,
+      confirmedQuoteId: confirmedQuote.id,
+      moverId: confirmedQuote.mover.id,
       service: confirmedQuote.movingRequest.service,
       isDesignated: confirmedQuote.movingRequest.mover.some(
         (mover) => mover.id === confirmedQuote.mover.id
