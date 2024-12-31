@@ -6,6 +6,7 @@ import RatingResult from "../utils/interfaces/mover/ratingResult";
 import imageRepository from "../repositorys/imageRepository";
 import { uploadFile } from "../utils/s3.utils";
 import getRatingsByMoverIds from "../utils/mover/getRatingsByMover";
+import { throwHttpError } from "../utils/constructors/httpError";
 
 interface queryString {
   order: string;
@@ -258,12 +259,7 @@ const updateMoverProfile = async (
     try {
       uploadedImageUrl = await uploadFile(imageUrl);
     } catch (e) {
-      const error: CustomError = new Error("Internal Server Error");
-      error.status = 500;
-      error.data = {
-        message: "이미지 업로드 실패",
-      };
-      throw error;
+      return throwHttpError(500, "이미지 업로드 실패");
     }
   }
 
@@ -275,12 +271,7 @@ const updateMoverProfile = async (
       rest
     );
   } catch (e) {
-    const error: CustomError = new Error("Internal Server Error");
-    error.status = 500;
-    error.data = {
-      message: "프로필 업데이트 실패",
-    };
-    throw error;
+    return throwHttpError(500, "프로필 업데이트 실패");
   }
 };
 

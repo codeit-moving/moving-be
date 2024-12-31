@@ -16,9 +16,9 @@ import {
 } from "../env";
 import { JWT_SECRET } from "../env";
 import oauthService from "../services/oauthService";
-import CustomError from "../utils/interfaces/customError";
 import { Strategy } from "passport-custom";
 import jwt from "jsonwebtoken";
+import { HttpError } from "../utils/constructors/httpError";
 
 passport.use(
   "jwt",
@@ -26,24 +26,14 @@ passport.use(
     const token = req.cookies["accessToken"];
 
     if (!token) {
-      const error: CustomError = new Error("Token missing");
-      error.status = 403;
-      error.data = {
-        message: "토큰이 존재하지 않습니다.",
-      };
-      return done(error, false); // 토큰이 없을 때 에러 반환
+      return done(new HttpError(403, "토큰이 존재하지 않습니다."), false); // 토큰이 없을 때 에러 반환
     }
 
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
       return done(null, decoded); // 토큰이 있고 유효하면 유저 정보 반환
     } catch (err) {
-      const error: CustomError = new Error("Invalid token");
-      error.status = 403;
-      error.data = {
-        message: "유효하지 않은 토큰입니다.",
-      };
-      return done(error, false); // 토큰이 있지만 유효하지 않으면 false 반환
+      return done(new HttpError(403, "유효하지 않은 토큰입니다."), false); // 토큰이 있지만 유효하지 않으면 false 반환
     }
   })
 );
@@ -71,24 +61,20 @@ passport.use(
     const refreshToken = req.cookies["refreshToken"];
 
     if (!refreshToken) {
-      const error: CustomError = new Error("Token missing");
-      error.status = 403;
-      error.data = {
-        message: "리프레시 토큰이 존재하지 않습니다.",
-      };
-      return done(error, false);
+      return done(
+        new HttpError(403, "리프레시 토큰이 존재하지 않습니다."),
+        false
+      );
     }
 
     try {
       const decoded = jwt.verify(refreshToken, REFRESH_SECRET);
       return done(null, decoded);
     } catch (err) {
-      const error: CustomError = new Error("Invalid token");
-      error.status = 403;
-      error.data = {
-        message: "유효하지 않은 리프레시 토큰입니다.",
-      };
-      return done(error, false);
+      return done(
+        new HttpError(403, "유효하지 않은 리프레시 토큰입니다."),
+        false
+      );
     }
   })
 );
