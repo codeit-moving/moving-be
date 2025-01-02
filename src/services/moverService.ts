@@ -191,6 +191,7 @@ const moverFavorite = async (customerId: number, moverId: number) => {
   return { ...mover, isFavorite: true };
 };
 
+//찜 취소
 const moverFavoriteCancel = async (customerId: number, moverId: number) => {
   const mover = await moverRepository.moverFavoriteCancel(customerId, moverId);
   if (!mover) {
@@ -199,6 +200,7 @@ const moverFavoriteCancel = async (customerId: number, moverId: number) => {
   return { ...mover, isFavorite: false };
 };
 
+//기사 조회
 const getMover = async (moverId: number) => {
   const mover = await moverRepository.getMoverById(null, moverId);
 
