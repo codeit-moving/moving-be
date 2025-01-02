@@ -88,23 +88,11 @@ const getMoverList = async (query: queryString, customerId: number | null) => {
     whereConditions.favorite = { some: { id: customerId } };
   }
 
-  // cursor가 있을 경우 해당 id의 mover 데이터를 먼저 조회
-  let cursorData: { [key: string]: any; id: number } | undefined;
-  if (cursor) {
-    const cursorMover = await moverRepository.getMoverById(null, cursor);
-    if (cursorMover) {
-      cursorData = {
-        id: cursor,
-        _count: cursorMover._count,
-      };
-    }
-  }
-
   //데이터 조회
   const movers = await moverRepository.getMoverList(
     orderByOptions,
     whereConditions,
-    cursorData || null, // 조회한 커서 데이터 전달
+    cursor,
     limit
   );
 

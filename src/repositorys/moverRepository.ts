@@ -7,17 +7,6 @@ interface whereConditions {
   OR?: object[];
 }
 
-type CursorFields = "id" | "createAt";
-
-interface UpdateProfile {
-  nickname?: string;
-  career?: number;
-  introduction?: string;
-  description?: string;
-  services?: number[];
-  regions?: number[];
-}
-
 interface Profile {
   userId: number;
   nickname: string;
@@ -54,22 +43,15 @@ const getMoverCount = async (where: whereConditions) => {
 const getMoverList = (
   orderBy: { [key: string]: object | string },
   where: whereConditions,
-  cursor: { [key: string]: any; id: number } | null,
+  cursor: number | null,
   limit: number
 ) => {
-  const orderByKey = Object.keys(orderBy)[0] as CursorFields;
-
   return prismaClient.mover.findMany({
     orderBy: [orderBy, { id: "asc" }],
     where,
     take: limit + 1,
     skip: cursor ? 1 : 0,
-    cursor: cursor
-      ? {
-          [orderByKey]: cursor[orderByKey],
-          id: cursor.id,
-        }
-      : undefined,
+    cursor: cursor ? { id: cursor } : undefined,
     select: {
       ...defaultSelect,
       imageUrl: {
