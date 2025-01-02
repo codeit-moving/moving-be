@@ -5,8 +5,7 @@ import quoteRepository from "../repositorys/quoteRepository";
 import processQuotes from "../utils/quote/processQuoteData";
 import notificationRepository from "../repositorys/notificationRepository";
 import moverRepository from "../repositorys/moverRepository";
-import { object } from "superstruct";
-
+import { throwHttpError } from "../utils/constructors/httpError";
 interface queryString {
   limit: number;
   isDesignated: boolean | undefined;
@@ -160,7 +159,7 @@ const setOrderBy = (orderBy: string) => {
   return orderByQuery;
 };
 
-//이사요청 목록 조회
+//기사의 이사요청 목록 조회
 const getMovingRequestListByMover = async (
   moverId: number,
   query: queryString
@@ -172,12 +171,7 @@ const getMovingRequestListByMover = async (
   const mover = await moverRepository.getMoverById(null, moverId);
   const regions = mover?.regions;
   if (!regions) {
-    const error: CustomError = new Error("Not Found");
-    error.status = 404;
-    error.data = {
-      message: "프로필에서 서비스 지역을 설정해 주세요.",
-    };
-    throw error;
+    return throwHttpError(404, "프로필에서 서비스 지역을 설정해 주세요.");
   }
 
   whereCondition.region = {
@@ -248,13 +242,7 @@ const getMovingRequestListByMover = async (
     ]);
 
   if (!movingRequestList) {
-    const error: CustomError = new Error("Not Found");
-    error.status = 404;
-    error.message = "Not Found";
-    error.data = {
-      message: "이사요청 목록이 없습니다.",
-    };
-    throw error;
+    return throwHttpError(404, "이사요청 목록이 없습니다.");
   }
 
   //커서 설정
@@ -289,6 +277,7 @@ const getMovingRequestListByMover = async (
   };
 };
 
+//고객의 이사요청 목록 조회
 const getMovingRequestListByCustomer = async (
   customerId: number,
   query: OffsetQueryString
@@ -309,12 +298,7 @@ const getMovingRequestListByCustomer = async (
   ]);
 
   if (!movingRequestList.length) {
-    const error: CustomError = new Error("Not Found");
-    error.status = 404;
-    error.data = {
-      message: "조건의 맞는 이사요청 목록이 없습니다.",
-    };
-    throw error;
+    return throwHttpError(404, "조건의 맞는 이사요청 목록이 없습니다.");
   }
 
   const resMovingRequestList = movingRequestList.map((movingRequest) => {
@@ -365,12 +349,7 @@ const getPendingQuotes = async (customerId: number) => {
   );
 
   if (!activeRequest) {
-    const error: CustomError = new Error("Not Found");
-    error.status = 404;
-    error.data = {
-      message: "활성중인 이사요청이 없습니다.",
-    };
-    throw error;
+    return throwHttpError(404, "활성중인 이사요청이 없습니다.");
   }
 
   const quoteCountPromise =
@@ -403,12 +382,7 @@ const createMovingRequest = async (
   );
 
   if (activeRequest) {
-    const error: CustomError = new Error("Bad Request");
-    error.status = 400;
-    error.data = {
-      message: "활성중인 이사요청이 있습니다.",
-    };
-    throw error;
+    return throwHttpError(400, "활성중인 이사요청이 있습니다.");
   }
 
   const movingRequest = await movingRequestRepository.createMovingRequest(
@@ -419,6 +393,7 @@ const createMovingRequest = async (
   return movingRequest;
 };
 
+//활성중인 이사요청 조회
 const checkActiveRequest = async (customerId: number) => {
   const activeRequest = await movingRequestRepository.getActiveRequest(
     customerId
@@ -445,12 +420,13 @@ const designateMover = async (moverId: number, customerId: number) => {
   );
 
   if (!activeRequest) {
-    const error: CustomError = new Error("Bad Request");
-    error.status = 422;
-    error.data = {
-      message: "일반 견적 요청을 먼저 진행해 주세요.",
-    };
-    throw error;
+    return throwHttpError(422, "일반 견적 요청을 먼저 진행해 주세요.");
+  }
+
+  const mover = await moverRepository.getMoverById(null, moverId);
+
+  if (!mover) {
+    return throwHttpError(404, "기사를 찾을 수 없습니다.");
   }
 
   //지정 가능 인원 조회
@@ -469,22 +445,15 @@ const designateMover = async (moverId: number, customerId: number) => {
   ]);
 
   if (designatedMovers) {
-    const error: CustomError = new Error("Bad Request");
-    error.status = 400;
-    error.data = {
-      message: "이미 지정된 기사 입니다.",
-    };
-    throw error;
+    return throwHttpError(400, "이미 지정된 기사 입니다.");
   }
 
   //지정 가능 인원 초과 체크
   if (!result || result._count.mover >= 3) {
-    const error: CustomError = new Error("Bad Request");
-    error.status = 400;
-    error.data = {
-      message: "지정 요청 가능한 인원이 초과되었습니다. (최대 3명)",
-    };
-    throw error;
+    return throwHttpError(
+      400,
+      "지정 요청 가능한 인원이 초과되었습니다. (최대 3명)"
+    );
   }
 
   //이사요청 지정
@@ -496,7 +465,7 @@ const designateMover = async (moverId: number, customerId: number) => {
   //알림 생성 기사에게
   notificationRepository.createNotification({
     userId: moverId,
-    content: `${movingRequest.mover[0].nickname}기사님 새로운 지정 요청이 있습니다.`,
+    content: `${mover.nickname}기사님 새로운 지정 요청이 있습니다.`,
     isRead: false,
   });
 
@@ -512,12 +481,7 @@ const cancelDesignateMover = async (moverId: number, customerId: number) => {
   );
 
   if (!activeRequest) {
-    const error: CustomError = new Error("Bad Request");
-    error.status = 422;
-    error.data = {
-      message: "일반 견적 요청을 먼저 진행해 주세요.",
-    };
-    throw error;
+    return throwHttpError(422, "일반 견적 요청을 먼저 진행해 주세요.");
   }
 
   const designatedMovers = await movingRequestRepository.getDesignatedMovers(
@@ -526,12 +490,7 @@ const cancelDesignateMover = async (moverId: number, customerId: number) => {
   );
 
   if (!designatedMovers) {
-    const error: CustomError = new Error("Bad Request");
-    error.status = 400;
-    error.data = {
-      message: "지정된 기사가 아닙니다.",
-    };
-    throw error;
+    return throwHttpError(400, "지정된 기사가 아닙니다.");
   }
 
   //이사요청 지정 취소
