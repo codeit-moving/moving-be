@@ -16,6 +16,7 @@ interface UpdateProfile {
   key?: string;
 }
 
+//고객 프로필 생성
 const createCustomerProfile = async (profile: Profile) => {
   const customerProfile = {
     ...profile,
@@ -24,6 +25,7 @@ const createCustomerProfile = async (profile: Profile) => {
   return customerRepository.createCustomerProfile(customerProfile);
 };
 
+//고객 프로필 업데이트
 const updateCustomerProfile = async (
   userId: number,
   customerId: number,
