@@ -1,6 +1,6 @@
 import { DEFAULT_PROFILE_IMAGE } from "../env";
 import userRepository from "../repositorys/userRepository";
-import CustomError from "../utils/interfaces/customError";
+import { throwHttpError } from "../utils/constructors/httpError";
 import bcrypt from "bcrypt";
 
 interface UpdateUser {
@@ -39,13 +39,10 @@ const updateUser = async (userId: number, updateData: UpdateUser) => {
     //새로운 비밀번호, 현재 비밀번호가 존재하면 일단 로직 수행
     if (!updateData.newPassword || !updateData.currentPassword) {
       //그런데 둘 중 하나라도 없으면 에러 발생
-      const error: CustomError = new Error("Bad Request");
-      error.status = 400;
-      error.data = {
-        message:
-          "비밀번호 변경을 위해서는 현재 비밀번호와 새로운 비밀번호가 모두 필요합니다.",
-      };
-      throw error;
+      return throwHttpError(
+        400,
+        "비밀번호 변경을 위해서는 현재 비밀번호와 새로운 비밀번호가 모두 필요합니다."
+      );
     }
 
     const isPasswordCorrect = await bcrypt.compare(
@@ -54,21 +51,11 @@ const updateUser = async (userId: number, updateData: UpdateUser) => {
     );
 
     if (!isPasswordCorrect) {
-      const error: CustomError = new Error("Invalid password");
-      error.status = 401;
-      error.data = {
-        message: "현재 비밀번호가 일치하지 않습니다.",
-      };
-      throw error;
+      return throwHttpError(401, "현재 비밀번호가 일치하지 않습니다.");
     }
 
     if (updateData.currentPassword === updateData.newPassword) {
-      const error: CustomError = new Error("Conflict");
-      error.status = 409;
-      error.data = {
-        message: "기존 비밀번호와 동일합니다.",
-      };
-      throw error;
+      return throwHttpError(409, "기존 비밀번호와 동일합니다.");
     }
   }
 
@@ -112,12 +99,16 @@ const getUser = async (userId: number) => {
     }
     return response;
   } else {
-    throw new Error("User not found");
+    return throwHttpError(404, "사용자가 존재하지 않습니다.");
   }
 }; //imageUrl: object 타입으로 반환하지 않고 string 타입으로 1개 반환
 
 const getUserById = async (userId: number) => {
-  return await userRepository.findByUserId(userId);
+  const user = await userRepository.findByUserId(userId);
+  if (!user) {
+    return throwHttpError(404, "사용자가 존재하지 않습니다.");
+  }
+  return user;
 };
 
 export default {

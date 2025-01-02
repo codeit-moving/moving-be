@@ -14,6 +14,7 @@ interface Query {
   lastCursorId: number | undefined;
 }
 
+//알림 목록 조회
 const findNotifications = async (userId: number, query: Query) => {
   const { limit, ...restQuery } = query;
   const addLimitNotifications = await notificationRepository.findNotifications(
@@ -40,10 +41,12 @@ const findNotifications = async (userId: number, query: Query) => {
   };
 };
 
+//알림 생성
 const createNotification = async (notification: Notification) => {
   return await notificationRepository.createNotification(notification);
 };
 
+//알림 읽음 여부 업데이트
 const isReadNotification = async (notificationId: number) => {
   return await notificationRepository.isReadNotification(notificationId);
 };
