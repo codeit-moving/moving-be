@@ -159,7 +159,7 @@ const setOrderBy = (orderBy: string) => {
   return orderByQuery;
 };
 
-//이사요청 목록 조회
+//기사의 이사요청 목록 조회
 const getMovingRequestListByMover = async (
   moverId: number,
   query: queryString
@@ -277,6 +277,7 @@ const getMovingRequestListByMover = async (
   };
 };
 
+//고객의 이사요청 목록 조회
 const getMovingRequestListByCustomer = async (
   customerId: number,
   query: OffsetQueryString
@@ -392,6 +393,7 @@ const createMovingRequest = async (
   return movingRequest;
 };
 
+//활성중인 이사요청 조회
 const checkActiveRequest = async (customerId: number) => {
   const activeRequest = await movingRequestRepository.getActiveRequest(
     customerId

@@ -212,6 +212,7 @@ const getMover = async (moverId: number) => {
   return processedMover[0];
 };
 
+//기사 프로필 업데이트
 const updateMoverProfile = async (
   userId: number,
   moverId: number,
@@ -250,6 +251,7 @@ const updateMoverProfile = async (
   }
 };
 
+//기사 프로필 생성
 const createMoverProfile = async (profile: Profile) => {
   const imageUrl = await uploadFile(profile.imageUrl);
   const moverProfile = {
