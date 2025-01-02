@@ -10,8 +10,14 @@ const createMovingRequestValidation: RequestHandler = (req, res, next) => {
     return throwHttpError(400, "이사 서비스 타입이 올바르지 않습니다.");
   }
   const date = new Date(movingDate);
-  if (!movingDate || !(date instanceof Date)) {
+
+  //이사 날짜 검증
+  if (!movingDate || isNaN(date.getTime())) {
     return throwHttpError(400, "이사 날짜가 올바르지 않습니다.");
+  }
+
+  if (date <= new Date()) {
+    return throwHttpError(400, "이사 날짜는 오늘 이후여야 합니다.");
   }
 
   if (!pickupAddress || typeof pickupAddress !== "string") {
