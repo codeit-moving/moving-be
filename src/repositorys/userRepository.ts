@@ -165,7 +165,7 @@ const createMover = (mover: Mover) => {
       mover: {
         create: {
           ...moverData,
-          imageUrl: { create: { imageUrl: imageUrl } },
+          imageUrl: { create: { imageUrl } },
         },
       },
     },
