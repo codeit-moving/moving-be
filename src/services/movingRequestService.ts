@@ -421,6 +421,12 @@ const designateMover = async (moverId: number, customerId: number) => {
     return throwHttpError(422, "일반 견적 요청을 먼저 진행해 주세요.");
   }
 
+  const mover = await moverRepository.getMoverById(null, moverId);
+
+  if (!mover) {
+    return throwHttpError(404, "기사를 찾을 수 없습니다.");
+  }
+
   //지정 가능 인원 조회
   const designateCountPromise = movingRequestRepository.getDesignateCount(
     activeRequest.id
@@ -457,7 +463,7 @@ const designateMover = async (moverId: number, customerId: number) => {
   //알림 생성 기사에게
   notificationRepository.createNotification({
     userId: moverId,
-    content: `${movingRequest.mover[0].nickname}기사님 새로운 지정 요청이 있습니다.`,
+    content: `${mover.nickname}기사님 새로운 지정 요청이 있습니다.`,
     isRead: false,
   });
 

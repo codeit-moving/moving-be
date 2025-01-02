@@ -17,6 +17,7 @@ const createMovingRequestValidation: RequestHandler = (req, res, next) => {
   if (!pickupAddress || typeof pickupAddress !== "string") {
     return throwHttpError(400, "이사 출발지가 올바르지 않습니다.");
   }
+
   if (!dropOffAddress || typeof dropOffAddress !== "string") {
     return throwHttpError(400, "이사 도착지가 올바르지 않습니다.");
   }

@@ -38,7 +38,14 @@ const createConfirmedQuote = async (confirmedQuoteData: ConfirmedQuote) => {
   //알림 생성 기사에게
   notificationRepository.createNotification({
     userId: quote.mover.id,
-    content: `${quote.mover.nickname}기사님 ${confirmedQuote.customer.user.name}님의 이사요청이 확정하셨습니다.`,
+    content: `${quote.mover.nickname}기사님 ${confirmedQuote.customer.user.name}님의 이사요청이 ,확정,되었어요.`,
+    isRead: false,
+  });
+
+  //알림 생성 고객에게
+  notificationRepository.createNotification({
+    userId: confirmedQuoteData.customerId,
+    content: `${quote.mover.nickname}기사님의 견적이 ,확정,되었어요.`,
     isRead: false,
   });
 
