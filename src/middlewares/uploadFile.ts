@@ -27,7 +27,7 @@ const s3Client = new S3Client({
 export const uploadFiles = asyncHandle(async (req, res, next) => {
   const files = req.files as Express.Multer.File[];
 
-  if (!files || files.length === 0) {
+  if (files.length === 0) {
     throwHttpError(400, "이미지 파일이 없습니다.");
   }
 
