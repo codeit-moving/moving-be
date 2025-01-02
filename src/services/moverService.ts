@@ -4,7 +4,6 @@ import CustomError from "../utils/interfaces/customError";
 import processMoversData from "../utils/mover/processMoverData";
 import RatingResult from "../utils/interfaces/mover/ratingResult";
 import imageRepository from "../repositorys/imageRepository";
-import { uploadFile } from "../utils/s3.utils";
 import getRatingsByMoverIds from "../utils/mover/getRatingsByMover";
 import { throwHttpError } from "../utils/constructors/httpError";
 
@@ -33,7 +32,7 @@ interface FavoriteData {
 
 interface UpdateProfile {
   nickname?: string;
-  imageUrl?: Express.Multer.File;
+  imageUrl?: string[];
   career?: number;
   introduction?: string;
   description?: string;
@@ -49,7 +48,7 @@ interface Profile {
   description: string;
   services: number[];
   regions: number[];
-  imageUrl: Express.Multer.File;
+  imageUrl: string[];
 }
 
 const setOrderByOptions = (
@@ -253,19 +252,10 @@ const updateMoverProfile = async (
   profile: UpdateProfile
 ) => {
   const { imageUrl, ...rest } = profile;
-  let uploadedImageUrl;
-
-  if (imageUrl) {
-    try {
-      uploadedImageUrl = await uploadFile(imageUrl);
-    } catch (e) {
-      return throwHttpError(500, "이미지 업로드 실패");
-    }
-  }
-
+  console.log(rest);
   try {
     return await imageRepository.updateMoverProfile(
-      uploadedImageUrl,
+      imageUrl ? imageUrl[0] : undefined,
       userId,
       moverId,
       rest
@@ -276,10 +266,9 @@ const updateMoverProfile = async (
 };
 
 const createMoverProfile = async (profile: Profile) => {
-  const imageUrl = await uploadFile(profile.imageUrl);
   const moverProfile = {
     ...profile,
-    imageUrl,
+    imageUrl: profile.imageUrl[0],
   };
   return moverRepository.createMoverProfile(moverProfile);
 };

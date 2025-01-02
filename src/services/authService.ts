@@ -1,6 +1,5 @@
 import bcrypt from "bcrypt";
 import userRepository from "../repositorys/userRepository";
-import { uploadFile } from "../utils/s3.utils";
 import { throwHttpError } from "../utils/constructors/httpError";
 
 interface SignInData {
@@ -17,7 +16,7 @@ interface User {
 }
 
 interface SignUpCustomer extends User {
-  imageUrl: Express.Multer.File;
+  imageUrl: string[];
   services: number[];
   regions: number[];
 }
@@ -27,7 +26,7 @@ interface SignUpMover extends User {
   career: number;
   introduction: string;
   description: string;
-  imageUrl: Express.Multer.File;
+  imageUrl: string[];
   services: number[];
   regions: number[];
 }
@@ -51,7 +50,6 @@ const signIn = async ({ email, password }: SignInData) => {
 
 const signUpCustomer = async (customer: SignUpCustomer) => {
   const { email, phoneNumber } = customer;
-  const imageUrl = await uploadFile(customer.imageUrl);
 
   try {
     const existingUser = await userRepository.existingUser(email, phoneNumber);
@@ -69,7 +67,7 @@ const signUpCustomer = async (customer: SignUpCustomer) => {
 
     const customerData = {
       ...customer,
-      imageUrl,
+      imageUrl: customer.imageUrl[0],
       password: hashedPassword,
     };
 
@@ -83,7 +81,6 @@ const signUpCustomer = async (customer: SignUpCustomer) => {
 
 const signUpMover = async (mover: SignUpMover) => {
   const { email, phoneNumber } = mover;
-  const imageUrl = await uploadFile(mover.imageUrl);
 
   try {
     const existingUser = await userRepository.existingUser(email, phoneNumber);
@@ -101,7 +98,7 @@ const signUpMover = async (mover: SignUpMover) => {
 
     const moverData = {
       ...mover,
-      imageUrl,
+      imageUrl: mover.imageUrl[0],
       password: hashedPassword,
     };
     const result = await userRepository.createMover(moverData);
