@@ -9,7 +9,7 @@ import {
   NAVER_CLIENT_ID,
   NAVER_REDIRECT_URI,
 } from "../env";
-import CustomError from "../utils/interfaces/customError";
+import { throwRedirectError } from "../utils/constructors/redirectError";
 
 const router = Router();
 
@@ -113,14 +113,10 @@ const handleOAuthCallback: RequestHandler = (req, res, next) => {
       mover: "/mover/profile",
     };
 
-    const error: CustomError = new Error("Forbidden");
-    error.status = 403;
-    error.data = {
-      message: messages[userType] || "프로필을 등록해주세요.",
-      redirectUrl: FRONTEND_URL + redirectUrls[userType],
-      redirect: true,
-    };
-    next(error);
+    return throwRedirectError(
+      messages[userType] || "프로필을 등록해주세요.",
+      redirectUrls[userType]
+    );
   }
 };
 

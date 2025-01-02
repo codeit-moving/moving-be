@@ -47,19 +47,11 @@ router.post(
         email,
         password,
       });
-      if (user) {
-        const accessToken = createToken(user, "access");
-        const refreshToken = createToken(user, "refresh");
-        res.cookie("accessToken", accessToken, cookieConfig.accessTokenOption);
-        res.cookie(
-          "refreshToken",
-          refreshToken,
-          cookieConfig.refreshTokenOption
-        );
-        res.status(204).send();
-      } else {
-        return res.status(400).send({ message: "로그인에 실패하였습니다." });
-      }
+      const accessToken = createToken(user, "access");
+      const refreshToken = createToken(user, "refresh");
+      res.cookie("accessToken", accessToken, cookieConfig.accessTokenOption);
+      res.cookie("refreshToken", refreshToken, cookieConfig.refreshTokenOption);
+      res.status(204).send();
     } catch (error) {
       next(error);
     }
@@ -142,9 +134,6 @@ router.post(
     try {
       const user = req.user as Payload;
       const userData = await userService.getUserById(user.id);
-      if (!userData) {
-        return res.status(400).send({ message: "유효하지 않은 사용자입니다." });
-      }
       const accessToken = createToken(
         {
           id: userData.id,

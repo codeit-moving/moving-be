@@ -23,6 +23,8 @@ export class HttpError implements CustomError {
         return "Forbidden";
       case 404:
         return "Not Found";
+      case 409:
+        return "Conflict";
       case 422:
         return "Unprocessable Entity";
       default:
