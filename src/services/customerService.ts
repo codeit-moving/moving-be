@@ -1,6 +1,6 @@
 import customerRepository from "../repositorys/customerRepository";
 import imageRepository from "../repositorys/imageRepository";
-import CustomError from "../utils/interfaces/customError";
+import { throwHttpError } from "../utils/constructors/httpError";
 import { uploadFile } from "../utils/s3.utils";
 
 interface Profile {
@@ -17,6 +17,7 @@ interface UpdateProfile {
   key?: string;
 }
 
+//고객 프로필 생성
 const createCustomerProfile = async (profile: Profile) => {
   const imageUrl = await uploadFile(profile.imageUrl);
   const customerProfile = {
@@ -28,6 +29,7 @@ const createCustomerProfile = async (profile: Profile) => {
   return customerRepository.createCustomerProfile(customerProfile);
 };
 
+//고객 프로필 업데이트
 const updateCustomerProfile = async (
   userId: number,
   customerId: number,
@@ -40,12 +42,7 @@ const updateCustomerProfile = async (
     try {
       uploadedImageUrl = await uploadFile(imageUrl);
     } catch (e) {
-      const error: CustomError = new Error("Internal Server Error");
-      error.status = 500;
-      error.data = {
-        message: "이미지 업로드 실패",
-      };
-      throw error;
+      return throwHttpError(500, "이미지 업로드 실패");
     }
   }
 
@@ -57,12 +54,7 @@ const updateCustomerProfile = async (
       rest
     );
   } catch (e) {
-    const error: CustomError = new Error("Internal Server Error");
-    error.status = 500;
-    error.data = {
-      message: "프로필 업데이트 실패",
-    };
-    throw error;
+    return throwHttpError(500, "프로필 업데이트 실패");
   }
 };
 

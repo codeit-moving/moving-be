@@ -339,6 +339,7 @@ const getDesignatedMovers = (movingRequestId: number, moverId: number) => {
       mover: {
         select: {
           id: true,
+          nickname: true,
         },
       },
     },

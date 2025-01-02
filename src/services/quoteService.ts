@@ -5,6 +5,7 @@ import processQuotes from "../utils/quote/processQuoteData";
 import movingRequestRepository from "../repositorys/movingRequestRepository";
 import moverRepository from "../repositorys/moverRepository";
 import { QuoteQueryString } from "../utils/quote/types";
+import { throwHttpError } from "../utils/constructors/httpError";
 
 // 특정 견적서를 아이디로 가져오는 함수입니다.
 const getQuoteById = async (customerId: number, quoteId: number) => {
@@ -13,13 +14,7 @@ const getQuoteById = async (customerId: number, quoteId: number) => {
 
   // 만약 견적서를 찾지 못하면 에러를 발생시킵니다.
   if (!quote) {
-    const error: customError = new Error("Not Found");
-    error.status = 404;
-    error.message = "Not Found";
-    error.data = {
-      message: "견적서를 찾을 수 없습니다.",
-    };
-    throw error;
+    return throwHttpError(404, "견적서를 찾을 수 없습니다.");
   }
 
   // 견적서 데이터를 가공합니다.
