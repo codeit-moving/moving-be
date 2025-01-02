@@ -7,15 +7,6 @@ interface whereConditions {
   OR?: object[];
 }
 
-interface UpdateProfile {
-  nickname?: string;
-  career?: number;
-  introduction?: string;
-  description?: string;
-  services?: number[];
-  regions?: number[];
-}
-
 interface Profile {
   userId: number;
   nickname: string;
@@ -52,14 +43,14 @@ const getMoverCount = async (where: whereConditions) => {
 const getMoverList = (
   orderBy: { [key: string]: object | string },
   where: whereConditions,
-  cursor: number,
+  cursor: number | null,
   limit: number
 ) => {
   return prismaClient.mover.findMany({
-    orderBy,
+    orderBy: [orderBy, { id: "asc" }],
     where,
-    take: limit + 1, //커서 페이지 넘버 계산을 위해 1개 더 조회
-    skip: cursor ? 1 : 0, //커서 자신을 스킵하기 위함
+    take: limit + 1,
+    skip: cursor ? 1 : 0,
     cursor: cursor ? { id: cursor } : undefined,
     select: {
       ...defaultSelect,

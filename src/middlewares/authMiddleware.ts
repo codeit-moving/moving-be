@@ -5,6 +5,8 @@ import passport from "passport";
 import CustomError from "../utils/interfaces/customError";
 import userRepository from "../repositorys/userRepository";
 import { FRONTEND_URL } from "../env";
+import { throwRedirectError } from "../utils/constructors/redirectError";
+import { throwHttpError } from "../utils/constructors/httpError";
 
 interface authUser {
   id: number;
@@ -68,23 +70,10 @@ export const isCustomer = async (
   };
   const findUser = await userRepository.findById(user.id);
   if (!findUser) {
-    const error: CustomError = new Error("Unauthorized");
-    error.status = 403;
-    error.data = {
-      message: "유효하지 않은 사용자입니다.",
-    };
-    return next(error);
+    return throwHttpError(403, "유효하지 않은 사용자입니다.");
   }
-
   if (!user?.customerId) {
-    const error: CustomError = new Error("Unauthorized");
-    error.status = 403;
-    error.data = {
-      message: "고객 프로필을 먼저 등록해주세요",
-      redirectUrl: FRONTEND_URL + "/me/profile",
-      redirect: true,
-    };
-    return next(error);
+    return throwRedirectError("고객 프로필을 먼저 등록해주세요", "/me/profile");
   }
 
   next();
@@ -102,23 +91,13 @@ export const isMover = async (
   };
   const findUser = await userRepository.findById(user.id);
   if (!findUser) {
-    const error: CustomError = new Error("Unauthorized");
-    error.status = 403;
-    error.data = {
-      message: "유효하지 않은 사용자입니다.",
-    };
-    return next(error);
+    return throwHttpError(403, "유효하지 않은 사용자입니다.");
   }
   if (!user?.moverId) {
-    const error: CustomError = new Error("Unauthorized");
-    error.status = 403;
-    error.data = {
-      message: "기사 프로필을 먼저 등록해 주세요.",
-      redirectUrl: FRONTEND_URL + "/mover/profile",
-      redirect: true,
-    };
-    return next(error);
+    return throwRedirectError(
+      "기사 프로필을 먼저 등록해 주세요.",
+      "/mover/profile"
+    );
   }
-
   next();
 };
