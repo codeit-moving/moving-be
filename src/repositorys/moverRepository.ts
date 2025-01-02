@@ -7,6 +7,8 @@ interface whereConditions {
   OR?: object[];
 }
 
+type CursorFields = "id" | "createAt";
+
 interface UpdateProfile {
   nickname?: string;
   career?: number;
@@ -52,15 +54,22 @@ const getMoverCount = async (where: whereConditions) => {
 const getMoverList = (
   orderBy: { [key: string]: object | string },
   where: whereConditions,
-  cursor: number,
+  cursor: { [key: string]: any; id: number } | null,
   limit: number
 ) => {
+  const orderByKey = Object.keys(orderBy)[0] as CursorFields;
+
   return prismaClient.mover.findMany({
-    orderBy,
+    orderBy: [orderBy, { id: "asc" }],
     where,
-    take: limit + 1, //커서 페이지 넘버 계산을 위해 1개 더 조회
-    skip: cursor ? 1 : 0, //커서 자신을 스킵하기 위함
-    cursor: cursor ? { id: cursor } : undefined,
+    take: limit + 1,
+    skip: cursor ? 1 : 0,
+    cursor: cursor
+      ? {
+          [orderByKey]: cursor[orderByKey],
+          id: cursor.id,
+        }
+      : undefined,
     select: {
       ...defaultSelect,
       imageUrl: {
