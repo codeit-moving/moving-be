@@ -6,6 +6,8 @@ import customError from "../utils/interfaces/customError";
 import { ReviewCreateData, ReviewQuery } from "../utils/review/types";
 import { uploadFile } from "../utils/s3.utils";
 import upload from "../utils/multer";
+import { uploadOptionalFiles } from "../middlewares/uploadFile"; // 추가
+import { throwHttpError } from "../utils/constructors/httpError";
 
 interface User {
   customerId: number;
@@ -61,51 +63,25 @@ router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
   upload.array("imageUrl", 3), // 수정: images -> imageUrl로 변경 (DB 필드명과 일치)
+  uploadOptionalFiles, // 미들웨어 추가
   asyncHandle(async (req, res) => {
     const user = req.user as User;
     const customerId = user.customerId;
     const { confirmedQuoteId, rating, content } = req.body;
 
     if (!customerId) {
-      const error: customError = new Error("Bad Request");
-      error.status = 400;
-      error.message = "고객 ID가 필요합니다.";
-      throw error;
+      throwHttpError(400, "고객 ID가 필요합니다.");
     }
 
     if (!confirmedQuoteId || !rating) {
-      const error: customError = new Error("Bad Request");
-      error.status = 400;
-      error.message = "필수 항목이 누락되었습니다.";
-      throw error;
-    }
-
-    // 이미지 파일 처리 로직
-    let imageUrl: string[] = [];
-    if (req.files && Array.isArray(req.files)) {
-      for (const file of req.files) {
-        try {
-          const uploadedUrl = await uploadFile(file);
-          if (uploadedUrl) {
-            imageUrl.push(uploadedUrl);
-          }
-        } catch (error) {
-          const uploadError: customError = new Error("Internal Server Error");
-          uploadError.status = 500;
-          uploadError.message = "Internal Server Error";
-          uploadError.data = {
-            message: "이미지 업로드에 실패했습니다.",
-          };
-          throw uploadError;
-        }
-      }
+      throwHttpError(400, "필수 항목이 누락되었습니다.");
     }
 
     const result = await reviewService.createNewReview(customerId, {
-      confirmedQuoteId,
-      rating,
+      confirmedQuoteId: Number(confirmedQuoteId),
+      rating: Number(rating),
       content,
-      imageUrl, // S3에 업로드된 URL 배열 전달
+      imageUrl: req.fileUrls || [], // S3에 업로드된 URL 배열 전달
     });
 
     res.status(201).send(result); // 수정: 201 Created 상태코드 사용
