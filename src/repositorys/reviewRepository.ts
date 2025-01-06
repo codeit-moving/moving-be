@@ -18,7 +18,7 @@ const getMoverReviewList = (moverId: number, { pageSize = 5, pageNum = 1 }) => {
       imageUrl: true,
       rating: true,
       content: true,
-      createAt: true,
+      createdAt: true,
       customer: {
         select: {
           user: {
@@ -29,6 +29,17 @@ const getMoverReviewList = (moverId: number, { pageSize = 5, pageNum = 1 }) => {
       mover: {
         select: {
           nickname: true,
+          imageUrl: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            where: {
+              status: true,
+            },
+            select: {
+              imageUrl: true,
+            },
+          },
         },
       },
       confirmedQuote: {
@@ -48,7 +59,7 @@ const getMoverReviewList = (moverId: number, { pageSize = 5, pageNum = 1 }) => {
         },
       },
     },
-    orderBy: { createAt: "desc" },
+    orderBy: { createdAt: "desc" },
   });
 };
 
@@ -68,11 +79,22 @@ const getMyReviewList = (customerId: number, { pageSize = 6, pageNum = 1 }) => {
       id: true,
       rating: true,
       content: true,
-      createAt: true,
+      createdAt: true,
       imageUrl: true,
       mover: {
         select: {
           nickname: true,
+          imageUrl: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            where: {
+              status: true,
+            },
+            select: {
+              imageUrl: true,
+            },
+          },
         },
       },
       confirmedQuote: {
@@ -92,7 +114,7 @@ const getMyReviewList = (customerId: number, { pageSize = 6, pageNum = 1 }) => {
         },
       },
     },
-    orderBy: { createAt: "desc" },
+    orderBy: { createdAt: "desc" },
   });
 };
 
@@ -151,6 +173,11 @@ const findConfirmedQuote = (confirmedQuoteId: number, customerId: number) => {
       quote: {
         select: {
           moverId: true,
+        },
+      },
+      review: {
+        select: {
+          id: true,
         },
       },
     },
@@ -213,7 +240,7 @@ const getAvailableReviewList = (
         },
       },
     },
-    orderBy: { createAt: "desc" },
+    orderBy: { createdAt: "desc" },
   });
 };
 

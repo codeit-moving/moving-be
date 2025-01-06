@@ -36,7 +36,7 @@ const getQuoteByMovingRequestId = (
         select: {
           service: true,
           movingDate: true,
-          createAt: true,
+          createdAt: true,
           pickupAddress: true,
           dropOffAddress: true,
         },
@@ -96,7 +96,7 @@ const getQuoteById = (quoteId: number) => {
       movingRequest: {
         select: {
           service: true,
-          createAt: true,
+          createdAt: true,
           movingDate: true,
           pickupAddress: true,
           dropOffAddress: true,
@@ -122,7 +122,7 @@ const getQuoteById = (quoteId: number) => {
               status: true,
             },
             orderBy: {
-              createAt: "desc",
+              createdAt: "desc",
             },
             select: {
               imageUrl: true,
@@ -194,7 +194,7 @@ const getQuoteListByMoverId = (moverId: number, options: PaginationOptions) => {
   return prismaClient.quote.findMany({
     where: { moverId },
     orderBy: {
-      createAt: "desc", // 최신 순 정렬
+      createdAt: "desc", // 최신 순 정렬
     },
     // 페이지네이션 코드 추가
     take: options.limit + 1,
@@ -204,7 +204,7 @@ const getQuoteListByMoverId = (moverId: number, options: PaginationOptions) => {
       id: true,
       cost: true,
       comment: true,
-      createAt: true,
+      createdAt: true,
       movingRequest: {
         select: {
           service: true, // service로 매핑 필요
@@ -227,7 +227,7 @@ const getQuoteListByMoverId = (moverId: number, options: PaginationOptions) => {
       confirmedQuote: {
         select: {
           id: true,
-          createAt: true,
+          createdAt: true,
         },
       },
     },
@@ -249,7 +249,7 @@ const getQuoteDetailByMoverId = (moverId: number, quoteId: number) => {
       id: true,
       cost: true,
       comment: true,
-      createAt: true,
+      createdAt: true,
       movingRequest: {
         select: {
           service: true,
@@ -308,7 +308,7 @@ const getRejectedMovingRequests = (
       movingDate: true,
       pickupAddress: true,
       dropOffAddress: true,
-      createAt: true,
+      createdAt: true,
       customer: {
         select: {
           user: {

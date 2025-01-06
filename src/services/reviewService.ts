@@ -31,13 +31,14 @@ const getMoverReviewsList = async (moverId: number, query: ReviewQuery) => {
         id: review.id,
         service: review.confirmedQuote.movingRequest.service,
         isDesignated: review.confirmedQuote.movingRequest.isDesignated,
-        imageUrl: review.imageUrl[0] ?? "", // string[] -> string
-        nickname: review.mover.nickname,
+        imageUrl: review.mover.imageUrl[0]?.imageUrl ?? "",
+        reviewImageUrl: review.imageUrl ?? [], // string[] -> string
+        name: review.customer.user.name, // review.mover.nickname,
         movingDate: review.confirmedQuote.movingRequest.movingDate,
         cost: review.confirmedQuote.quote.cost,
         rating: review.rating,
         content: review.content,
-        createdAt: review.createAt,
+        createdAt: review.createdAt,
       })
     ),
   };
@@ -66,13 +67,14 @@ const getMyReviewsList = async (customerId: number, query: ReviewQuery) => {
         id: review.id,
         service: review.confirmedQuote.movingRequest.service,
         isDesignated: review.confirmedQuote.movingRequest.isDesignated,
-        imageUrl: review.imageUrl[0] ?? "", // string[] -> string
+        imageUrl: review.mover.imageUrl[0]?.imageUrl ?? "",
+        reviewImageUrl: review.imageUrl ?? [],
         nickname: review.mover.nickname,
         movingDate: review.confirmedQuote.movingRequest.movingDate,
         cost: review.confirmedQuote.quote.cost,
         rating: review.rating,
         content: review.content,
-        createdAt: review.createAt,
+        createdAt: review.createdAt,
       })
     ),
   };
@@ -87,17 +89,21 @@ const createNewReview = async (customerId: number, data: ReviewCreateData) => {
     );
 
     if (!confirmedQuote) {
-      throwHttpError(400, "리뷰를 작성할 수 있는 견적이 아닙니다.");
+      return throwHttpError(400, "리뷰를 작성할 수 있는 견적이 아닙니다.");
+    }
+
+    if (confirmedQuote.review.length > 0) {
+      return throwHttpError(400, "이미 리뷰를 작성한 견적입니다.");
     }
 
     // 평점 유효성 검사
     if (data.rating < 1 || data.rating > 5) {
-      throwHttpError(400, "평점은 1-5 사이여야 합니다.");
+      return throwHttpError(400, "평점은 1-5 사이여야 합니다.");
     }
 
     // 리뷰 내용 길이 검사
     if (!data.content || data.content.length > 150) {
-      throwHttpError(400, "리뷰 내용은 1-150자 사이여야 합니다.");
+      return throwHttpError(400, "리뷰 내용은 1-150자 사이여야 합니다.");
     }
 
     return await reviewRepository.createReview(

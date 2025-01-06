@@ -8,7 +8,12 @@ const errorHandler: ErrorRequestHandler = (
   next
 ) => {
   const status = err.status ?? 500;
-  console.log(err);
+  console.log({
+    path: req.path,
+    method: req.method,
+    ...err,
+    date: new Date(),
+  });
   if (status >= 500) {
     err.data = {
       message: "Internal Server Error",

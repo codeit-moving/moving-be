@@ -22,7 +22,7 @@ const findNotifications = async (userId: number, query: Query) => {
     take: limit,
     ...(cursor && { cursor: { id: cursor }, skip: 1 }),
     orderBy: {
-      createAt: "desc",
+      createdAt: "desc",
     },
   });
 };
