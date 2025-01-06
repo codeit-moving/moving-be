@@ -58,14 +58,15 @@ router.get(
 
 // 리뷰 생성하기
 router.post(
-  "/",
+  "/:id",
   passport.authenticate("jwt", { session: false }),
   upload.array("imageUrl", 3), // 수정: images -> imageUrl로 변경 (DB 필드명과 일치)
   uploadOptionalFiles, // 미들웨어 추가
   asyncHandle(async (req, res) => {
     const user = req.user as User;
     const customerId = user.customerId;
-    const { confirmedQuoteId, rating, content } = req.body;
+    const confirmedQuoteId = parseInt(req.params.id);
+    const { rating, content } = req.body;
 
     if (!customerId) {
       throwHttpError(400, "고객 ID가 필요합니다.");
