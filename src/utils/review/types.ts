@@ -16,6 +16,7 @@ export interface ReviewListItem {
   service: number;
   isDesignated: boolean;
   imageUrl: string;
+  reviewImageUrl: string[];
   nickname: string;
   movingDate: Date;
   cost: number;

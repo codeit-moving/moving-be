@@ -29,6 +29,17 @@ const getMoverReviewList = (moverId: number, { pageSize = 5, pageNum = 1 }) => {
       mover: {
         select: {
           nickname: true,
+          imageUrl: {
+            orderBy: {
+              createAt: "desc",
+            },
+            where: {
+              status: true,
+            },
+            select: {
+              imageUrl: true,
+            },
+          },
         },
       },
       confirmedQuote: {
@@ -73,6 +84,17 @@ const getMyReviewList = (customerId: number, { pageSize = 6, pageNum = 1 }) => {
       mover: {
         select: {
           nickname: true,
+          imageUrl: {
+            orderBy: {
+              createAt: "desc",
+            },
+            where: {
+              status: true,
+            },
+            select: {
+              imageUrl: true,
+            },
+          },
         },
       },
       confirmedQuote: {
@@ -151,6 +173,11 @@ const findConfirmedQuote = (confirmedQuoteId: number, customerId: number) => {
       quote: {
         select: {
           moverId: true,
+        },
+      },
+      review: {
+        select: {
+          id: true,
         },
       },
     },
