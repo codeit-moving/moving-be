@@ -13,15 +13,15 @@ export interface ReviewQuery {
 // 중첩 없는 평탄화된 응답 구조
 export interface ReviewListItem {
   id: number;
+  service: number;
+  isDesignated: boolean;
+  imageUrl: string;
+  nickname: string;
+  movingDate: Date;
+  cost: number;
   rating: number;
   content: string;
   createdAt: Date;
-  service: number;
-  isDesignated: boolean;
-  movingDate: Date;
-  cost: number;
-  imageUrl: string;
-  nickname: string;
 }
 
 export interface ReviewListResponse {
