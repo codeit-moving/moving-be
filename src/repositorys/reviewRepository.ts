@@ -18,7 +18,7 @@ const getMoverReviewList = (moverId: number, { pageSize = 5, pageNum = 1 }) => {
       imageUrl: true,
       rating: true,
       content: true,
-      createAt: true,
+      createdAt: true,
       customer: {
         select: {
           user: {
@@ -31,7 +31,7 @@ const getMoverReviewList = (moverId: number, { pageSize = 5, pageNum = 1 }) => {
           nickname: true,
           imageUrl: {
             orderBy: {
-              createAt: "desc",
+              createdAt: "desc",
             },
             where: {
               status: true,
@@ -59,7 +59,7 @@ const getMoverReviewList = (moverId: number, { pageSize = 5, pageNum = 1 }) => {
         },
       },
     },
-    orderBy: { createAt: "desc" },
+    orderBy: { createdAt: "desc" },
   });
 };
 
@@ -79,14 +79,14 @@ const getMyReviewList = (customerId: number, { pageSize = 6, pageNum = 1 }) => {
       id: true,
       rating: true,
       content: true,
-      createAt: true,
+      createdAt: true,
       imageUrl: true,
       mover: {
         select: {
           nickname: true,
           imageUrl: {
             orderBy: {
-              createAt: "desc",
+              createdAt: "desc",
             },
             where: {
               status: true,
@@ -114,7 +114,7 @@ const getMyReviewList = (customerId: number, { pageSize = 6, pageNum = 1 }) => {
         },
       },
     },
-    orderBy: { createAt: "desc" },
+    orderBy: { createdAt: "desc" },
   });
 };
 
@@ -240,7 +240,7 @@ const getAvailableReviewList = (
         },
       },
     },
-    orderBy: { createAt: "desc" },
+    orderBy: { createdAt: "desc" },
   });
 };
 

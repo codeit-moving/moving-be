@@ -33,12 +33,12 @@ const getMoverReviewsList = async (moverId: number, query: ReviewQuery) => {
         isDesignated: review.confirmedQuote.movingRequest.isDesignated,
         imageUrl: review.mover.imageUrl[0]?.imageUrl ?? "",
         reviewImageUrl: review.imageUrl ?? [], // string[] -> string
-        nickname: review.mover.nickname,
+        name: review.customer.user.name, // review.mover.nickname,
         movingDate: review.confirmedQuote.movingRequest.movingDate,
         cost: review.confirmedQuote.quote.cost,
         rating: review.rating,
         content: review.content,
-        createdAt: review.createAt,
+        createdAt: review.createdAt,
       })
     ),
   };
@@ -74,7 +74,7 @@ const getMyReviewsList = async (customerId: number, query: ReviewQuery) => {
         cost: review.confirmedQuote.quote.cost,
         rating: review.rating,
         content: review.content,
-        createdAt: review.createAt,
+        createdAt: review.createdAt,
       })
     ),
   };
