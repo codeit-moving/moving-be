@@ -13,16 +13,16 @@ erDiagram
   String password "nullable"
   String phoneNumber UK "nullable"
   Boolean isOAuth
-  DateTime createAt
-  DateTime updateAt
+  DateTime createdAt
+  DateTime updatedAt
   String userType
 }
 "Customer" {
   Int id PK
   Int services
   Int regions
-  DateTime createAt
-  DateTime updateAt
+  DateTime createdAt
+  DateTime updatedAt
   Int userId FK
 }
 "Mover" {
@@ -34,24 +34,24 @@ erDiagram
   String description
   String introduction
   Int userId FK
-  DateTime createAt
-  DateTime updateAt
+  DateTime createdAt
+  DateTime updatedAt
 }
 "Service" {
   Int id PK
   String value
   Int code UK
   Boolean status
-  DateTime createAt
-  DateTime updateAt
+  DateTime createdAt
+  DateTime updatedAt
 }
 "Region" {
   Int id PK
   String value
   Int code
   Boolean status
-  DateTime createAt
-  DateTime updateAt
+  DateTime createdAt
+  DateTime updatedAt
 }
 "MovingRequest" {
   Int id PK
@@ -63,23 +63,23 @@ erDiagram
   Int requestCount
   Int designateCount
   Boolean isDesignated
-  DateTime createAt
-  DateTime updateAt
+  DateTime createdAt
+  DateTime updatedAt
   Int customerId FK
 }
 "Quote" {
   Int id PK
   Int cost
   String comment
-  DateTime createAt
-  DateTime updateAt
+  DateTime createdAt
+  DateTime updatedAt
   Int movingRequestId FK
   Int moverId FK
 }
 "ConfirmedQuote" {
   Int id PK
-  DateTime createAt
-  DateTime updateAt
+  DateTime createdAt
+  DateTime updatedAt
   Int movingRequestId FK
   Int quoteId FK
   Int customerId FK
@@ -90,8 +90,8 @@ erDiagram
   String content
   Int rating
   String imageUrl
-  DateTime createAt
-  DateTime updateAt
+  DateTime createdAt
+  DateTime updatedAt
   Int confirmedQuoteId FK
   Int customerId FK
   Int moverId FK
@@ -100,15 +100,15 @@ erDiagram
   Int id PK
   String content
   Boolean isRead
-  DateTime createAt
-  DateTime updateAt
+  DateTime createdAt
+  DateTime updatedAt
   Int userId FK
 }
 "ReviewComment" {
   Int id PK
   String content
-  DateTime createAt
-  DateTime updateAt
+  DateTime createdAt
+  DateTime updatedAt
   Int reviewId FK
   Int moverId FK
 }
@@ -116,8 +116,8 @@ erDiagram
   Int id PK
   String imageUrl
   Boolean status
-  DateTime createAt
-  DateTime updateAt
+  DateTime createdAt
+  DateTime updatedAt
   Int customerId FK "nullable"
   Int moverId FK "nullable"
 }
@@ -161,8 +161,8 @@ erDiagram
   - `password`: 
   - `phoneNumber`: 
   - `isOAuth`: 
-  - `createAt`: 
-  - `updateAt`: 
+  - `createdAt`: 
+  - `updatedAt`: 
   - `userType`: 
 
 ### `Customer`
@@ -171,8 +171,8 @@ erDiagram
   - `id`: 
   - `services`: 
   - `regions`: 
-  - `createAt`: 
-  - `updateAt`: 
+  - `createdAt`: 
+  - `updatedAt`: 
   - `userId`: 
 
 ### `Mover`
@@ -186,8 +186,8 @@ erDiagram
   - `description`: 
   - `introduction`: 
   - `userId`: 
-  - `createAt`: 
-  - `updateAt`: 
+  - `createdAt`: 
+  - `updatedAt`: 
 
 ### `Service`
 
@@ -196,8 +196,8 @@ erDiagram
   - `value`: 
   - `code`: 
   - `status`: 
-  - `createAt`: 
-  - `updateAt`: 
+  - `createdAt`: 
+  - `updatedAt`: 
 
 ### `Region`
 
@@ -206,8 +206,8 @@ erDiagram
   - `value`: 
   - `code`: 
   - `status`: 
-  - `createAt`: 
-  - `updateAt`: 
+  - `createdAt`: 
+  - `updatedAt`: 
 
 ### `MovingRequest`
 
@@ -221,8 +221,8 @@ erDiagram
   - `requestCount`: 
   - `designateCount`: 
   - `isDesignated`: 
-  - `createAt`: 
-  - `updateAt`: 
+  - `createdAt`: 
+  - `updatedAt`: 
   - `customerId`: 
 
 ### `Quote`
@@ -231,8 +231,8 @@ erDiagram
   - `id`: 
   - `cost`: 
   - `comment`: 
-  - `createAt`: 
-  - `updateAt`: 
+  - `createdAt`: 
+  - `updatedAt`: 
   - `movingRequestId`: 
   - `moverId`: 
 
@@ -240,8 +240,8 @@ erDiagram
 
 **Properties**
   - `id`: 
-  - `createAt`: 
-  - `updateAt`: 
+  - `createdAt`: 
+  - `updatedAt`: 
   - `movingRequestId`: 
   - `quoteId`: 
   - `customerId`: 
@@ -254,8 +254,8 @@ erDiagram
   - `content`: 
   - `rating`: 
   - `imageUrl`: 
-  - `createAt`: 
-  - `updateAt`: 
+  - `createdAt`: 
+  - `updatedAt`: 
   - `confirmedQuoteId`: 
   - `customerId`: 
   - `moverId`: 
@@ -266,8 +266,8 @@ erDiagram
   - `id`: 
   - `content`: 
   - `isRead`: 
-  - `createAt`: 
-  - `updateAt`: 
+  - `createdAt`: 
+  - `updatedAt`: 
   - `userId`: 
 
 ### `ReviewComment`
@@ -275,8 +275,8 @@ erDiagram
 **Properties**
   - `id`: 
   - `content`: 
-  - `createAt`: 
-  - `updateAt`: 
+  - `createdAt`: 
+  - `updatedAt`: 
   - `reviewId`: 
   - `moverId`: 
 
@@ -286,8 +286,8 @@ erDiagram
   - `id`: 
   - `imageUrl`: 
   - `status`: 
-  - `createAt`: 
-  - `updateAt`: 
+  - `createdAt`: 
+  - `updatedAt`: 
   - `customerId`: 
   - `moverId`: 
 

@@ -155,7 +155,7 @@ const getAvailableReviewList = (
           nickname: true,
           imageUrl: {
             orderBy: {
-              createAt: "desc",
+              createdAt: "desc",
             },
             where: {
               status: true,

@@ -27,8 +27,8 @@ model User {
   password     String? // 비밀번호 (해싱) 특수 + 숫자 + 문자
   phoneNumber  String?        @unique // 전화번호
   isOAuth      Boolean        @default(false) // 소셜 로그인 여부
-  createAt     DateTime       @default(now())
-  updateAt     DateTime       @updatedAt
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
   notification notification[]
   mover        Mover?         @relation
   customer     Customer?      @relation
@@ -41,8 +41,8 @@ model Customer {
   imageUrl       ProfileImage[]
   services       Int[] // [1, 2]
   regions        Int[] // 리전으로 변경 // 지역
-  createAt       DateTime         @default(now())
-  updateAt       DateTime         @updatedAt
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
   user           User             @relation(fields: [userId], references: [id])
   userId         Int              @unique
   movingRequest  MovingRequest[]
@@ -63,8 +63,8 @@ model Mover {
   introduction   String // 한 줄 소개 1~50
   user           User             @relation(fields: [userId], references: [id]) // User와 1:1 관계
   userId         Int              @unique
-  createAt       DateTime         @default(now())
-  updateAt       DateTime         @updatedAt
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
   quote          Quote[] // 견적서 
   movingRequest  MovingRequest[]  @relation // 지정 견적 관련
   isRejected     MovingRequest[]  @relation("Rejected") //반려를 하면 관계 형성
@@ -76,22 +76,22 @@ model Mover {
 
 // 서비스
 model Service {
-  id       Int      @id @unique @default(autoincrement()) //자동증가
-  value    String //값 예 ) 소형, 중형, 대형
-  code     Int      @unique //로직에서 사용할 값 예 ) 1, 2, 3
-  status   Boolean //사용여부 예 ) false면 노출을 안 함
-  createAt DateTime @default(now())
-  updateAt DateTime @updatedAt
+  id        Int      @id @unique @default(autoincrement()) //자동증가
+  value     String //값 예 ) 소형, 중형, 대형
+  code      Int      @unique //로직에서 사용할 값 예 ) 1, 2, 3
+  status    Boolean //사용여부 예 ) false면 노출을 안 함
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // 지역 -> 리전
 model Region {
-  id       Int      @id @unique @default(autoincrement()) //자동증가
-  value    String //값 예 ) 서울, 경기, 전국
-  code     Int // 8202 -> 대한 82 + 지역번호 02
-  status   Boolean //사용여부 예 ) false면 노출을 안 함
-  createAt DateTime @default(now())
-  updateAt DateTime @updatedAt
+  id        Int      @id @unique @default(autoincrement()) //자동증가
+  value     String //값 예 ) 서울, 경기, 전국
+  code      Int // 8202 -> 대한 82 + 지역번호 02
+  status    Boolean //사용여부 예 ) false면 노출을 안 함
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // 이사정보 -> 고객이 등록 Requset
@@ -105,8 +105,8 @@ model MovingRequest {
   requestCount   Int             @default(0) //견적서 받은 수 예 0~5
   designateCount Int             @default(0) //지정 견적 보낸 수 예 0~3
   isDesignated   Boolean         @default(false) //지정유무 
-  createAt       DateTime        @default(now())
-  updateAt       DateTime        @updatedAt
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   customer       Customer        @relation(fields: [customerId], references: [id])
   customerId     Int
   quote          Quote[] //견적서
@@ -120,8 +120,8 @@ model Quote {
   id              Int             @id @unique @default(autoincrement()) //자동증가
   cost            Int             @default(0) //견적가 0~**
   comment         String //코멘트 10~50
-  createAt        DateTime        @default(now())
-  updateAt        DateTime        @updatedAt
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
   movingRequest   MovingRequest   @relation(fields: [movingRequestId], references: [id])
   movingRequestId Int
   mover           Mover           @relation(fields: [moverId], references: [id])
@@ -132,8 +132,8 @@ model Quote {
 // 확정 견적서 -> 고객이 확정을 하면 생성
 model ConfirmedQuote {
   id              Int           @id @unique @default(autoincrement()) //자동증가
-  createAt        DateTime      @default(now())
-  updateAt        DateTime      @updatedAt
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
   movingRequest   MovingRequest @relation(fields: [movingRequestId], references: [id])
   movingRequestId Int           @unique //이사정보
   quote           Quote         @relation(fields: [quoteId], references: [id])
@@ -151,8 +151,8 @@ model Review {
   content          String //리뷰 내용 0~150
   rating           Int //별점 1~5
   imageUrl         String[] //이미지
-  createAt         DateTime        @default(now())
-  updateAt         DateTime        @updatedAt
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
   confirmedQuote   ConfirmedQuote  @relation(fields: [confirmedQuoteId], references: [id])
   confirmedQuoteId Int //완료된 확정견적
   customer         Customer        @relation(fields: [customerId], references: [id])
@@ -164,33 +164,33 @@ model Review {
 
 // 알림
 model notification {
-  id       Int      @id @unique @default(autoincrement()) //자동증가
-  content  String //예 ) 김코드 기사님의 소형이사 견적이 도착했습니다.
-  isRead   Boolean  @default(false) //읽음 여부
-  createAt DateTime @default(now())
-  updateAt DateTime @updatedAt
-  user     User     @relation(fields: [userId], references: [id])
-  userId   Int //알림을 받는 사용자 (고객/기사)
+  id        Int      @id @unique @default(autoincrement()) //자동증가
+  content   String //예 ) 김코드 기사님의 소형이사 견적이 도착했습니다.
+  isRead    Boolean  @default(false) //읽음 여부
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int //알림을 받는 사용자 (고객/기사)
 }
 
 // 리뷰 댓글 ( 미확정 기능 )
 model ReviewComment {
-  id       Int      @id @unique @default(autoincrement()) //자동증가
-  content  String //기사님의 리뷰 댓글
-  createAt DateTime @default(now())
-  updateAt DateTime @updatedAt
-  review   Review   @relation(fields: [reviewId], references: [id])
-  reviewId Int //해당 리뷰
-  mover    Mover    @relation(fields: [moverId], references: [id])
-  moverId  Int //댓글 작성자
+  id        Int      @id @unique @default(autoincrement()) //자동증가
+  content   String //기사님의 리뷰 댓글
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  review    Review   @relation(fields: [reviewId], references: [id])
+  reviewId  Int //해당 리뷰
+  mover     Mover    @relation(fields: [moverId], references: [id])
+  moverId   Int //댓글 작성자
 }
 
 model ProfileImage {
   id         Int       @id @unique @default(autoincrement()) //자동증가
   imageUrl   String
   status     Boolean   @default(true) //사용여부
-  createAt   DateTime  @default(now())
-  updateAt   DateTime  @updatedAt
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
   customer   Customer? @relation(fields: [customerId], references: [id])
   customerId Int?
   mover      Mover?    @relation(fields: [moverId], references: [id])

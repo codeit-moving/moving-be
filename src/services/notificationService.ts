@@ -31,7 +31,7 @@ const findNotifications = async (userId: number, query: Query) => {
 
   const addTimeGap = notifications.map((notification) => ({
     ...notification,
-    timeGap: calculateTimeGap(notification.createAt),
+    timeGap: calculateTimeGap(notification.createdAt),
   })); //각 알림에 timeGap 추가
 
   return {

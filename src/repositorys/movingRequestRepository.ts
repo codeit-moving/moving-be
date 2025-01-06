@@ -104,7 +104,7 @@ const getMovingRequestListByMover = (
       movingDate: true,
       pickupAddress: true,
       dropOffAddress: true,
-      createAt: true,
+      createdAt: true,
       _count: {
         select: {
           mover: true,
@@ -144,7 +144,7 @@ const getMovingRequestListByCustomer = (
     where: {
       customerId,
     },
-    orderBy: { createAt: "desc" },
+    orderBy: { createdAt: "desc" },
     take: pageSize,
     skip: (pageNum - 1) * pageSize, //페이지 번호 계산 2가 오면 기존의 1페이지의 수를 스킵
     select: {
@@ -153,7 +153,7 @@ const getMovingRequestListByCustomer = (
       movingDate: true,
       pickupAddress: true,
       dropOffAddress: true,
-      createAt: true,
+      createdAt: true,
       confirmedQuote: {
         select: {
           id: true,
@@ -181,7 +181,7 @@ const getMovingRequestById = (movingRequestId: number) => {
       movingDate: true,
       pickupAddress: true,
       dropOffAddress: true,
-      createAt: true,
+      createdAt: true,
       _count: {
         select: {
           mover: true,
