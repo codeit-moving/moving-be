@@ -77,7 +77,7 @@ router.post(
     }
 
     const result = await reviewService.createNewReview(customerId, {
-      confirmedQuoteId: Number(confirmedQuoteId),
+      confirmedQuoteId: confirmedQuoteId,
       rating: Number(rating),
       content,
       imageUrl: req.fileUrls || [], // S3에 업로드된 URL 배열 전달
