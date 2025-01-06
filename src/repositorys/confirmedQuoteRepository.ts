@@ -128,6 +128,9 @@ const getAvailableReviewList = (
           lt: new Date(),
         },
       },
+      review: {
+        none: {},
+      },
     },
     take: query.pageSize || 6,
     skip: (query.pageNum - 1) * (query.pageSize || 6),
