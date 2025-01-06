@@ -32,6 +32,16 @@ interface MoverResponse {
   };
 }
 
+interface SocialUserResponse {
+  id: number;
+  email: string;
+  name: string;
+  phoneNumber: string;
+  isOAuth: boolean;
+  mover: null;
+  customer: null;
+}
+
 const updateUser = async (userId: number, updateData: UpdateUser) => {
   const user = await userRepository.findById(userId);
 
@@ -76,9 +86,9 @@ const updateUser = async (userId: number, updateData: UpdateUser) => {
 };
 
 const getUser = async (userId: number) => {
-  const user = await userRepository.getUser(userId);
+  const userType = await userRepository.getUserType(userId);
 
-  if (user === "customer") {
+  if (userType === "customer") {
     const response = (await userRepository.getCustomer(
       userId
     )) as CustomerResponse;
@@ -89,7 +99,7 @@ const getUser = async (userId: number) => {
         response.customer.imageUrl[0]?.imageUrl || DEFAULT_PROFILE_IMAGE;
     }
     return response;
-  } else if (user === "mover") {
+  } else if (userType === "mover") {
     const response = (await userRepository.getMover(userId)) as MoverResponse;
     if (!response?.mover?.imageUrl) {
       response.mover.imageUrl = DEFAULT_PROFILE_IMAGE;
@@ -98,8 +108,11 @@ const getUser = async (userId: number) => {
         response.mover.imageUrl[0]?.imageUrl || DEFAULT_PROFILE_IMAGE;
     }
     return response;
-  } else if (user) {
-    return user;
+  } else if (userType === "social") {
+    const response = (await userRepository.getSocialUser(
+      userId
+    )) as SocialUserResponse;
+    return response;
   } else {
     return throwHttpError(404, "사용자가 존재하지 않습니다.");
   }

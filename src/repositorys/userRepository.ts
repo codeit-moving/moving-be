@@ -232,8 +232,8 @@ const getMover = (userId: number) => {
   });
 };
 
-const getUser = async (userId: number) => {
-  const user = await prismaClient.user.findUnique({
+const getSocialUser = (userId: number) => {
+  return prismaClient.user.findUnique({
     where: { id: userId },
     select: {
       id: true,
@@ -249,12 +249,26 @@ const getUser = async (userId: number) => {
       },
     },
   });
+};
+
+const getUserType = async (userId: number) => {
+  const user = await prismaClient.user.findUnique({
+    where: { id: userId },
+    select: {
+      customer: {
+        select: { id: true },
+      },
+      mover: {
+        select: { id: true },
+      },
+    },
+  });
   if (user?.customer) {
     return "customer";
   } else if (user?.mover) {
     return "mover";
   } else {
-    return user;
+    return "social";
   }
 };
 
@@ -278,11 +292,12 @@ export default {
   createMover,
   existingUser,
   createUser,
-  getUser,
+  getUserType,
   getCustomer,
   findByUserId,
   getMover,
   updateUser,
   findById,
   findPassword,
+  getSocialUser,
 };
