@@ -62,7 +62,7 @@ export const uploadOptionalFiles = asyncHandle(async (req, res, next) => {
 
   try {
     const uploadPromises = files.map(async (file) => {
-      const key = `reviews/${Date.now()}-${file.originalname}`;
+      const key = `profiles/${Date.now()}-${file.originalname}`;
       await s3Client.send(
         new PutObjectCommand({
           Bucket: AWS_S3_BUCKET_NAME,

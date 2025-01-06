@@ -1,17 +1,16 @@
 import customerRepository from "../repositorys/customerRepository";
 import imageRepository from "../repositorys/imageRepository";
 import { throwHttpError } from "../utils/constructors/httpError";
-import { uploadFile } from "../utils/s3.utils";
 
 interface Profile {
   userId: number;
-  imageUrl: Express.Multer.File;
+  imageUrl: string[];
   services: number[];
   regions: number[];
 }
 
 interface UpdateProfile {
-  imageUrl?: Express.Multer.File;
+  imageUrl?: string[];
   services?: number[];
   regions?: number[];
   key?: string;
@@ -19,12 +18,9 @@ interface UpdateProfile {
 
 //고객 프로필 생성
 const createCustomerProfile = async (profile: Profile) => {
-  const imageUrl = await uploadFile(profile.imageUrl);
   const customerProfile = {
-    userId: profile.userId,
-    imageUrl,
-    services: profile.services,
-    regions: profile.regions,
+    ...profile,
+    imageUrl: profile.imageUrl[0],
   };
   return customerRepository.createCustomerProfile(customerProfile);
 };
@@ -36,19 +32,9 @@ const updateCustomerProfile = async (
   profile: UpdateProfile
 ) => {
   const { imageUrl, ...rest } = profile;
-  let uploadedImageUrl;
-
-  if (imageUrl) {
-    try {
-      uploadedImageUrl = await uploadFile(imageUrl);
-    } catch (e) {
-      return throwHttpError(500, "이미지 업로드 실패");
-    }
-  }
-
   try {
     return await imageRepository.updateCustomerProfile(
-      uploadedImageUrl,
+      imageUrl ? imageUrl[0] : undefined,
       userId,
       customerId,
       rest
