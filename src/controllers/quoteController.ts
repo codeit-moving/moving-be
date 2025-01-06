@@ -110,21 +110,16 @@ router.post(
     const moverId = user.moverId;
     const movingRequestId = parseInt(req.params.movingRequestId);
 
-    // 파라미터 검증 후에 서비스를 호출하고 응답을 보내는 부분이 없어요!
+    // 파라미터 검증
     if (!movingRequestId) {
       const error: customError = new Error("Bad Request");
       error.status = 400;
-      error.message = "Bad Request";
-      error.data = {
-        message: "이사 요청 ID가 필요합니다.",
-      };
+      error.message = "이사 요청 ID가 필요합니다.";
       throw error;
     }
 
-    // 서비스 호출 추가
     const result = await quoteService.rejectRequest(moverId, movingRequestId);
 
-    // 응답 추가
     res.status(200).send(result);
   })
 );

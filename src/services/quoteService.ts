@@ -169,7 +169,6 @@ const rejectRequest = async (moverId: number, movingRequestId: number) => {
   // 3. API 명세에 맞는 응답 데이터 반환
   return {
     id: movingRequestId,
-    comment: "죄송합니다. 그날 예약이 되어 있습니다", // 실제 데이터에서 가져오거나 설정된 메시지
   };
 };
 

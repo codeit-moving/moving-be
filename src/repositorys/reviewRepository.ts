@@ -26,6 +26,27 @@ const getMoverReviewList = (moverId: number, { pageSize = 5, pageNum = 1 }) => {
           },
         },
       },
+      mover: {
+        select: {
+          nickname: true,
+        },
+      },
+      confirmedQuote: {
+        select: {
+          movingRequest: {
+            select: {
+              service: true,
+              isDesignated: true,
+              movingDate: true,
+            },
+          },
+          quote: {
+            select: {
+              cost: true,
+            },
+          },
+        },
+      },
     },
     orderBy: { createAt: "desc" },
   });
