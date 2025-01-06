@@ -108,7 +108,7 @@ const getQuoteList = async (moverId: number, query: QuoteQueryString) => {
         cost: quote.cost,
         isCompleted: movingDate < today, // 추가: 이사일이 지났는지 확인
         isConfirmed: !!quote.confirmedQuote,
-        requestDate: quote.createAt, // 추가: 요청일자 추가
+        requestDate: quote.createdAt, // 추가: 요청일자 추가
       };
     }),
   };
@@ -140,7 +140,7 @@ const getQuoteDetail = async (moverId: number, quoteId: number) => {
     pickupAddress: quote.movingRequest.pickupAddress,
     dropOffAddress: quote.movingRequest.dropOffAddress,
     isDesignated: quote.movingRequest.isDesignated,
-    requestDate: quote.createAt, // 추가: 요청일자 추가
+    requestDate: quote.createdAt, // 추가: 요청일자 추가
   };
 };
 
@@ -214,7 +214,7 @@ const getRejectedRequestList = async (
       movingDate: movingRequest.movingDate,
       pickupAddress: movingRequest.pickupAddress,
       dropOffAddress: movingRequest.dropOffAddress,
-      requestDate: movingRequest.createAt, // 추가: 요청일자 추가
+      requestDate: movingRequest.createdAt, // 추가: 요청일자 추가
     })),
   };
 };

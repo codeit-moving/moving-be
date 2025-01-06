@@ -8,7 +8,7 @@ interface Quote {
   mover: Mover;
   movingRequest: {
     service: number;
-    createAt: Date;
+    createdAt: Date;
     movingDate: Date;
     pickupAddress?: string;
     dropOffAddress?: string;
@@ -59,7 +59,7 @@ const processQuotes = async (customerId: number, quote: Quote[] | Quote) => {
   const processQuotes = quotes.map((quote) => {
     const { mover, confirmedQuote, movingRequest, ...rest } = quote;
     const {
-      createAt,
+      createdAt,
       confirmedQuote: confirmedQuoteReq,
       ...restMovingRequest
     } = movingRequest;
@@ -77,7 +77,7 @@ const processQuotes = async (customerId: number, quote: Quote[] | Quote) => {
       isConfirmed: Boolean(confirmedQuote),
       movingRequest: {
         ...restMovingRequest,
-        requestDate: createAt,
+        requestDate: createdAt,
         isConfirmed: Boolean(confirmedQuoteReq),
         status: status.toUpperCase(),
       },

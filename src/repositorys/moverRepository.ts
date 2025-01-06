@@ -59,7 +59,7 @@ const getMoverList = (
           status: true,
         },
         orderBy: {
-          createAt: "desc",
+          createdAt: "desc",
         },
         select: {
           imageUrl: true,
@@ -90,7 +90,7 @@ const getMoverById = (customerId: number | null, moverId: number) => {
           status: true,
         },
         orderBy: {
-          createAt: "desc",
+          createdAt: "desc",
         },
         select: {
           imageUrl: true,
@@ -160,7 +160,7 @@ const getMoverByFavorite = (
   cursor: number
 ) => {
   return prismaClient.mover.findMany({
-    orderBy: { createAt: "desc" },
+    orderBy: { createdAt: "desc" },
     take: limit + 1,
     skip: cursor ? 1 : 0,
     cursor: cursor ? { id: cursor } : undefined,
@@ -172,7 +172,7 @@ const getMoverByFavorite = (
           status: true,
         },
         orderBy: {
-          createAt: "desc",
+          createdAt: "desc",
         },
         select: {
           imageUrl: true,

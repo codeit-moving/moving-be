@@ -148,13 +148,13 @@ const setOrderBy = (orderBy: string) => {
   let orderByQuery: { [key: string]: "desc" | "asc" };
   switch (orderBy) {
     case "resent":
-      orderByQuery = { createAt: "desc" };
+      orderByQuery = { createdAt: "desc" };
       break;
     case "movingDate":
       orderByQuery = { movingDate: "asc" };
       break;
     default:
-      orderByQuery = { createAt: "desc" };
+      orderByQuery = { createdAt: "desc" };
   }
   return orderByQuery;
 };
@@ -252,12 +252,12 @@ const getMovingRequestListByMover = async (
 
   //데이터 가공
   const resMovingRequestList = movingRequestList.map((movingRequest) => {
-    const { _count, customer, createAt, confirmedQuote, isRejected, ...rest } =
+    const { _count, customer, createdAt, confirmedQuote, isRejected, ...rest } =
       movingRequest;
 
     return {
       ...rest,
-      requestDate: createAt,
+      requestDate: createdAt,
       isConfirmed: Boolean(confirmedQuote), //완료된 견적서와 관계가 있다면 true
       name: customer.user.name,
       isDesignated: Boolean(_count.mover), //관계가 있다면 true
@@ -302,12 +302,12 @@ const getMovingRequestListByCustomer = async (
   }
 
   const resMovingRequestList = movingRequestList.map((movingRequest) => {
-    const { customer, createAt, confirmedQuote, ...rest } = movingRequest;
+    const { customer, createdAt, confirmedQuote, ...rest } = movingRequest;
 
     return {
       ...rest,
       name: customer.user.name,
-      requestDate: createAt,
+      requestDate: createdAt,
       isConfirmed: Boolean(confirmedQuote), //완료된 견적서와 관계가 있다면 true
     };
   });
