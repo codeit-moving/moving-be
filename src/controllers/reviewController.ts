@@ -3,8 +3,6 @@ import passport from "passport";
 import { asyncHandle } from "../utils/asyncHandler";
 import reviewService from "../services/reviewService";
 import customError from "../utils/interfaces/customError";
-import { ReviewCreateData, ReviewQuery } from "../utils/review/types";
-import { uploadFile } from "../utils/s3.utils";
 import upload from "../utils/multer";
 import { uploadOptionalFiles } from "../middlewares/uploadFile"; // 추가
 import { throwHttpError } from "../utils/constructors/httpError";
