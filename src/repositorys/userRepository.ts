@@ -232,11 +232,12 @@ const getMover = (userId: number) => {
   });
 };
 
-const getUserType = async (userId: number) => {
+const getUser = async (userId: number) => {
   const user = await prismaClient.user.findUnique({
     where: { id: userId },
     select: {
       id: true,
+      name: true,
       customer: {
         select: { id: true },
       },
@@ -250,7 +251,7 @@ const getUserType = async (userId: number) => {
   } else if (user?.mover) {
     return "mover";
   } else {
-    return null;
+    return user;
   }
 };
 
@@ -274,7 +275,7 @@ export default {
   createMover,
   existingUser,
   createUser,
-  getUserType,
+  getUser,
   getCustomer,
   findByUserId,
   getMover,

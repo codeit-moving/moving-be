@@ -76,9 +76,9 @@ const updateUser = async (userId: number, updateData: UpdateUser) => {
 };
 
 const getUser = async (userId: number) => {
-  const userType = await userRepository.getUserType(userId);
+  const user = await userRepository.getUser(userId);
 
-  if (userType === "customer") {
+  if (user === "customer") {
     const response = (await userRepository.getCustomer(
       userId
     )) as CustomerResponse;
@@ -89,7 +89,7 @@ const getUser = async (userId: number) => {
         response.customer.imageUrl[0]?.imageUrl || DEFAULT_PROFILE_IMAGE;
     }
     return response;
-  } else if (userType === "mover") {
+  } else if (user === "mover") {
     const response = (await userRepository.getMover(userId)) as MoverResponse;
     if (!response?.mover?.imageUrl) {
       response.mover.imageUrl = DEFAULT_PROFILE_IMAGE;
@@ -98,6 +98,8 @@ const getUser = async (userId: number) => {
         response.mover.imageUrl[0]?.imageUrl || DEFAULT_PROFILE_IMAGE;
     }
     return response;
+  } else if (user) {
+    return { name: user.name };
   } else {
     return throwHttpError(404, "사용자가 존재하지 않습니다.");
   }
