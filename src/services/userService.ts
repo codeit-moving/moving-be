@@ -99,7 +99,7 @@ const getUser = async (userId: number) => {
     }
     return response;
   } else if (user) {
-    return { name: user.name };
+    return user;
   } else {
     return throwHttpError(404, "사용자가 존재하지 않습니다.");
   }

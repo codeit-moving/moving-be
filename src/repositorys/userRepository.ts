@@ -237,7 +237,10 @@ const getUser = async (userId: number) => {
     where: { id: userId },
     select: {
       id: true,
+      email: true,
       name: true,
+      phoneNumber: true,
+      isOAuth: true,
       customer: {
         select: { id: true },
       },
