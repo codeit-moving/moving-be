@@ -1,6 +1,6 @@
 import confirmedQuoteRepository from "../repositorys/confirmedQuoteRepository";
 import reviewRepository from "../repositorys/reviewRepository";
-import customError from "../utils/interfaces/customError";
+import { HttpError, throwHttpError } from "../utils/constructors/httpError";
 import {
   ReviewCreateData,
   ReviewQuery,
@@ -23,13 +23,23 @@ const getMoverReviewsList = async (moverId: number, query: ReviewQuery) => {
 
   return {
     currentPage: pageNum,
+    pageSize,
     totalPages: Math.ceil(totalCount / pageSize),
     totalCount,
-    list: reviews.map((review) => ({
-      ...review,
-      name: review.customer.user.name, // 중첩된 객체에서 name만 추출
-      customer: undefined, // customer 객체 제거
-    })),
+    list: reviews.map(
+      (review): ReviewListItem => ({
+        id: review.id,
+        service: review.confirmedQuote.movingRequest.service,
+        isDesignated: review.confirmedQuote.movingRequest.isDesignated,
+        imageUrl: review.imageUrl[0] ?? "", // string[] -> string
+        nickname: review.mover.nickname,
+        movingDate: review.confirmedQuote.movingRequest.movingDate,
+        cost: review.confirmedQuote.quote.cost,
+        rating: review.rating,
+        content: review.content,
+        createdAt: review.createAt,
+      })
+    ),
   };
 };
 
@@ -71,33 +81,23 @@ const getMyReviewsList = async (customerId: number, query: ReviewQuery) => {
 // 리뷰 생성하기
 const createNewReview = async (customerId: number, data: ReviewCreateData) => {
   try {
-    // 레포지토리 함수 사용
     const confirmedQuote = await reviewRepository.findConfirmedQuote(
       data.confirmedQuoteId,
       customerId
     );
 
     if (!confirmedQuote) {
-      const error: customError = new Error("Bad Request");
-      error.status = 400;
-      error.message = "리뷰를 작성할 수 있는 견적이 아닙니다.";
-      throw error;
+      throwHttpError(400, "리뷰를 작성할 수 있는 견적이 아닙니다.");
     }
 
     // 평점 유효성 검사
     if (data.rating < 1 || data.rating > 5) {
-      const error: customError = new Error("Bad Request");
-      error.status = 400;
-      error.message = "평점은 1-5 사이여야 합니다.";
-      throw error;
+      throwHttpError(400, "평점은 1-5 사이여야 합니다.");
     }
 
     // 리뷰 내용 길이 검사
     if (!data.content || data.content.length > 150) {
-      const error: customError = new Error("Bad Request");
-      error.status = 400;
-      error.message = "리뷰 내용은 1-150자 사이여야 합니다.";
-      throw error;
+      throwHttpError(400, "리뷰 내용은 1-150자 사이여야 합니다.");
     }
 
     return await reviewRepository.createReview(
@@ -105,12 +105,11 @@ const createNewReview = async (customerId: number, data: ReviewCreateData) => {
       customerId,
       data.rating,
       data.content,
-      data.imageUrl // images -> imageUrl로 수정
+      data.imageUrl
     );
   } catch (error) {
-    const serverError: customError = new Error("Internal Server Error");
-    serverError.status = 500;
-    throw serverError;
+    if (error instanceof HttpError) throw error;
+    throwHttpError(500, "서버 오류가 발생했습니다.");
   }
 };
 
