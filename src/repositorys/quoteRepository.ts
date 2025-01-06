@@ -273,16 +273,17 @@ const getQuoteDetailByMoverId = (moverId: number, quoteId: number) => {
 };
 
 // (기사님의) 지정이사 요청 반려
-const rejectMovingRequest = (
-  moverId: number,
-  movingRequestId: number,
-  comment: string
-) => {
-  return prismaClient.quote.create({
+const rejectMovingRequest = (moverId: number, movingRequestId: number) => {
+  return prismaClient.movingRequest.update({
+    where: { id: movingRequestId },
     data: {
-      moverId,
-      movingRequestId,
-      comment, // 기존 comment 컬럼 사용
+      isRejected: {
+        connect: { id: moverId },
+      },
+      designateCount: {
+        decrement: 1, // 지정 횟수 감소
+      },
+      isDesignated: false, // 지정 상태 해제
     },
   });
 };

@@ -109,7 +109,6 @@ router.post(
     const user = req.user as any;
     const moverId = user.moverId;
     const movingRequestId = parseInt(req.params.movingRequestId);
-    const { comment } = req.body; // comment 추가
 
     // 파라미터 검증
     if (!movingRequestId) {
@@ -119,20 +118,7 @@ router.post(
       throw error;
     }
 
-    if (!comment) {
-      // comment 검증 추가
-      const error: customError = new Error("Bad Request");
-      error.status = 400;
-      error.message = "거절 사유를 입력해 주세요.";
-      throw error;
-    }
-
-    // 서비스 호출 시 comment 전달
-    const result = await quoteService.rejectRequest(
-      moverId,
-      movingRequestId,
-      comment
-    );
+    const result = await quoteService.rejectRequest(moverId, movingRequestId);
 
     res.status(200).send(result);
   })
