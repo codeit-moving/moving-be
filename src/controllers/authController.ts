@@ -6,6 +6,7 @@ import createToken, { Payload } from "../utils/token.utils";
 import upload from "../utils/multer";
 import passport from "passport";
 import userService from "../services/userService";
+import { uploadFiles } from "../middlewares/uploadFile";
 
 const router = Router();
 
@@ -23,7 +24,7 @@ interface User {
 }
 
 interface SignUpCustomer extends User {
-  imageUrl: Express.Multer.File;
+  imageUrl: string[];
   services: number[];
   regions: number[];
 }
@@ -33,7 +34,7 @@ interface SignUpMover extends User {
   career: number;
   introduction: string;
   description: string;
-  imageUrl: Express.Multer.File;
+  imageUrl: string[];
   services: number[];
   regions: number[];
 }
@@ -66,21 +67,17 @@ router.post("/signout", (_, res) => {
 
 router.post(
   "/signup/customer",
-  upload.single("imageUrl"),
+  upload.array("imageUrl"),
+  uploadFiles,
   asyncHandle(async (req, res, next) => {
     try {
       const signUpCustomer: SignUpCustomer = {
         ...req.body,
-        imageUrl: req.file!,
-        services: Array.isArray(req.body.services)
-          ? req.body.services.map(Number)
-          : JSON.parse(req.body.services).map(Number),
-        regions: Array.isArray(req.body.regions)
-          ? req.body.regions.map(Number)
-          : JSON.parse(req.body.regions).map(Number),
+        imageUrl: req.fileUrls,
+        services: JSON.parse(req.body.services).map(Number),
+        regions: JSON.parse(req.body.regions).map(Number),
         isOAuth: req.body.isOAuth === "true",
       };
-
       await authService.signUpCustomer(signUpCustomer);
       res.status(204).send();
     } catch (error) {
@@ -91,20 +88,17 @@ router.post(
 
 router.post(
   "/signup/mover",
-  upload.single("imageUrl"),
+  upload.array("imageUrl"),
+  uploadFiles,
   asyncHandle(async (req, res, next) => {
     try {
       const SignUpMover: SignUpMover = {
         ...req.body,
-        imageUrl: req.file!,
-        services: Array.isArray(req.body.services)
-          ? req.body.services.map(Number)
-          : JSON.parse(req.body.services).map(Number),
-        regions: Array.isArray(req.body.regions)
-          ? req.body.regions.map(Number)
-          : JSON.parse(req.body.regions).map(Number),
+        imageUrl: req.fileUrls,
+        services: JSON.parse(req.body.services).map(Number),
+        regions: JSON.parse(req.body.regions).map(Number),
         isOAuth: req.body.isOAuth === "true",
-        career: Number(req.body.career),
+        career: parseInt(req.body.career),
       };
       await authService.signUpMover(SignUpMover);
       res.status(204).send();
