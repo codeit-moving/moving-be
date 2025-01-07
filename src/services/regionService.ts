@@ -1,14 +1,10 @@
 import regionRepository from "../repositorys/regionRepository";
-import CustomError from "../utils/interfaces/customError";
+import { throwHttpError } from "../utils/constructors/httpError";
 
 const getRegionsAll = async () => {
   const regions = await regionRepository.getRegionAll();
   if (!regions) {
-    const error: CustomError = new Error("Not Found");
-    error.status = 404;
-    error.data = {
-      message: "지역 리스트를 찾을 수 없습니다.",
-    };
+    return throwHttpError(404, "지역 리스트를 찾을 수 없습니다.");
   }
   const response = regions.reduce((acc: { [key: string]: number }, region) => {
     acc[region.value] = region.code;
