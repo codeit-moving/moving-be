@@ -46,7 +46,6 @@ export const uploadFiles = asyncHandle(async (req, res, next) => {
     });
 
     req.fileUrls = await Promise.all(uploadPromises);
-    console.log(req.fileUrls);
     next();
   } catch (e) {
     throwHttpError(500, "이미지 업로드 실패");
