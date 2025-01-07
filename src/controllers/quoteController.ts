@@ -5,6 +5,7 @@ import passport from "passport";
 import customError from "../utils/interfaces/customError";
 import quoteValidation from "../middlewares/validations/quote";
 import { isCustomer } from "../middlewares/authMiddleware";
+import { throwHttpError } from "../utils/constructors/httpError";
 
 const router = express.Router();
 
@@ -41,13 +42,7 @@ router.get(
     const moverId = user.moverId; // user.id를 먼저 확인
 
     if (!moverId) {
-      const error: customError = new Error("Unauthorized");
-      error.status = 401;
-      error.message = "Unauthorized";
-      error.data = {
-        message: "기사 정보를 찾을 수 없습니다.",
-      };
-      throw error;
+      return throwHttpError(401, "기사 정보를 찾을 수 없습니다.");
     }
 
     // 기본값 설정
@@ -75,13 +70,7 @@ router.get(
 
     // moverId 유효성 검사
     if (!moverId) {
-      const error: customError = new Error("Bad Request");
-      error.status = 400;
-      error.message = "Bad Request";
-      error.data = {
-        message: "기사 ID가 필요합니다.",
-      };
-      throw error;
+      return throwHttpError(400, "기사 ID가 필요합니다.");
     }
 
     // 쿼리 파라미터 처리 (페이지네이션)
@@ -112,10 +101,7 @@ router.post(
 
     // 파라미터 검증
     if (!movingRequestId) {
-      const error: customError = new Error("Bad Request");
-      error.status = 400;
-      error.message = "이사 요청 ID가 필요합니다.";
-      throw error;
+      return throwHttpError(400, "이사 요청 ID가 필요합니다.");
     }
 
     const result = await quoteService.rejectRequest(moverId, movingRequestId);
@@ -133,25 +119,13 @@ router.get(
     const moverId = user.moverId;
 
     if (!moverId) {
-      const error: customError = new Error("Unauthorized");
-      error.status = 401;
-      error.message = "Unauthorized";
-      error.data = {
-        message: "기사 정보를 찾을 수 없습니다.",
-      };
-      throw error;
+      return throwHttpError(401, "기사 정보를 찾을 수 없습니다.");
     }
 
     const quoteId = parseInt(req.params.quoteId);
 
     if (isNaN(quoteId)) {
-      const error: customError = new Error("Bad Request");
-      error.status = 400;
-      error.message = "Bad Request";
-      error.data = {
-        message: "올바르지 않은 파라미터입니다.",
-      };
-      throw error;
+      return throwHttpError(400, "올바르지 않은 파라미터입니다.");
     }
 
     const quote = await quoteService.getQuoteDetail(moverId, quoteId);
