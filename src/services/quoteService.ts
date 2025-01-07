@@ -35,13 +35,7 @@ const createQuote = async (
     movingRequestId
   );
   if (!movingRequest) {
-    const error: customError = new Error("Not Found");
-    error.status = 404;
-    error.message = "Not Found";
-    error.data = {
-      message: "존재하지 않는 이사 요청입니다.",
-    };
-    throw error;
+    return throwHttpError(404, "존재하지 않는 이사 요청입니다.");
   }
 
   // 견적서 생성
@@ -68,13 +62,7 @@ const createQuote = async (
 const getQuoteList = async (moverId: number, query: QuoteQueryString) => {
   // moverId 유효성 검사
   if (!moverId) {
-    const error: customError = new Error("Bad Request");
-    error.status = 400;
-    error.message = "Bad Request";
-    error.data = {
-      message: "기사 ID가 필요합니다.",
-    };
-    throw error;
+    return throwHttpError(400, "기사 ID가 필요합니다.");
   }
 
   const { limit, cursor } = query;
@@ -120,13 +108,7 @@ const getQuoteDetail = async (moverId: number, quoteId: number) => {
   const quote = await quoteRepository.getQuoteDetailByMoverId(moverId, quoteId);
 
   if (!quote) {
-    const error: customError = new Error("Not Found");
-    error.status = 404;
-    error.message = "Not Found";
-    error.data = {
-      message: "견적서를 찾을 수 없습니다.",
-    };
-    throw error;
+    return throwHttpError(404, "견적서를 찾을 수 없습니다.");
   }
 
   // 2. 응답 데이터를 가공하여 반환합니다.
@@ -151,13 +133,7 @@ const rejectRequest = async (moverId: number, movingRequestId: number) => {
     movingRequestId
   );
   if (!movingRequest) {
-    const error: customError = new Error("Not Found");
-    error.status = 404;
-    error.message = "Not Found";
-    error.data = {
-      message: "존재하지 않는 이사 요청입니다.",
-    };
-    throw error;
+    return throwHttpError(404, "존재하지 않는 이사 요청입니다.");
   }
 
   // 2. 반려 처리
@@ -179,13 +155,7 @@ const getRejectedRequestList = async (
 ) => {
   // moverId 유효성 검사
   if (!moverId) {
-    const error: customError = new Error("Bad Request");
-    error.status = 400;
-    error.message = "Bad Request";
-    error.data = {
-      message: "기사 ID가 필요합니다.",
-    };
-    throw error;
+    return throwHttpError(400, "기사 ID가 필요합니다.");
   }
 
   const { limit, cursor } = query;
