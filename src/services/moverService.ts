@@ -220,7 +220,6 @@ const updateMoverProfile = async (
   profile: UpdateProfile
 ) => {
   const { imageUrl, ...rest } = profile;
-  console.log(rest);
   try {
     return await imageRepository.updateMoverProfile(
       imageUrl ? imageUrl[0] : undefined,

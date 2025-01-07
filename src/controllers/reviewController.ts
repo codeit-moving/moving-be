@@ -39,10 +39,7 @@ router.get(
     const customerId = user.customerId;
 
     if (!customerId) {
-      const error: customError = new Error("Bad Request");
-      error.status = 400;
-      error.message = "고객 ID가 필요합니다.";
-      throw error;
+      return throwHttpError(400, "고객 ID가 필요합니다.");
     }
 
     const { pageSize, pageNum } = req.query;
@@ -96,10 +93,7 @@ router.get(
     const customerId = user.customerId;
 
     if (!customerId) {
-      const error: customError = new Error("Bad Request");
-      error.status = 400;
-      error.message = "고객 ID가 필요합니다.";
-      throw error;
+      return throwHttpError(400, "고객 ID가 필요합니다.");
     }
 
     const { pageSize, pageNum } = req.query;

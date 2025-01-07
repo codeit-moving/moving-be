@@ -1,37 +1,20 @@
 import { RequestHandler } from "express";
 import customError from "../../utils/interfaces/customError";
+import { throwHttpError } from "../../utils/constructors/httpError";
 
 const createQuoteValidation: RequestHandler = (req, res, next) => {
   const { movingRequestId, cost, comment } = req.body;
 
   if (!movingRequestId || typeof movingRequestId !== "number") {
-    const error: customError = new Error("Bad Request");
-    error.status = 400;
-    error.message = "Bad Request";
-    error.data = {
-      message: "이사 요청 ID가 올바르지 않습니다.",
-    };
-    return next(error);
+    return throwHttpError(400, "이사 요청 ID가 올바르지 않습니다.");
   }
 
   if (!cost || typeof cost !== "number" || cost <= 0) {
-    const error: customError = new Error("Bad Request");
-    error.status = 400;
-    error.message = "Bad Request";
-    error.data = {
-      message: "견적 금액이 올바르지 않습니다.",
-    };
-    return next(error);
+    return throwHttpError(400, "견적 금액이 올바르지 않습니다.");
   }
 
   if (!comment || typeof comment !== "string" || !comment.trim()) {
-    const error: customError = new Error("Bad Request");
-    error.status = 400;
-    error.message = "Bad Request";
-    error.data = {
-      message: "견적 코멘트가 올바르지 않습니다.",
-    };
-    return next(error);
+    return throwHttpError(400, "견적 코멘트가 올바르지 않습니다.");
   }
 
   next();
