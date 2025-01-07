@@ -9,8 +9,9 @@ import {
   optionalJwtAuth,
 } from "../middlewares/authMiddleware";
 import upload from "../utils/multer";
-import { Payload } from "../utils/token.utils";
+import createToken, { Payload } from "../utils/token.utils";
 import { uploadFiles, uploadOptionalFiles } from "../middlewares/uploadFile";
+import cookieConfig from "../config/cookie.config";
 
 interface queryString {
   nextCursorId: string;
@@ -209,7 +210,12 @@ router.post(
         regions: JSON.parse(req.body.regions).map(Number),
         services: JSON.parse(req.body.services).map(Number),
       };
-      await moverService.createMoverProfile(profile);
+      const { id } = await moverService.createMoverProfile(profile);
+
+      const payload = { id: userId, mover: { id: id } };
+
+      const accessToken = createToken(payload, "access");
+      res.cookie("accessToken", accessToken, cookieConfig.accessTokenOption);
       res.status(204).send();
     } catch (error) {
       next(error);

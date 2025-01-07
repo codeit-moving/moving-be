@@ -2,9 +2,10 @@ import customerService from "../services/customerService";
 import { Router } from "express";
 import { asyncHandle } from "../utils/asyncHandler";
 import passport from "passport";
-import { Payload } from "../utils/token.utils";
+import createToken, { Payload } from "../utils/token.utils";
 import upload from "../utils/multer";
 import { uploadFiles, uploadOptionalFiles } from "../middlewares/uploadFile";
+import cookieConfig from "../config/cookie.config";
 
 const router = Router();
 
@@ -22,7 +23,12 @@ router.post(
         regions: JSON.parse(req.body.regions).map(Number),
         services: JSON.parse(req.body.services).map(Number),
       };
-      await customerService.createCustomerProfile(profile);
+      const { id } = await customerService.createCustomerProfile(profile);
+
+      const payload = { id: userId, customer: { id: id } };
+
+      const accessToken = createToken(payload, "access");
+      res.cookie("accessToken", accessToken, cookieConfig.accessTokenOption);
       res.status(204).send();
     } catch (error) {
       next(error);
