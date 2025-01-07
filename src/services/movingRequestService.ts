@@ -43,7 +43,7 @@ const setWhereCondition = (query: queryString, moverId: number) => {
     houseMove,
     officeMove,
     isDesignated,
-    isQuoted,
+    isQuoted = false,
     isPastRequest,
   } = query;
   const where: WhereCondition = {};
@@ -93,10 +93,7 @@ const setWhereCondition = (query: queryString, moverId: number) => {
     };
   }
 
-  if (isQuoted === undefined) {
-    where.quote = {};
-    where.isRejected = {};
-  } else if (isQuoted) {
+  if (isQuoted) {
     where.OR = [
       {
         quote: {
@@ -164,7 +161,7 @@ const getMovingRequestListByMover = async (
   moverId: number,
   query: queryString
 ) => {
-  const { limit, cursor, orderBy, isQuoted, isPastRequest } = query;
+  const { limit, cursor, orderBy, isQuoted = false, isPastRequest } = query;
   const whereCondition: WhereCondition = setWhereCondition(query, moverId);
   const orderByQuery = setOrderBy(orderBy);
 
@@ -225,7 +222,10 @@ const getMovingRequestListByMover = async (
   const totalCountPromise =
     movingRequestRepository.getTotalCount(countCondition);
   const designatedCountPromise =
-    movingRequestRepository.getMovingRequestCountByDesignated(moverId);
+    movingRequestRepository.getMovingRequestCountByDesignated(
+      moverId,
+      isPastRequest
+    );
 
   const movingRequestListPromise =
     movingRequestRepository.getMovingRequestListByMover(

@@ -65,11 +65,16 @@ const getMovingRequestCountByServices = async (where: WhereCondition = {}) => {
 
 const getMovingRequestCountByDesignated = async (
   moverId: number,
+  isPastRequest: boolean,
   where: WhereCondition = {}
 ) => {
   return prismaClient.movingRequest.count({
     where: {
       ...where,
+      ...(!isPastRequest ? { movingDate: { gt: new Date() } } : {}),
+      confirmedQuote: {
+        is: null,
+      },
       mover: {
         some: {
           id: moverId,
