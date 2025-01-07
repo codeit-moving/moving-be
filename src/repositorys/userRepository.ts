@@ -232,11 +232,29 @@ const getMover = (userId: number) => {
   });
 };
 
+const getSocialUser = (userId: number) => {
+  return prismaClient.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      phoneNumber: true,
+      isOAuth: true,
+      customer: {
+        select: { id: true },
+      },
+      mover: {
+        select: { id: true },
+      },
+    },
+  });
+};
+
 const getUserType = async (userId: number) => {
   const user = await prismaClient.user.findUnique({
     where: { id: userId },
     select: {
-      id: true,
       customer: {
         select: { id: true },
       },
@@ -250,7 +268,7 @@ const getUserType = async (userId: number) => {
   } else if (user?.mover) {
     return "mover";
   } else {
-    return null;
+    return "social";
   }
 };
 
@@ -281,4 +299,5 @@ export default {
   updateUser,
   findById,
   findPassword,
+  getSocialUser,
 };
