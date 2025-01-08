@@ -27,6 +27,7 @@ const app = express();
 const allowedOrigins: string[] = [
   "http://localhost:3001",
   "https://moving-fe-e1p7.vercel.app",
+  "https://moving-fe-weld.vercel.app",
 ];
 // CORS 설정
 const corsOptions: CorsOptions = {
