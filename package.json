@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.26.0",
-    "@mermaid-js/mermaid-cli": "^11.4.0",
+    "@mermaid-js/mermaid-cli": "^11.4.2",
     "@types/dompurify": "^3.2.0",
     "@types/jest": "^29.5.14",
     "@types/node-cron": "^3.0.11",
