@@ -326,6 +326,16 @@ const getActiveRequest = (customerId: number) => {
           id: true,
         },
       },
+      quote: {
+        select: {
+          mover: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      },
+      designateCount: true,
     },
   });
 };
