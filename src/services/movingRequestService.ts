@@ -423,33 +423,29 @@ const designateMover = async (moverId: number, customerId: number) => {
     return throwHttpError(422, "일반 견적 요청을 먼저 진행해 주세요.");
   }
 
-  const mover = await moverRepository.getMoverById(null, moverId);
+  const isQuote = activeRequest.quote.some(
+    (quote) => quote.mover.id === moverId
+  );
 
+  const isDesignated = activeRequest.mover.some(
+    (mover) => mover.id === moverId
+  );
+
+  if (isDesignated) {
+    return throwHttpError(400, "이미 지정된 기사 입니다.");
+  }
+
+  if (isQuote) {
+    return throwHttpError(400, "받은 일반 견적이 있습니다.");
+  }
+
+  const mover = await moverRepository.getMoverById(null, moverId);
   if (!mover) {
     return throwHttpError(404, "기사를 찾을 수 없습니다.");
   }
 
-  //지정 가능 인원 조회
-  const designateCountPromise = movingRequestRepository.getDesignateCount(
-    activeRequest.id
-  );
-
-  const designatedMoversPromise = movingRequestRepository.getDesignatedMovers(
-    activeRequest.id,
-    moverId
-  );
-
-  const [result, designatedMovers] = await Promise.all([
-    designateCountPromise,
-    designatedMoversPromise,
-  ]);
-
-  if (designatedMovers) {
-    return throwHttpError(400, "이미 지정된 기사 입니다.");
-  }
-
   //지정 가능 인원 초과 체크
-  if (!result || result._count.mover >= 3) {
+  if (activeRequest.designateCount >= 3) {
     return throwHttpError(
       400,
       "지정 요청 가능한 인원이 초과되었습니다. (최대 3명)"
