@@ -12,7 +12,7 @@
 
 탁우현 [개인 Github 링크: https://github.com/WooHyunTak] 
 
-안재민 [개인 Github 링크: ]
+안재민 [개인 Github 링크: https://github.com/mini-1018]
 
 강범준 [개인 Github 링크: https://github.com/kangbeomjoon]
 
