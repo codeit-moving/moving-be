@@ -829,6 +829,311 @@
 
 ---
 
+### **강범준**
+
+<details>
+<summary>- quotes [강범준] : (기사님의) 견적서 보내기</summary>
+
+- quotes [강범준] : (기사님의) 견적서 보내기
+    - / (POST)
+        1. Endpoint: POST /quotes
+        2. Description : (기사님의)견적서 보내기
+        3. Reqeust : 
+        - body
+        
+        ```
+        {
+            "movingRequestId": 1,
+            "cost": 150000,
+            "comment": "안전하고 신속한 이사를 약속드립니다."
+        }
+        ```
+        
+        1. Response 
+        - 201 Created
+        
+        ```tsx
+        {
+          "success": true,
+          "message": "견적서가 성공적으로 생성되었습니다.",
+          "data": {
+            "id": 6,
+            "cost": 150000,
+            "comment": "안전하고 신속한 이사를 약속드립니다.",
+            "service": 1,
+            "pickupAddress": "123 Maple St, City A",
+            "dropOffAddress": "456 Oak Rd, City B",
+            "movingDate": "2024-12-05T10:00:00.000Z",
+            "isDesignated": false
+          }
+        ```
+        
+</details>
+
+<details>
+<summary>- quotes [강범준] : (기사님의) 보낸 견적서 목록 조회</summary>
+
+- quotes [강범준] : (기사님의) 보낸 견적서 목록 조회
+    - /(GET)
+        1. Endpoint : GET /quotes/mover
+        2. Description : (기사님의)보낸 견적서 목록 조회
+        3. Reqeust : accessToken 
+        - 200 OK
+        
+        1. Response : 
+    
+    ```tsx
+    {
+      "nextCursor": null,
+      "hasNext": false,
+      "list": [
+        {
+          "id": 1,
+          "service": 1,
+          "isDesignated": false,
+          "name": "김철수",
+          "movingDate": "2024-12-28T10:00:00.000Z",
+          "pickupAddress": "서울시 강남구",
+          "dropOffAddress": "서울시 송파구",
+          "cost": 580000,
+          "isCompleted": true,
+          "isConfirmed": false,
+          "requestDate": "2024-12-23T00:00:00.000Z"
+        },
+    ```
+    
+</details>
+
+<details>
+<summary>- quotes [강범준] : (기사님의) 견적서 상세 조회</summary>
+
+- quotes [강범준] : (기사님의) 견적서 상세 조회
+    - /(GET)
+        1. Endpoint : GET /quotes/mover/:quoteId
+        2. Description : (기사님의)견적서 상세 조회
+        3. Reqeust : accessToken 
+        - 200 OK
+        
+        1. Response : 
+        
+        ```tsx
+        {
+          "id": 37,
+          "cost": 520000,
+          "comment": "대구 지역 이사 전문가입니다.",
+          "service": 2,
+          "customerName": "이수연",
+          "movingDate": "2024-11-15T10:00:00.000Z",
+          "pickupAddress": "대구시 중구",
+          "dropOffAddress": "대구시 북구",
+          "isDesignated": false,
+          "requestDate": "2024-12-23T00:00:00.000Z"
+        }
+        ```
+        
+</details>
+
+<details>
+<summary>- quotes [강범준] : (기사님의) 지정 이사 요청 반려</summary>
+
+- quotes [강범준] : (기사님의) 지정 이사 요청 반려
+    - (POST)
+        1. Endpoint : POST /qoutes/mover/:movingRequestId/reject
+        2. Description : (기사님의) 지정 이사 요청 반려
+        3. Reqeust : accessToken
+        - 200 OK
+        
+        1. Response
+        
+        ```tsx
+        {
+          "id": 1,
+          "comment": "죄송합니다. 그날 예약이 되어 있습니다"
+        }
+        ```
+        
+</details>
+
+<details>
+<summary>- quotes [강범준] : (기사님이) 반려한 이사요청 목록 조회</summary>
+
+- quotes [강범준] : (기사님이) 반려한 이사요청 목록 조회
+    
+    (GET)
+    
+    1. Endpoint : GET /quotes/mover/rejected
+    2. Description : (기사님이) 반려한 이사요청 목록 조회
+    3. Request : accessToken
+    
+    ```jsx
+    limit=8&nextCursorId=38
+    ```
+    
+    1. Response : 
+    
+    ```tsx
+    {
+      "nextCursor": null,
+      "hasNext": false,
+      "list": [
+        {
+          "id": 1,
+          "service": 1,
+          "name": "김철수",
+          "movingDate": "2024-12-28T10:00:00.000Z",
+          "pickupAddress": "서울시 강남구",
+          "dropOffAddress": "서울시 송파구",
+          "requestDate": "2024-12-23T00:00:00.000Z"
+        }
+      ]
+    }
+    ```
+    
+</details>
+
+<details>
+<summary>- review [강범준] : (고객이 조회하는)기사의 리뷰 목록 조회</summary>
+
+- review [강범준] : (고객이 조회하는)기사의 리뷰 목록 조회
+    - (GET)
+        1. Endpoint : GET /reviews/mover/:moverId
+        2. Description : 기사의 리뷰 목록 조회
+        3. Request : accessToken
+        - 200 OK
+        
+        1. Response : 
+        
+        ```tsx
+        {
+            "currentPage": 1,
+            "pageSize": 10,
+            "totalPages": 1,
+            "totalCount": 4,
+            "list": [
+                {
+                    "id": 1,
+                    "service": 2,
+                    "isDesignated": false,
+                    "imageUrl": "",
+                    "reviewImageUrl": [],
+                    "name": "손",
+                    "movingDate": "2024-11-01T00:00:00.000Z",
+                    "cost": 400000,
+                    "rating": 4,
+                    "content": "4점 드리겠습니다.",
+                    "createdAt": "2025-01-06T06:08:53.427Z"
+                },
+                ...     
+          }      
+        ```
+        
+</details>
+
+<details>
+<summary>- review [강범준] : (고객이) 작성한 리뷰 목록 조회</summary>
+
+- review [강범준] : (고객이) 작성한 리뷰 목록 조회
+    - (GET)
+        1. Endpoint : GET /reviews/me
+        2. Description : 내가 작성한 리뷰 목록 조회
+        3. Request : 
+        - 200 OK
+        
+        1. Response : 
+        
+        ```tsx
+        {
+          "currentPage": 1,
+          "pageSize": 6,
+          "totalPages": 2,
+          "totalCount": 7,
+          "list": [
+            {
+              "id": 7,
+              "service": 1,
+              "isDesignated": false,
+              "imageUrl": "www.codeit.com/rv2_image1.svg",
+              "nickname": "최지우",
+              "movingDate": "2024-11-15T10:00:00.000Z",
+              "cost": 480000,
+              "reviewImageUrl":[]
+              "rating": 3,
+              "content": "책상에 파손 부분이 있습니다.",
+              "createdAt": "2024-12-29T14:09:00.488Z"
+            },
+            ...
+         }
+        ```
+        
+</details>
+
+<details>
+<summary>- review [강범준] : (고객의) 리뷰 생성하기</summary>
+
+- review [강범준] : (고객의) 리뷰 생성하기
+    - (POST)
+        1. Endpoint : POST /reviews/:confirmed-quote-Id
+        2. Description : 리뷰 생성하기
+        3. Request Query :
+            
+            ```json
+              ":id": "number" // 완료된 ID
+            ```
+            
+        4. Request Body:
+            
+            ```json
+            {
+              "content": "string", //리뷰 내용
+            	"rating" : "number", //평점
+            	"imageUrl" : "files"
+            }
+            ```
+            
+        5. Response : 
+        
+        ![image.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/ff51c3c0-4d11-48ed-b338-2077d1f8947f/11715432-b199-425c-8d2d-8565824c9edd/image.png)
+        
+        ![image.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/ff51c3c0-4d11-48ed-b338-2077d1f8947f/d58e20fd-1291-4b0a-8ecc-b2592bcc4296/image.png)
+        
+</details>
+
+<details>
+<summary>- review [강범준] : (고객이) 작성할 수 있는(=작성 가능한) 리뷰 목록 조회</summary>
+
+- review [강범준] : (고객이) 작성할 수 있는(=작성 가능한) 리뷰 목록 조회
+    - (GET)
+        1. Endpoint : GET /reviews/available
+        2. Description : 내가 작성할 수 있는 리뷰 목록 조회
+        3. Request : 
+        4. Response : 
+        
+        ```tsx
+        {
+          "currentPage": 1,
+          "totalPages": 1,
+          "totalCount": 6,
+          "list": [
+            {
+              "confirmedQuoteId": 6, 
+              "moverId": 7,
+              "imageUrl": [
+                "www.codeit.com/rv2_image1.svg",
+                ],
+              "service": 1,
+              "isDesignated": false,
+              "movingDate": "2024-11-15T10:00:00.000Z",
+              "nickname": "최지우",
+              "cost": 480000
+            },
+            ...   
+         }
+        ```
+        
+</details>
+
+---
+
 ## 📁 파일 구조
 
 ```
