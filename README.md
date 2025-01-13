@@ -1134,6 +1134,30 @@
 
 ---
 
+### **안재민**
+
+<summary>유저</summary>
+</br>
+<details>
+    <summary>유저</summary>
+
+ - 로그인 ( 로컬, 소셜 )
+ - 회원가입 ( 로컬, 소셜 )
+ - JWT 토큰 방식
+ - 프로필 등록/수정
+ - 사용자 정보 가져오기
+</details>
+</br>
+<summary>알림</summary>
+</br>
+<details>
+    <summary>알림</summary>
+
+ - 사용자 알림 조회
+</details>
+
+---
+
 ## 📁 파일 구조
 
 ```
